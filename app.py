@@ -33,7 +33,7 @@ st.markdown("""
 st.markdown("""
     <div class="brand-header">
         <div class="brand-title">K&G Arte em Confeitaria</div>
-        <div class="brand-subtitle">💎 Painel de Gestão ERP, CRM e precificação Inteligente 💎</div>
+        <div class="brand-subtitle">💎 Painel de Gestão ERP, CRM e Engenharia de Custos 💎</div>
     </div>
 """, unsafe_allow_html=True)
 
@@ -47,13 +47,14 @@ if 'banco_caldas' not in st.session_state:
 if 'banco_coberturas' not in st.session_state:
     st.session_state['banco_coberturas'] = {"Chantiganache ao Leite": 35.00, "Glacê de Leite em Pó": 28.00}
 
-# Abas do Menu Principal
+# Abas Principais do Sistema
 tabs = st.tabs([
-    "💰 GESTÃO FINANCEIRA & DP",
+    "💰 CENTRAL FINANCEIRA & DRE",
+    "👥 DEPARTAMENTO PESSOAL (DP)",
     "👥 CRM & HISTÓRICO DE PEDIDOS",
     "🥣 1. FÁBRICA DE BASES",
     "🍫 2. DOCES PERSONALIZADOS",
-    "🎂 3. PRODUCTS COMPLETOS",
+    "🎂 3. PRODUTOS COMPLETOS",
     "📦 EMBALAGENS & IMPRESSÃO",
     "🥦 ANVISA & ADVERTÊNCIAS",
     "🛒 ESTOQUE INTELIGENTE",
@@ -61,10 +62,12 @@ tabs = st.tabs([
     "🏛️ INVENTÁRIO DE BENS"
 ])
 
-# --- ABA 0: GESTÃO FINANCEIRA ---
+# ==========================================
+# ABA 0: CENTRAL FINANCEIRA & DRE
+# ==========================================
 with tabs[0]:
-    st.markdown('<div class="section-title">💼 Centro de Controle Financeiro, Custos e RH</div>', unsafe_allow_html=True)
-    sub_fin1, sub_fin2, sub_fin3 = st.tabs(["📊 Dashboard de Elite", "💸 Entradas & Saídas (Fluxo)", "🏢 Custos Fixos, Impostos & Folha DP"])
+    st.markdown('<div class="section-title">📊 Gestão de Fluxo, DRE e Demonstrativos de Lucro</div>', unsafe_allow_html=True)
+    sub_fin1, sub_fin2, sub_fin3 = st.tabs(["📈 Dashboard de Resultados", "💸 Lançamentos Diários", "📉 Estrutura DRE (Fixos e Variáveis)"])
     
     with sub_fin1:
         col_d1, col_d2, col_d3, col_d4 = st.columns(4)
@@ -72,30 +75,71 @@ with tabs[0]:
         with col_d2: st.metric("Faturamento Atual Real", "R$ 6.420,00")
         with col_d3: st.metric("Ponto de Equilíbrio Operacional", "R$ 5.800,00")
         with col_d4: st.metric("Margem de Lucro Média", "32.5 %")
-        st.progress(6420 / 10000, text="64.2% da Meta Batida")
+        st.progress(6420 / 10000, text="64.2% da Meta do Mês Alcançada")
         
     with sub_fin2:
+        st.write("📝 Registro de Entradas e Saídas do Caixa:")
         st.data_editor(pd.DataFrame([
             {"Data": "28/06/2026", "Tipo": "Receita (Entrada)", "Descrição": "Encomenda Casamento - Bolo 5kg + Doces", "Valor (R$)": 1450.00},
             {"Data": "28/06/2026", "Tipo": "Despesa (Saída)", "Descrição": "Compra de Morangos e Suspiros - Mercado Central", "Valor (R$)": 120.00}
         ]), num_rows="dynamic", use_container_width=True, key="fluxo_caixa_key")
         
     with sub_fin3:
-        col_dp1, col_dp2 = st.columns(2)
-        with col_dp1:
-            st.write("📋 Custos Fixos & Impostos:")
-            st.json({"Pró-Labore Empresária (Karyn)": 4000.00, "Água/Luz Comercial": 650.00, "Imposto MEI/DAS Nacional": 75.00})
-        with col_dp2:
-            st.write("👥 Folha de Pagamento & Ocorrências (CLT):")
+        st.write("Registre e acompanhe as despesas estruturais da sua confeitaria:")
+        col_dre1, col_dre2 = st.columns(2)
+        with col_dre1:
+            st.markdown("##### 📌 Custos Fixos (Independem das Vendas)")
             st.data_editor(pd.DataFrame([
-                {"Funcionário": "Ana Silva", "Cargo": "Auxiliar Confeitaria", "Salário Base": 1650.00, "Status Atestados": "Nenhum", "Férias": "A vencer"},
-                {"Funcionário": "Mariana Costa", "Cargo": "Atendente Balcão", "Salário Base": 1412.00, "Status Atestados": "1 dia", "Férias": "Regular"}
-            ]), num_rows="dynamic", use_container_width=True, key="folha_dp_key")
+                {"Descrição do Custo Fixo": "Aluguel / Espaço Comercial", "Valor Mensal (R$)": 1500.00},
+                {"Descrição do Custo Fixo": "Água e Energia Elétrica", "Valor Mensal (R$)": 650.00},
+                {"Descrição do Custo Fixo": "Imposto MEI / DAS Nacional", "Valor Mensal (R$)": 75.00},
+                {"Descrição do Custo Fixo": "Internet e Plataformas de Software", "Valor Mensal (R$)": 150.00}
+            ]), num_rows="dynamic", use_container_width=True, key="custos_fixos_key")
+        with col_dre2:
+            st.markdown("##### 📌 Custos Variáveis (Sobem conforme a Produção)")
+            st.data_editor(pd.DataFrame([
+                {"Descrição do Custo Variável": "Matérias-Primas e Insumos de Reposição", "Valor Estimado (R$)": 1500.00},
+                {"Descrição do Custo Variável": "Gás de Cozinha Recarga", "Valor Estimado (R$)": 135.00},
+                {"Descrição do Custo Variável": "Taxas de Entrega / Logística", "Valor Estimado (R$)": 220.00}
+            ]), num_rows="dynamic", use_container_width=True, key="custos_variaveis_key")
+            
+        if st.button("🖨️ Imprimir DRE Gerencial"):
+            st.markdown('<div class="print-box"><b>K&G ARTE EM CONFEITARIA - DEMONSTRATIVO DE RESULTADOS (DRE)</b><br>Data: '+datetime.now().strftime('%d/%m/%Y')+'<br>---------------------------------------<br>Faturamento Bruto: R$ 6.420,00<br>(-) Custos Fixos Totais: R$ 2.375,00<br>(-) Custos Variáveis Totais: R$ 1.855,00<br>---------------------------------------<br>(=) Lucro Líquido Operacional: R$ 2.190,00<br>---------------------------------------<br>Homologado pela Diretoria Executiva</div>', unsafe_allow_html=True)
 
-# --- ABA 1: CRM ---
+# ==========================================
+# ABA 1: DEPARTAMENTO PESSOAL (CLT, PRÓ-LABORE & RH)
+# ==========================================
 with tabs[1]:
+    st.markdown('<div class="section-title">👥 Gestão de Departamento Pessoal, Remunerações e Ocorrências</div>', unsafe_allow_html=True)
+    sub_dp1, sub_dp2 = st.tabs(["💰 Retiradas & Folha de Pagamento", "📋 Registro de Atestados & Contratos"])
+    
+    with sub_dp1:
+        st.write("Controle financeiro de remunerações da equipe e da proprietária:")
+        col_rem1, col_rem2 = st.columns(2)
+        with col_rem1:
+            st.markdown("##### 👑 Pró-Labore da Empresária")
+            st.metric("Retirada Mensal Fixada (Karyn)", "R$ 4.000,00")
+        with col_rem2:
+            st.markdown("##### 👥 Folha de Salários (Equipe)")
+            st.data_editor(pd.DataFrame([
+                {"Funcionário contratado": "Ana Silva", "Cargo": "Auxiliar de Confeitaria", "Salário Base (R$)": 1650.00},
+                {"Funcionário contratado": "Mariana Costa", "Cargo": "Atendente de Balcão", "Salário Base (R$)": 1412.00}
+            ]), num_rows="dynamic", use_container_width=True, key="salarios_equipe_key")
+            
+    with sub_dp2:
+        st.write("Controle administrativo de ocorrências trabalhistas e status de contratação na lei:")
+        st.data_editor(pd.DataFrame([
+            {"Funcionário": "Ana Silva", "Status do Contrato": "CLT Ativo", "Atestados Apresentados": "Nenhum registrado", "Histórico de Férias": "Período aquisitivo em andamento"},
+            {"Funcionário": "Mariana Costa", "Status do Contrato": "CLT Ativo", "Atestados Apresentados": "1 dia (Anexado ao prontuário)", "Histórico de Férias": "Regular"},
+            {"Funcionário": "Candidata em Seleção", "Status do Contrato": "Admissão Pendente", "Atestados Apresentados": "Exame admissional agendado", "Histórico de Férias": "-"}
+        ]), num_rows="dynamic", use_container_width=True, key="rh_ocorrencias_key")
+
+# ==========================================
+# ABA 2: CRM & HISTÓRICO DE PEDIDOS
+# ==========================================
+with tabs[2]:
     st.markdown('<div class="section-title">👥 Gestão de Relacionamento (CRM) e Fichas de Atendimento</div>', unsafe_allow_html=True)
-    sub_crm1, sub_crm2 = st.tabs(["📇 Cadastro de Clientes & Restrições", "📋 Sub-aba: Histórico de Encomendas & Pedidos"])
+    sub_crm1, sub_crm2 = st.tabs(["📇 Cadastro de Clientes & Restrições", "📋 Histórico de Encomendas & Pedidos"])
     
     with sub_crm1:
         st.data_editor(pd.DataFrame([
@@ -107,9 +151,11 @@ with tabs[1]:
             {"ID": "KG-2026-01", "Cliente": "Juliana Mendes Rossi", "Produto Encomendado": "Bolo Supremo de Nozes 3kg", "Data de Entrega": "04/07/2026", "Valor Total (R$)": 450.00, "Status": "Agendado"}
         ]), num_rows="dynamic", use_container_width=True, key="crm_pedidos_key")
 
-# --- ABA 2: FÁBRICA DE BASES ---
-with tabs[2]:
-    st.markdown('<div class="section-title">🥣 Central de Production de Sub-Bases Cadastradas</div>', unsafe_allow_html=True)
+# ==========================================
+# ABA 3: FÁBRICA DE BASES
+# ==========================================
+with tabs[3]:
+    st.markdown('<div class="section-title">🥣 Central de Produção de Sub-Bases Cadastradas</div>', unsafe_allow_html=True)
     sub_b1, sub_b2, sub_b3, sub_b4 = st.tabs(["🍞 Massas de Bolo", "🍓 Recheios Estruturados", "💧 Caldas para Molhar", "✨ Coberturas & Blindagens"])
     with sub_b1:
         m_edit = st.data_editor(pd.DataFrame(list(st.session_state['banco_massas'].items()), columns=["Nome da Massa", "Custo por kg (R$)"]), num_rows="dynamic", use_container_width=True, key="m_edit_key")
@@ -124,8 +170,10 @@ with tabs[2]:
         cob_edit = st.data_editor(pd.DataFrame(list(st.session_state['banco_coberturas'].items()), columns=["Nome da Cobertura", "Custo por kg (R$)"]), num_rows="dynamic", use_container_width=True, key="cob_edit_key")
         st.session_state['banco_coberturas'] = dict(cob_edit.values)
 
-# --- ABA 3: DOCES PERSONALIZADOS ---
-with tabs[3]:
+# ==========================================
+# ABA 4: DOCES PERSONALIZADOS
+# ==========================================
+with tabs[4]:
     st.markdown('<div class="section-title">🍫 Engenharia de Doces Personalizados (Formas BWB)</div>', unsafe_allow_html=True)
     col_bwb1, col_bwb2 = st.columns(2)
     with col_bwb1:
@@ -135,17 +183,16 @@ with tabs[3]:
         tipo_pasta_bwb = st.selectbox("Pasta Escolhida para Modelagem", ["Pasta de Leite em Pó", "Pasta Americana"])
         peso_pasta_bwb = st.number_input("Gramas de Pasta por Unidade (g)", value=10)
 
-# --- ABA 4: PRODUTOS COMPLETOS & CALCULADORA IFOOD COM MARGEM DE SEGURANÇA ---
-with tabs[4]:
+# ==========================================
+# ABA 5: PRODUTOS COMPLETOS & CALCULADORA IFOOD
+# ==========================================
+with tabs[5]:
     st.markdown('<div class="section-title">📐 Engenharia Estrutural de Pesos e Precificação Balcão vs iFood</div>', unsafe_allow_html=True)
-    
     col_prop1, col_prop2 = st.columns(2)
     with col_prop1:
         nome_bolo_final = st.text_input("Nome do Produto Final Homologado", value="Bolo de Morango Especial com Suspiros")
         peso_alvo = st.number_input("Defina o Peso Alvo Solicitado pelo Cliente (kg)", min_value=1.0, value=5.0)
         formato_forma = st.selectbox("Formato Geométrico da Forma", ["Redonda", "Quadrada", "Retangular"])
-        
-        st.markdown("##### 🛡️ Blindagem de Margem de Lucro Estratégica")
         margem_desejada = st.slider("Defina a sua Margem de Segurança (%) contra alta de insumos", min_value=40, max_value=50, value=45)
     
     with col_prop2:
@@ -154,26 +201,18 @@ with tabs[4]:
         calc_recheio = peso_alvo_g * 0.40
         calc_cobertura = peso_alvo_g * 0.15
         calc_calda = peso_alvo_g * 0.10
-        
-        # Custo Fixo Simulado de Matéria Prima Proporcional para o Peso Alvo
-        custo_insumos_base = (peso_alvo * 25.0) # Média de R$ 25 por kg de custo real de luxo
+        custo_insumos_base = (peso_alvo * 25.0)
         
         if formato_forma == "Redonda":
             diametro_sugerido = math.ceil(2 * math.sqrt(peso_alvo_g / (3.14 * 10 * 0.6)))
             st.metric("📐 Diâmetro Recomendado da Forma", f"{diametro_sugerido} cm")
         else:
             st.metric("📐 Medida Recomendada da Forma", "35x25 cm")
-            
         st.metric("💵 Custo Real Estimado de Produção", f"R$ {custo_insumos_base:.2f}")
 
-    # LÓGICA DE PRECIFICAÇÃO DE BALCÃO E IFOOD SOLICITADA
     st.markdown("### 💰 Tabela Inteligente de Venda Comercial")
-    
-    # Preço Balcão = Custo / (1 - Margem)
     fator_margem = (100 - margem_desejada) / 100
     preco_balcao = custo_insumos_base / fator_margem
-    
-    # Preço iFood = Considera taxa média de 25% da plataforma para manter sua margem intocável
     preco_ifood = preco_balcao / 0.75
     
     c_v1, c_v2, c_v3 = st.columns(3)
@@ -184,34 +223,14 @@ with tabs[4]:
     with c_v3:
         st.metric("🛡️ Margem de Flutuação Segurada", f"R$ {(preco_balcao - custo_insumos_base):.2f}", "Margem para suportar altas")
 
-    st.markdown("##### ⚖️ Pesagem Obrigatória para a Cozinha:")
-    c_g1, c_g2, c_g3, c_g4 = st.columns(4)
-    with c_g1: st.metric("Massa Base", f"{int(calc_massa)} g")
-    with c_g2: st.metric("Recheio, Frutas e Suspiro", f"{int(calc_recheio)} g")
-    with c_g3: st.metric("Cobertura / Chantiganache", f"{int(calc_cobertura)} g")
-    with c_g4: st.metric("Calda de Regar", f"{int(calc_calda)} g")
-
-    if st.button("📋 Emitir Ficha Técnica com Preços"):
-        st.markdown(f"""
-            <div class="print-box">
-                <b>K&G ARTE EM CONFEITARIA - ORD DE PRODUÇÃO E VENDA</b><br>
-                <b>Produto Final:</b> {nome_bolo_final} | Peso Alvo: {peso_alvo} kg<br>
-                -------------------------------------------------------------------------<br>
-                <b>VALORES DE DIRETRIZ COMERCIAL:</b><br>
-                - Preço Sugerido para Balcão: R$ {preco_balcao:.2f}<br>
-                - Preço Sugerido para Cardápio iFood: R$ {preco_ifood:.2f}<br>
-                -------------------------------------------------------------------------<br>
-                *Margem de {margem_desejada}% aplicada com sucesso e blindada contra reajustes.*
-            </div>
-        """, unsafe_allow_html=True)
+    foto_composto = st.file_uploader("📸 Anexar Foto do Padrão Visual Finalizado", type=["png","jpg","jpeg"], key="foto_final")
 
 # --- DEMAIS ABAS COMPLEMENTARES MANTIDAS ---
-with tabs[5]: st.write("Módulo de Cubagem e Impressora Portátil Ativo.")
-with tabs[6]:
+with tabs[6]: st.write("Módulo de Cubagem e Impressora Portátil Ativo.")
+with tabs[7]:
     st.markdown('<div class="section-title">🥦 Parâmetros de Vigilância ANVISA</div>', unsafe_allow_html=True)
     st.markdown("<div class='lupa-box'>🔍 <b>ROTULAGEM AMBIENTAL/FRONTAL MANDATÓRIA:</b><br>⚠️ ALTO EM AÇÚCAR ADICIONADO</div>", unsafe_allow_html=True)
-with tabs[7]: st.write("Estoque Inteligente Ativo.")
-with tabs[8]:
+with tabs[8]: st.write("Estoque Inteligente Ativo.")
+with tabs[9]:
     st.write("Fornecedores Principais de Curitiba (BWB, Central do Chocolate CWB, Nova Íris, Plassete).")
-    st.dataframe(pd.DataFrame([{"Fornecedor": "Central do Chocolate CWB", "Região": "Curitiba / Centro"}]))
-with tabs[9]: st.write("Inventário de Bens Ativo.")
+with tabs[10]: st.write("Inventário de Bens Ativo.")
