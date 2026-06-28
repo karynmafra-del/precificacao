@@ -101,7 +101,7 @@ with tabs[1]:
     if st.button("📋 Gerar e Imprimir Ficha Técnica para a Cozinha"):
         st.markdown(f"""
             <div class="print-box">
-                <b>FICHA TÉCNICA DE PRODUÇÃO - K&G ARTE EM CONFEITARIA</b><br>
+                <b>FICHA TÉCNICA DE PRODUCTION - K&G ARTE EM CONFEITARIA</b><br>
                 <b>Produto:</b> {nome_doce}<br>
                 <b>Molde/Forma:</b> {tipo_forma}<br>
                 <b>Elemento Decorativo:</b> {tipo_pasta}<br>
@@ -143,7 +143,7 @@ with tabs[3]:
         lote = st.text_input("Lote Automatizado", value=datetime.now().strftime("%Y%m%d")+"-01")
     with c_e2:
         alergias = st.multiselect("Alertas de Alergênicos (Lei Vigente)", 
-            ["Trigo (Glúten)", "Ovos", "Leite", "Derivados de Aveia", "Amendoim", "Soja"], default=["Leite", "Trigo"])
+            ["Trigo (Glúten)", "Ovos", "Leite", "Derivados de Aveia", "Amendoim", "Soja"], default=["Leite", "Trigo (Glúten)"])
     
     if st.button("🖨️ Gerar Código de Barras EAN-13 para Revenda"):
         st.success("Código de Barras Oficial Solicitado e Vinculado!")
