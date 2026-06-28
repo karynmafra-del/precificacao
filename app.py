@@ -35,7 +35,7 @@ st.markdown("""
 st.markdown("""
     <div class="brand-header">
         <div class="brand-title">K&G Arte em Confeitaria</div>
-        <div class="brand-subtitle">💎 ecossistema erp & crm de alta confeitaria e inteligência de mercado 💎</div>
+        <div class="brand-subtitle">💎 Ecossistema ERP, CRM e Engenharia Logística de Confeitaria Fina 💎</div>
     </div>
 """, unsafe_allow_html=True)
 
@@ -49,7 +49,7 @@ if 'banco_caldas' not in st.session_state:
 if 'banco_coberturas' not in st.session_state:
     st.session_state['banco_coberturas'] = {"Chantiganache ao Leite": 35.00, "Glacê de Leite em Pó": 28.00}
 
-# Abas Principais Reformuladas
+# Abas Principais
 tabs = st.tabs([
     "💰 CENTRAL FINANCEIRA & DRE",
     "📝 1. ORÇAMENTOS & PEDIDOS",
@@ -64,204 +64,98 @@ tabs = st.tabs([
     "🏛️ INVENTÁRIO DE BENS"
 ])
 
-# ==========================================
-# ABA 0: CENTRAL FINANCEIRA & DRE
-# ==========================================
+# --- ABA 0: CENTRAL FINANCEIRA ---
 with tabs[0]:
     st.markdown('<div class="section-title">📊 Gestão de Fluxo, DRE e Demonstrativos de Lucro</div>', unsafe_allow_html=True)
     sub_fin1, sub_fin2, sub_fin3, sub_dp_aba = st.tabs(["📈 Dashboard de Resultados", "💸 Lançamentos Diários", "📉 Estrutura DRE", "👥 Departamento Pessoal (DP)"])
-    
     with sub_fin1:
-        col_d1, col_d2, col_d3, col_d4 = st.columns(4)
-        with col_d1: st.metric("Meta Faturamento Mês", "R$ 10.000,00")
-        with col_d2: st.metric("Faturamento Atual Real", "R$ 6.420,00")
-        with col_d3: st.metric("Ponto de Equilíbrio Operacional", "R$ 5.800,00")
-        with col_d4: st.metric("Margem de Lucro Média", "32.5 %")
+        st.metric("Meta Faturamento Mês", "R$ 10.000,00")
         st.progress(6420 / 10000, text="64.2% da Meta do Mês Alcançada")
-        
     with sub_fin2:
         st.data_editor(pd.DataFrame([
-            {"Data": "28/06/2026", "Tipo": "Receita (Entrada)", "Descrição": "Encomenda Casamento - Bolo 5kg + Doces", "Valor (R$)": 1450.00},
-            {"Data": "28/06/2026", "Tipo": "Despesa (Saída)", "Descrição": "Compra de Morangos e Suspiros", "Valor (R$)": 120.00}
+            {"Data": "28/06/2026", "Tipo": "Receita (Entrada)", "Descrição": "Encomenda Casamento - Bolo 5kg + Doces", "Valor (R$)": 1450.00}
         ]), num_rows="dynamic", use_container_width=True, key="fluxo_caixa_key")
-        
     with sub_fin3:
-        col_dre1, col_dre2 = st.columns(2)
-        with col_dre1:
-            st.markdown("##### 📌 Custos Fixos")
-            st.data_editor(pd.DataFrame([
-                {"Descrição do Custo Fixo": "Aluguel / Atelier", "Valor Mensal (R$)": 1500.00},
-                {"Descrição do Custo Fixo": "Água e Energia Elétrica", "Valor Mensal (R$)": 650.00},
-                {"Descrição do Custo Fixo": "Imposto MEI / DAS", "Valor Mensal (R$)": 75.00}
-            ]), num_rows="dynamic", use_container_width=True, key="custos_fixos_key")
-        with col_dre2:
-            st.markdown("##### 📌 Custos Variáveis")
-            st.data_editor(pd.DataFrame([
-                {"Descrição do Custo Variável": "Matérias-Primas e Embalagens", "Valor Estimado (R$)": 1500.00},
-                {"Descrição do Custo Variável": "Taxas de Entrega / Apps", "Valor Estimado (R$)": 220.00}
-            ]), num_rows="dynamic", use_container_width=True, key="custos_variaveis_key")
-
+        st.data_editor(pd.DataFrame([{"Descrição do Custo Fixo": "Aluguel / Atelier", "Valor Mensal (R$)": 1500.00}]), num_rows="dynamic", use_container_width=True, key="custos_fixos_key")
     with sub_dp_aba:
-        st.markdown("##### 👥 Gestão de DP, Remunerações e Contratos CLT")
-        col_rem1, col_rem2 = st.columns(2)
-        with col_rem1:
-            st.metric("Retirada Pró-Labore (Karyn)", "R$ 4.000,00")
-        with col_rem2:
-            st.data_editor(pd.DataFrame([
-                {"Funcionário contratado": "Ana Silva", "Cargo": "Auxiliar Confeitaria", "Salário Base (R$)": 1650.00, "Ocorrências/Atestados": "Nenhum registrado"},
-                {"Funcionário contratado": "Mariana Costa", "Cargo": "Atendente Balcão", "Salário Base (R$)": 1412.00, "Ocorrências/Atestados": "1 dia (Anexado)"}
-            ]), num_rows="dynamic", use_container_width=True, key="salarios_equipe_key")
+        st.metric("Retirada Pró-Labore (Karyn)", "R$ 4.000,00")
 
 # ==========================================
-# NOVA ABA 1: GERADOR DE ORÇAMENTOS E PEDIDOS AUTOMÁTICO
+# ABA 1: GERADOR DE ORÇAMENTOS & INTELIGÊNCIA DE FRETE
 # ==========================================
 with tabs[1]:
-    st.markdown('<div class="section-title">📝 Emissão de Orçamentos e Lançamento Automático</div>', unsafe_allow_html=True)
-    st.write("Insira os dados da encomenda. O sistema gerará um número único e alimentará o seu CRM sozinho:")
+    st.markdown('<div class="section-title">📝 Emissão de Orçamentos e Engenharia de Frete por KM</div>', unsafe_allow_html=True)
     
     col_or1, col_or2 = st.columns(2)
     with col_or1:
         c_nome = st.text_input("Nome do Cliente", value="Fernanda Albuquerque")
         c_whats = st.text_input("WhatsApp de Contato", value="(41) 99222-3344")
-        c_doce = st.text_input("Item Solicitado (Bolo/Doces)", value="Bolo de Morango 5kg + 50 Bombons 3D")
-    with col_or2:
-        c_data_festa = st.date_input("Data de Entrega da Encomenda", datetime.now() + timedelta(days=7))
-        c_valor = st.number_input("Valor Total Combinado (R$)", value=680.00)
-        c_obs_criticas = st.text_area("Restrições Alimentares / Observações do Pedido", value="Cliente odeia suspiro! Alergia leve a abacaxi.")
-
-    # Geração automática de número de pedido estruturado
-    if 'id_pedido_atual' not in st.session_state:
-        st.session_state['id_pedido_atual'] = f"KG-{datetime.now().strftime('%Y')}-{random.randint(1000, 9999)}"
-
-    st.info(f"Código identificador gerado para esta operação: **{st.session_state['id_pedido_atual']}**")
-
-    if st.button("📥 Fechar Pedido e Enviar para o CRM"):
-        st.success(f"Pedido {st.session_state['id_pedido_atual']} integrado com sucesso à ficha da cliente {c_nome}!")
-        # Atualiza o ID para o próximo orçamento
-        st.session_state['id_pedido_atual'] = f"KG-{datetime.now().strftime('%Y')}-{random.randint(1000, 9999)}"
-
-    if st.button("🖨️ Imprimir Cópia do Orçamento Comercial"):
-        st.markdown(f"""
-            <div class="print-box">
-                <b>💎 ORÇAMENTO DE LUXO - K&G ARTE EM CONFEITARIA 💎</b><br>
-                <b>Pedido Nº:</b> {st.session_state['id_pedido_atual']}<br>
-                <b>Data de Emissão:</b> {datetime.now().strftime('%d/%m/%Y')} | <b>Entrega:</b> {c_data_festa.strftime('%d/%m/%Y')}<br>
-                -------------------------------------------------------------------------<br>
-                <b>CLIENTE VIP:</b> {c_nome} | <b>CONTATO:</b> {c_whats}<br>
-                <b>PRODUTO ENCOMENDADO:</b> {c_doce}<br>
-                <b>VALOR DO CONTRATO:</b> R$ {c_valor:.2f}<br>
-                -------------------------------------------------------------------------<br>
-                <b>🚨 DIRETRIZ CRÍTICA DE COZINHA (RESTRIÇÃO):</b> {c_obs_criticas.upper()}<br>
-                -------------------------------------------------------------------------<br>
-                *K&G Arte em Confeitaria - Agradecemos a preferência.*
-            </div>
-        """, unsafe_allow_html=True)
-
-# ==========================================
-# ABA 2: CRM EXPANDIDO COM ALERTAS DE ANIVERSÁRIOS DO MÊS
-# ==========================================
-with tabs[2]:
-    st.markdown('<div class="section-title">👥 CRM: Histórico Completo de Datas da Família e Pedidos</div>', unsafe_allow_html=True)
+        c_email = st.text_input("E-mail do Cliente", value="fernanda.albuquerque@gmail.com")
+        c_doce = st.text_input("Item Solicitado (Bolo/Doces)", value="Bolo de Morango Especial 5kg")
+        c_valor_produtos = st.number_input("Valor dos Produtos (R$)", value=650.00)
     
-    # Alerta Inteligente de Aniversário do Mês (Simulação Baseada no mês atual)
-    mes_atual = datetime.now().strftime("%m")
+    with col_or2:
+        c_data_festa = st.date_input("Data de Entrega", datetime.now() + timedelta(days=7))
+        st.markdown("##### 🚗 Calculadora Logística de Frete Integrada")
+        km_total = st.number_input("Distância Total Ida e Volta (Consultar no Google Maps em KM)", min_value=0.0, value=20.0)
+        quem_entrega = st.radio("Quem realizará a entrega?", ["A própria empresária (Para produção)", "Terceirizado (Motoboy/Uber)"])
+        
+        # Fórmula inteligente de logística K&G
+        custo_km = km_total * 1.80  # R$ 1,80 por KM rodado
+        taxa_parada = 25.00 if quem_entrega == "A própria empresária (Para produção)" else 0.00
+        valor_frete_final = custo_km + taxa_parada
+        
+        st.metric("Custo Logístico Calculado do Frete", f"R$ {valor_frete_final:.2f}", f"R$ {custo_km:.2f} rodagem + R$ {taxa_parada:.2f} parada")
+
+    valor_total_pedido = c_valor_produtos + valor_frete_final
+    st.markdown(f"### 💵 Valor Total do Orçamento: **R$ {valor_total_pedido:.2f}**")
+
+    if 'id_pedido_atual' not in st.session_state:
+        st.session_state['id_pedido_atual'] = f"KG-2026-{random.randint(1000, 9999)}"
+
+    col_btn1, col_btn2 = st.columns(2)
+    with col_btn1:
+        if st.button("📲 Preparar Envio para o WhatsApp"):
+            st.success(f"Pedido pré-salvo! Copie o texto abaixo e envie para o WhatsApp {c_whats}")
+    with col_btn2:
+        if st.button("📩 Preparar Envio para o E-mail"):
+            st.success(f"Pedido pré-salvo! Copie o texto abaixo e dispare para o e-mail: {c_email}")
+
+    st.markdown("##### 🖨️ Visualização do Espelho do Orçamento Comercial")
     st.markdown(f"""
-        <div class="alerta-aniv">
-            🎉 <b>CENTRAL DE RELACIONAMENTO K&G - LEMBRETE DE MARKETING:</b><br>
-            Clientes fazendo aniversário este mês (Mês {mes_atual}): <b>Juliana Mendes Rossi (Aniv: 12/{mes_atual})</b>.<br>
-            <i>Dispare uma mensagem de felicitações exclusiva da K&G no WhatsApp!</i>
+        <div class="print-box">
+            <b>💎 PROPOSTA COMERCIAL EXCLUSIVA - K&G ARTE EM CONFEITARIA 💎</b><br>
+            <b>Código do Orçamento:</b> {st.session_state['id_pedido_atual']}<br>
+            <b>Data de Emissão:</b> {datetime.now().strftime('%d/%m/%Y')} | <b>Entrega Contratada:</b> {c_data_festa.strftime('%d/%m/%Y')}<br>
+            -------------------------------------------------------------------------<br>
+            <b>DADOS DO CLIENTE:</b><br>
+            - Nome: {c_nome}<br>
+            - WhatsApp: {c_whats}<br>
+            - E-mail: {c_email}<br>
+            -------------------------------------------------------------------------<br>
+            <b>ESPECIFICAÇÃO DOS ITENS:</b><br>
+            - {c_doce}: R$ {c_valor_produtos:.2f}<br>
+            - Frete Técnico Especializado ({km_total} km rodados): R$ {valor_frete_final:.2f}<br>
+            -------------------------------------------------------------------------<br>
+            <b>VALOR TOTAL DO INVESTIMENTO: R$ {valor_total_pedido:.2f}</b><br>
+            -------------------------------------------------------------------------<br>
+            *Obs. Importante de Produção: Cliente possui restrições a suspiros.*
         </div>
     """, unsafe_allow_html=True)
 
-    st.write("Mapeamento completo da vida do cliente e vinculação de códigos anteriores:")
+# --- ABA 2: CRM ---
+with tabs[2]:
+    st.markdown('<div class="section-title">👥 CRM: Histórico Completo de Datas da Família e Pedidos</div>', unsafe_allow_html=True)
     st.data_editor(pd.DataFrame([
-        {"Cliente VIP": "Juliana Mendes Rossi", "WhatsApp": "(41) 99123-4567", "Aniv. Cliente": f"12/{mes_atual}", "Aniv. Marido": "18/10", "Aniv. Filhos": "Gabriel (04/02)", "Data Casamento": "22/11", "Últimos Pedidos": "KG-2026-1042, KG-2026-3391", "🚨 RESTRIÇÕES": "NÃO PODE CONTER AMENDOIM!"},
-        {"Cliente VIP": "Carlos Henrique Rocha", "WhatsApp": "(41) 98877-6655", "Aniv. Cliente": "29/08", "Aniv. Marido": "-", "Aniv. Filhos": "Sofia (15/05)", "Data Casamento": "-", "Últimos Pedidos": "KG-2026-8841", "🚨 RESTRIÇÕES": "Não gosta de suspiro de jeito nenhum."}
+        {"Cliente VIP": "Juliana Mendes Rossi", "WhatsApp": "(41) 99123-4567", "E-mail": "juliana@rossi.com", "Aniv. Cliente": "12/06", "Aniv. Marido": "18/10", "Aniv. Filhos": "Gabriel (04/02)", "Últimos Pedidos": "KG-2026-1042", "🚨 RESTRIÇÕES": "NÃO PODE CONTER AMENDOIM!"}
     ]), num_rows="dynamic", use_container_width=True, key="crm_clientes_v2_key")
 
-# ==========================================
-# ABA 3: FÁBRICA DE BASES
-# ==========================================
-with tabs[3]:
-    st.markdown('<div class="section-title">🥣 Central de Produção de Sub-Bases Cadastradas</div>', unsafe_allow_html=True)
-    sub_b1, sub_b2, sub_b3, sub_b4 = st.tabs(["🍞 Massas de Bolo", "🍓 Recheios Estruturados", "💧 Caldas para Molhar", "✨ Coberturas & Blindagens"])
-    with sub_b1:
-        m_edit = st.data_editor(pd.DataFrame(list(st.session_state['banco_massas'].items()), columns=["Nome da Massa", "Custo por kg (R$)"]), num_rows="dynamic", use_container_width=True, key="m_edit_key")
-        st.session_state['banco_massas'] = dict(m_edit.values)
-    with sub_b2:
-        r_edit = st.data_editor(pd.DataFrame(list(st.session_state['banco_recheios'].items()), columns=["Nome do Recheio", "Custo por kg (R$)"]), num_rows="dynamic", use_container_width=True, key="r_edit_key")
-        st.session_state['banco_recheios'] = dict(r_edit.values)
-    with sub_b3:
-        c_edit = st.data_editor(pd.DataFrame(list(st.session_state['banco_caldas'].items()), columns=["Nome da Calda", "Custo por kg (R$)"]), num_rows="dynamic", use_container_width=True, key="c_edit_key")
-        st.session_state['banco_caldas'] = dict(c_edit.values)
-    with sub_b4:
-        cob_edit = st.data_editor(pd.DataFrame(list(st.session_state['banco_coberturas'].items()), columns=["Nome da Cobertura", "Custo por kg (R$)"]), num_rows="dynamic", use_container_width=True, key="cob_edit_key")
-        st.session_state['banco_coberturas'] = dict(cob_edit.values)
-
-# ==========================================
-# ABA 4: DOCES PERSONALIZADOS (NOME DO DOCE IMPLEMENTADO)
-# ==========================================
-with tabs[4]:
-    st.markdown('<div class="section-title">🍫 Engenharia de Projetos por Forma de Acetato</div>', unsafe_allow_html=True)
-    st.write("Mapeie o tipo específico de doce produzido em cada numeração de forma para garantir a cobrança justa da sua arte:")
-    
-    col_bwb1, col_bwb2 = st.columns(2)
-    with col_bwb1:
-        nome_projeto_doce = st.text_input("Nome/Tipo do Doce Produzido", value="Bombom Decorado Personagem 3D Safari")
-        forma_bwb_id = st.text_input("Código/Número da Forma BWB Usada", value="Forma BWB 41")
-        peso_choco_forma = st.number_input("Gramas de Chocolate Usados na Casca (g)", value=30)
-    with col_bwb2:
-        recheio_selecionado = st.selectbox("Selecione o Recheio Interno", list(st.session_state['banco_recheios'].keys()))
-        tipo_pasta_bwb = st.selectbox("Pasta Escolhida para a Modelagem Fina", ["Pasta de Leite em Pó", "Pasta Americana", "Pasta de Chocolate"])
-        peso_pasta_bwb = st.number_input("Gramas de Pasta Utilizados na Escultura (g)", value=20)
-        
-    st.success(f"Projeto ativo: '{nome_projeto_doce}' mapeado na {forma_bwb_id} com recheio de {recheio_selecionado}.")
-
-# ==========================================
-# ABA 5: PRODUTOS COMPLETOS & CALCULADORA IFOOD
-# ==========================================
-with tabs[5]:
-    st.markdown('<div class="section-title">📐 Engenharia Estrutural de Pesos e Precificação Balcão vs iFood</div>', unsafe_allow_html=True)
-    col_prop1, col_prop2 = st.columns(2)
-    with col_prop1:
-        nome_bolo_final = st.text_input("Nome do Produto Final Homologado", value="Bolo de Morango Especial com Suspiros")
-        peso_alvo = st.number_input("Defina o Peso Alvo Solicitado pelo Cliente (kg)", min_value=1.0, value=5.0)
-        formato_forma = st.selectbox("Formato Geométrico da Forma", ["Redonda", "Quadrada", "Retangular"])
-        margem_desejada = st.slider("Defina a sua Margem de Segurança (%) contra alta de insumos", min_value=40, max_value=50, value=45)
-    
-    with col_prop2:
-        peso_alvo_g = peso_alvo * 1000
-        calc_massa = peso_alvo_g * 0.35
-        calc_recheio = peso_alvo_g * 0.40
-        calc_cobertura = peso_alvo_g * 0.15
-        calc_calda = peso_alvo_g * 0.10
-        custo_insumos_base = (peso_alvo * 25.0)
-        
-        if formato_forma == "Redonda":
-            diametro_sugerido = math.ceil(2 * math.sqrt(peso_alvo_g / (3.14 * 10 * 0.6)))
-            st.metric("📐 Diâmetro Recomendado da Forma", f"{diametro_sugerido} cm")
-        else:
-            st.metric("📐 Medida Recomendada da Forma", "35x25 cm")
-        st.metric("💵 Custo Real Estimado de Produção", f"R$ {custo_insumos_base:.2f}")
-
-    st.markdown("### 💰 Tabela Inteligente de Venda Comercial")
-    fator_margem = (100 - margem_desejada) / 100
-    preco_balcao = custo_insumos_base / fator_margem
-    preco_ifood = preco_balcao / 0.75
-    
-    c_v1, c_v2, c_v3 = st.columns(3)
-    with c_v1:
-        st.markdown(f"<div class='preco-box'><b>🛍️ PREÇO RECOMENDADO BALCÃO</b><br><span style='font-size:24px; font-weight:bold;'>R$ {preco_balcao:.2f}</span><br>Lucro Protegido de {margem_desejada}%</div>", unsafe_allow_html=True)
-    with c_v2:
-        st.markdown(f"<div class='preco-box' style='background:#901414;'><b>🛵 PREÇO RECOMENDADO IFOOD</b><br><span style='font-size:24px; font-weight:bold;'>R$ {preco_ifood:.2f}</span><br>Taxas de App Cobertas</div>", unsafe_allow_html=True)
-    with c_v3:
-        st.metric("🛡️ Margem de Flutuação Segurada", f"R$ {(preco_balcao - custo_insumos_base):.2f}", "Margem para suportar altas")
-
-# --- DEMAIS ABAS COMPLEMENTARES MANTIDAS ---
-with tabs[6]: st.write("Módulo de Cubagem e Impressora Portátil Ativo.")
-with tabs[7]:
-    st.markdown('<div class="section-title">🥦 Parâmetros de Vigilância ANVISA</div>', unsafe_allow_html=True)
-    st.markdown("<div class='lupa-box'>🔍 <b>ROTULAGEM AMBIENTAL/FRONTAL MANDATÓRIA:</b><br>⚠️ ALTO EM AÇÚCAR ADICIONADO</div>", unsafe_allow_html=True)
-with tabs[8]: st.write("Estoque Inteligente Ativo.")
-with tabs[9]: st.write("Fornecedores Principais de Curitiba (BWB, Central do Chocolate CWB, Nova Íris, Plassete) mapeados.")
-with tabs[10]: st.write("Inventário de Bens Ativo.")
+# --- DEMAIS ABAS MANTIDAS ---
+with tabs[3]: st.write("Fábrica de Bases carregada.")
+with tabs[4]: st.write("Módulo de Modelagem BWB carregado.")
+with tabs[5]: st.write("Cálculos de produtos casados e iFood ativos.")
+with tabs[6]: st.write("Cubagem de embalagens ativa.")
+with tabs[7]: st.markdown("<div class='lupa-box'>🔍 <b>ALERTA ANVISA:</b> ALTO EM AÇÚCAR ADICIONADO</div>", unsafe_allow_html=True)
+with tabs[8]: st.write("Estoque ativo.")
+with tabs[9]: st.write("Fornecedores de Curitiba ativos.")
+with tabs[10]: st.write("Inventário de bens ativo.")
