@@ -30,52 +30,11 @@ st.markdown("""
         /* Títulos de Seção */
         .section-title { font-family: 'Playfair Display', serif; color: #043927; font-size: 22px; border-left: 4px solid #D4AF37; padding-left: 12px; margin-top: 20px; margin-bottom: 15px; }
         
-        /* Caixas de Texto, Exibição e Fichas Técnicas */
+        /* Caixas de Texto e Exibição */
         .print-box { background: white; border: 1px solid #ced4da; padding: 20px; border-radius: 10px; font-family: monospace; color: black; line-height: 1.4; }
         .lupa-box { border: 3px solid black; background: white; color: black; padding: 10px; font-weight: bold; text-align: center; font-size: 14px; margin-bottom: 10px; font-family: Arial, sans-serif; }
         .preco-box { background: #043927; color: #FAF6F0; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #D4AF37; }
         .alerta-aniv { background: #FAF0F2; border-left: 5px solid #D4AF37; padding: 12px; border-radius: 4px; margin-bottom: 15px; }
-        
-        /* Ficha Técnica de Produção para a Cozinha */
-        .ficha-producao {
-            background-color: #FFFFFF;
-            border: 3px double #D4AF37;
-            border-radius: 12px;
-            padding: 25px;
-            margin: 15px 0px;
-            color: #333333;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-        .ficha-header {
-            text-align: center;
-            border-bottom: 2px solid #043927;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-        .ficha-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 24px;
-            color: #043927;
-            font-weight: 700;
-            margin: 0;
-        }
-        .ficha-subtitle {
-            font-size: 11px;
-            color: #888888;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 3px;
-        }
-        .ficha-section-title {
-            font-weight: bold;
-            color: #043927;
-            border-bottom: 1px solid #E6C5BA;
-            padding-bottom: 4px;
-            margin-top: 15px;
-            margin-bottom: 10px;
-            font-size: 14px;
-            text-transform: uppercase;
-        }
         
         /* Customização das Abas em Rosé Nude */
         button[data-baseweb="tab"] {
@@ -104,7 +63,7 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# --- FUNÇÃO DE SEGURANÇA ABSOLUTA CONTRA ERROS DE DIGITAÇÃO OU CAMPOS EM BRANCO ---
+# --- FUNÇÃO DE SEGURANÇA CONTRA CAMPOS EM BRANCO NAS RECEITAS ---
 def calcular_custo_tabela_seguro(df, col_preco, col_embalagem, col_usado):
     if df is None or df.empty:
         return 0.0
@@ -113,11 +72,9 @@ def calcular_custo_tabela_seguro(df, col_preco, col_embalagem, col_usado):
         for col in [col_preco, col_embalagem, col_usado]:
             if col not in df_temp.columns:
                 df_temp[col] = 0.0
-        
         df_temp[col_preco] = pd.to_numeric(df_temp[col_preco], errors='coerce').fillna(0.0)
         df_temp[col_embalagem] = pd.to_numeric(df_temp[col_embalagem], errors='coerce').fillna(1.0)
         df_temp[col_usado] = pd.to_numeric(df_temp[col_usado], errors='coerce').fillna(0.0)
-        
         df_temp[col_embalagem] = df_temp[col_embalagem].replace(0, 1.0)
         
         custos = (df_temp[col_preco] / df_temp[col_embalagem]) * df_temp[col_usado]
@@ -125,83 +82,92 @@ def calcular_custo_tabela_seguro(df, col_preco, col_embalagem, col_usado):
     except Exception:
         return 0.0
 
-# 🔒 CHAVE DE ACESSO GLOBAL DO SISTEMA
+def get_recipe_cost_kg(banco, name):
+    if not name or name not in banco:
+        return 0.0
+    try:
+        recipe = banco[name]
+        df = recipe["ingredientes"]
+        peso_obtido = recipe.get("peso_obtido", 1000.0)
+        if peso_obtido <= 0:
+            peso_obtido = 1.0
+        custo_total = calcular_custo_tabela_seguro(df, "Preço Embalagem (R$)", "Gramos Embalagem (g)", "Gramos Usados")
+        return (custo_total / peso_obtido) * 1000.0
+    except Exception:
+        return 0.0
+
+# 🔒 CHAVE DE ACESSO GLOBAL
 chave_usuario = st.text_input("Insira a sua Chave de Acesso para liberar o sistema:", type="password")
 
 if chave_usuario == "kg10k":
-    st.success("Acesso Autorizado! Seja bem-vinda ao seu sistema, Karyn.")
+    st.success("Acesso Homologado! Seja bem-vinda ao seu sistema, Karyn.")
 
-    # Inicialização do Banco de Dados Dinâmico de Receitas (Aba 3)
-    if 'receitas' not in st.session_state:
-        st.session_state['receitas'] = {
-            "Massas": {
-                "Massa Choc Premium": {
-                    "ingredientes": pd.DataFrame([
-                        {"Ingrediente": "Farinha de Trigo Premium", "Preço Embalagem (R$)": 8.50, "Gramos Embalagem (g)": 1000.0, "Gramos Usados na Receita": 300.0},
-                        {"Ingrediente": "Chocolate em Pó 50%", "Preço Embalagem (R$)": 22.00, "Gramos Embalagem (g)": 500.0, "Gramos Usados na Receita": 100.0},
-                        {"Ingrediente": "Ovos Frescos", "Preço Embalagem (R$)": 12.00, "Gramos Embalagem (g)": 600.0, "Gramos Usados na Receita": 240.0}
-                    ]),
-                    "peso_final": 1000.0,
-                    "preparo": "1. Peneire a farinha e o chocolate em pó para aerar.\n2. Bata os ovos com o açúcar na batedeira por 10 minutos até dobrar de volume.\n3. Adicione os líquidos delicadamente.\n4. Incorpore os secos peneirados com movimentos de baixo para cima.",
-                    "decoracao": "Massa base para bolos estruturados. Cortar as fatias com faca de serra apenas após resfriamento completo de 4 horas sob refrigeração."
-                },
-                "Pão de Ló de Baunilha": {
-                    "ingredientes": pd.DataFrame([
-                        {"Ingrediente": "Farinha de Trigo Premium", "Preço Embalagem (R$)": 8.50, "Gramos Embalagem (g)": 1000.0, "Gramos Usados na Receita": 350.0},
-                        {"Ingrediente": "Açúcar", "Preço Embalagem (R$)": 4.50, "Gramos Embalagem (g)": 1000.0, "Gramos Usados na Receita": 200.0},
-                        {"Ingrediente": "Ovos Frescos", "Preço Embalagem (R$)": 12.00, "Gramos Embalagem (g)": 600.0, "Gramos Usados na Receita": 240.0}
-                    ]),
-                    "peso_final": 950.0,
-                    "preparo": "1. Bata as claras em neve.\n2. Adicione as gemas e o açúcar.\n3. Misture a farinha de trigo peneirada à mão lentamente para preservar a aeração.",
-                    "decoracao": "Não aplicável diretamente à massa base."
-                }
+    # Inicialização Dinâmica de Bancos de Dados de Receita na Memória (Aba 3)
+    if 'banco_massas_rec' not in st.session_state:
+        st.session_state['banco_massas_rec'] = {
+            "Massa Choc Premium": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Farinha de Trigo Premium", "Preço Embalagem (R$)": 8.50, "Gramos Embalagem (g)": 1000.0, "Gramos Usados": 300.0},
+                    {"Ingrediente": "Chocolate em Pó 50%", "Preço Embalagem (R$)": 22.00, "Gramos Embalagem (g)": 500.0, "Gramos Usados": 100.0},
+                    {"Ingrediente": "Ovos Frescos", "Preço Embalagem (R$)": 12.00, "Gramos Embalagem (g)": 600.0, "Gramos Usados": 240.0}
+                ]),
+                "peso_obtido": 1000.0,
+                "preparo": "Bater claras em neve, juntar secos aos poucos na velocidade baixa da planetária.",
+                "decoracao": "Dourado uniforme com aroma intenso de cacau nobre."
             },
-            "Recheios": {
-                "Brigadeiro de Ninho": {
-                    "ingredientes": pd.DataFrame([
-                        {"Ingrediente": "Leite Condensado Itambé", "Preço Embalagem (R$)": 6.80, "Gramos Embalagem (g)": 395.0, "Gramos Usados na Receita": 395.0},
-                        {"Ingrediente": "Creme de Leite", "Preço Embalagem (R$)": 4.20, "Gramos Embalagem (g)": 200.0, "Gramos Usados na Receita": 200.0},
-                        {"Ingrediente": "Leite Ninho", "Preço Embalagem (R$)": 18.50, "Gramos Embalagem (g)": 400.0, "Gramos Usados na Receita": 100.0}
-                    ]),
-                    "peso_final": 650.0,
-                    "preparo": "1. Misture todos os ingredientes secos e líquidos frios diretamente na panela de fundo grosso.\n2. Leve ao fogo médio mexendo constantemente com espátula de silicone até desgrudar das laterais.",
-                    "decoracao": "Aplicação uniforme sobre as camadas de massa usando bico de confeitar para padronização de altura de recheio."
-                },
-                "Geleia de Morango Caseira": {
-                    "ingredientes": pd.DataFrame([
-                        {"Ingrediente": "Morango in Natura", "Preço Embalagem (R$)": 10.00, "Gramos Embalagem (g)": 250.0, "Gramos Usados na Receita": 500.0},
-                        {"Ingrediente": "Açúcar", "Preço Embalagem (R$)": 4.50, "Gramos Embalagem (g)": 1000.0, "Gramos Usados na Receita": 200.0}
-                    ]),
-                    "peso_final": 500.0,
-                    "preparo": "1. Higienize os morangos e corte-os em cubos médios.\n2. Leve ao fogo com o açúcar e suco de meio limão.\n3. Cozinhe em fogo baixo até reduzir e obter consistência brilhante e pedaçuda.",
-                    "decoracao": "Aplicar de forma centralizada sobre a camada de brigadeiro para evitar vazamentos na estrutura lateral."
-                }
-            },
-            "Caldas": {
-                "Calda Básica de Açúcar": {
-                    "ingredientes": pd.DataFrame([
-                        {"Ingrediente": "Açúcar Refinado", "Preço Embalagem (R$)": 4.50, "Gramos Embalagem (g)": 1000.0, "Gramos Usados na Receita": 200.0},
-                        {"Ingrediente": "Água Filtrada", "Preço Embalagem (R$)": 0.00, "Gramos Embalagem (g)": 1000.0, "Gramos Usados na Receita": 500.0}
-                    ]),
-                    "peso_final": 700.0,
-                    "preparo": "1. Dissolva o açúcar na água e leve ao fogo médio.\n2. Ferva por 3 minutos até homogeneizar.\n3. Espere esfriar completamente antes de colocar na bisnaga.",
-                    "decoracao": "Regar uniformemente com movimentos em espiral sem encharcar o centro."
-                }
-            },
-            "Coberturas": {
-                "Chantiganache ao Leite": {
-                    "ingredientes": pd.DataFrame([
-                        {"Ingrediente": "Chocolate Nobre ao Leite", "Preço Embalagem (R$)": 55.00, "Gramos Embalagem (g)": 1000.0, "Gramos Usados na Receita": 500.0},
-                        {"Ingrediente": "Creme de Leite", "Preço Embalagem (R$)": 4.20, "Gramos Embalagem (g)": 200.0, "Gramos Usados na Receita": 200.0}
-                    ]),
-                    "peso_final": 700.0,
-                    "preparo": "1. Derreta o chocolate de 30 em 30 segundos no micro-ondas.\n2. Adicione o creme de leite e bata na batedeira até obter consistência de espatular rígida.",
-                    "decoracao": "Espatular o bolo de forma precisa usando guia metálica. Decorar o topo com bico 1M de forma simétrica."
-                }
+            "Pão de Ló de Baunilha": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Farinha de Trigo Premium", "Preço Embalagem (R$)": 8.50, "Gramos Embalagem (g)": 1000.0, "Gramos Usados": 300.0},
+                    {"Ingrediente": "Açúcar Refinado", "Preço Embalagem (R$)": 4.50, "Gramos Embalagem (g)": 1000.0, "Gramos Usados": 250.0},
+                    {"Ingrediente": "Ovos Frescos", "Preço Embalagem (R$)": 12.00, "Gramos Embalagem (g)": 600.0, "Gramos Usados": 300.0}
+                ]),
+                "peso_obtido": 1000.0,
+                "preparo": "Emulsionar ovos e açúcar, peneirar farinha levemente e assar a 180°C.",
+                "decoracao": "Espessura simétrica, ideal para camadas com frutas frescas."
             }
         }
 
-    # Criação das Abas Principais Unificadas
+    if 'banco_recheios_rec' not in st.session_state:
+        st.session_state['banco_recheios_rec'] = {
+            "Brigadeiro de Ninho": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Leite Condensado Itambé", "Preço Embalagem (R$)": 6.80, "Gramos Embalagem (g)": 395.0, "Gramos Usados": 395.0},
+                    {"Ingrediente": "Creme de Leite", "Preço Embalagem (R$)": 4.20, "Gramos Embalagem (g)": 200.0, "Gramos Usados": 200.0},
+                    {"Ingrediente": "Leite Ninho", "Preço Embalagem (R$)": 18.50, "Gramos Embalagem (g)": 400.0, "Gramos Usados": 100.0}
+                ]),
+                "peso_obtido": 695.0,
+                "preparo": "Levar ao fogo mexendo sem parar até atingir ponto de bloco firme para estruturação de bolos.",
+                "decoracao": "Cor marfim lisa, sem grumos e textura ultra aveludada."
+            }
+        }
+
+    if 'banco_caldas_rec' not in st.session_state:
+        st.session_state['banco_caldas_rec'] = {
+            "Calda Básica de Açúcar": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Açúcar Refinado", "Preço Embalagem (R$)": 4.50, "Gramos Embalagem (g)": 1000.0, "Gramos Usados": 150.0},
+                    {"Ingrediente": "Água Filtrada", "Preço Embalagem (R$)": 0.0, "Gramos Embalagem (g)": 1000.0, "Gramos Usados": 500.0}
+                ]),
+                "peso_obtido": 650.0,
+                "preparo": "Ferver água e açúcar até reduzir ligeiramente e homogeneizar. Deixar esfriar.",
+                "decoracao": "Fluidez perfeita para absorção uniforme na massa."
+            }
+        }
+
+    if 'banco_coberturas_rec' not in st.session_state:
+        st.session_state['banco_coberturas_rec'] = {
+            "Chantiganache ao Leite": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Chocolate Nobre ao Leite", "Preço Embalagem (R$)": 55.00, "Gramos Embalagem (g)": 1000.0, "Gramos Usados": 500.0},
+                    {"Ingrediente": "Creme de Leite", "Preço Embalagem (R$)": 4.20, "Gramos Embalagem (g)": 200.0, "Gramos Usados": 200.0}
+                ]),
+                "peso_obtido": 700.0,
+                "preparo": "Derreter o chocolate nobre e emulsionar com creme de leite. Bater levemente para obter textura fosca.",
+                "decoracao": "Firmeza total para blindagem de quinas perfeitas."
+            }
+        }
+
+    # Definição das Abas do Menu Principal
     tabs = st.tabs([
         "💰 CENTRAL FINANCEIRA",
         "📝 1. ORÇAMENTOS & FRETE",
@@ -323,96 +289,169 @@ if chave_usuario == "kg10k":
             st.dataframe(df_crm, use_container_width=True)
 
     # ==========================================
-    # ABA 3: FÁBRICA DE BASES (SISTEMA DE RECEITAS CADASTRADAS)
+    # ABA 3: FÁBRICA DE BASES (COM INSERÇÃO DE NOVAS RECEITAS)
     # ==========================================
     with tabs[3]:
-        st.markdown('<div class="section-title">🥣 Fábrica de Bases: Gestão Completa de Receitas Cadastradas</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title">🥣 Fábrica de Bases: Gestão Ilimitada de Receitas e Custos</div>', unsafe_allow_html=True)
+        sub_b1, sub_b2, sub_b3, sub_b4 = st.tabs(["🍞 Massas de Bolo", "🍓 Recheios Estruturados", "💧 Caldas para Regar", "✨ Coberturas e Blindagens"])
         
-        # Seleção de Categoria e Receita
-        cat_selecionada = st.selectbox("Selecione a Categoria de Produção", ["Massas", "Recheios", "Caldas", "Coberturas"])
-        
-        lista_receitas = list(st.session_state['receitas'][cat_selecionada].keys())
-        rec_selecionada = st.selectbox("Selecione a Receita para Ver/Editar", lista_receitas + ["+ Cadastrar Nova Receita..."])
-        
-        # Estrutura de dados para armazenar a nova receita ou edição
-        if rec_selecionada == "+ Cadastrar Nova Receita...":
-            nome_nova = st.text_input("Nome da Nova Receita (Ex: Massa Red Velvet Luxo)", value="")
-            ing_df = pd.DataFrame([{"Ingrediente": "", "Preço Embalagem (R$)": 0.0, "Gramos Embalagem (g)": 1.0, "Gramos Usados na Receita": 0.0}])
-            peso_obt = 1000.0
-            preparo_txt = ""
-            decoracao_txt = ""
-        else:
-            nome_nova = rec_selecionada
-            ing_df = st.session_state['receitas'][cat_selecionada][rec_selecionada]["ingredientes"]
-            peso_obt = st.session_state['receitas'][cat_selecionada][rec_selecionada]["peso_final"]
-            preparo_txt = st.session_state['receitas'][cat_selecionada][rec_selecionada]["preparo"]
-            decoracao_txt = st.session_state['receitas'][cat_selecionada][rec_selecionada]["decoracao"]
+        # --- SUB-ABA 1: MASSAS ---
+        with sub_b1:
+            st.markdown("##### ➕ Cadastrar Nova Receita de Massa")
+            with st.form("nova_massa_form"):
+                novo_m_nome = st.text_input("Nome da Nova Massa")
+                submit_m = st.form_submit_button("➕ Cadastrar Massa")
+                if submit_m and novo_m_nome:
+                    if novo_m_nome not in st.session_state['banco_massas_rec']:
+                        st.session_state['banco_massas_rec'][novo_m_nome] = {
+                            "ingredientes": pd.DataFrame([{"Ingrediente": "Ingrediente Exemplo", "Preço Embalagem (R$)": 10.00, "Gramos Embalagem (g)": 1000.0, "Gramos Usados": 100.0}]),
+                            "peso_obtido": 1000.0,
+                            "preparo": "Descreva aqui o modo de preparo passo a passo.",
+                            "decoracao": "Padrão estético aceito para a produção."
+                        }
+                        st.success(f"Massa '{novo_m_nome}' cadastrada! Atualize a página para editar os ingredientes.")
+                    else:
+                        st.warning("Massa já cadastrada!")
+
+            st.write("---")
+            sel_massa = st.selectbox("Selecione a Massa para Visualizar/Editar os Ingredientes:", list(st.session_state['banco_massas_rec'].keys()))
             
-        st.markdown("---")
-        col_ed1, col_ed2 = st.columns([3, 2])
-        
-        with col_ed1:
-            st.markdown(f"##### 📝 Ficha de Cadastro: **{nome_nova if nome_nova else 'Nova Receita'}**")
-            
-            # Editor da tabela de ingredientes
-            ing_editado = st.data_editor(ing_df, num_rows="dynamic", use_container_width=True, key=f"editor_{cat_selecionada}_{rec_selecionada}")
-            
-            col_b_f1, col_b_f2 = st.columns(2)
-            with col_b_f1:
-                peso_final_v = st.number_input("Peso Final Obtido (Rendimento em g)", min_value=1.0, value=float(peso_obt), key=f"peso_{cat_selecionada}_{rec_selecionada}")
-            with col_b_f2:
-                # Cálculo de custo da receita atual
-                custo_total_v = calcular_custo_tabela_seguro(ing_editado, "Preço Embalagem (R$)", "Gramos Embalagem (g)", "Gramos Usados na Receita")
-                custo_kg_v = (custo_total_v / peso_final_v) * 1000.0 if peso_final_v > 0 else 0.0
-                st.metric("Custo Proporcional por kg", f"R$ {custo_kg_v:.2f}")
+            if sel_massa:
+                rec_m = st.session_state['banco_massas_rec'][sel_massa]
+                m_edit = st.data_editor(rec_m["ingredientes"], num_rows="dynamic", use_container_width=True, key=f"m_edit_{sel_massa}")
+                st.session_state['banco_massas_rec'][sel_massa]["ingredientes"] = m_edit
                 
-            preparo_editado = st.text_area("🥣 Modo de Preparo Passo a Passo", value=preparo_txt, height=180, key=f"prep_{cat_selecionada}_{rec_selecionada}")
-            decoracao_editada = st.text_area("🎨 Diretrizes de Decoração, Acabamento e Padronização", value=decoracao_txt, height=120, key=f"dec_{cat_selecionada}_{rec_selecionada}")
+                col_m1, col_m2 = st.columns(2)
+                with col_m1:
+                    peso_obt_m = st.number_input("Peso Final Obtido na Receita (g)", value=float(rec_m.get("peso_obtido", 1000.0)), key=f"peso_m_{sel_massa}")
+                    st.session_state['banco_massas_rec'][sel_massa]["peso_obtido"] = peso_obt_m
+                    custo_massa_total = calcular_custo_tabela_seguro(m_edit, "Preço Embalagem (R$)", "Gramos Embalagem (g)", "Gramos Usados")
+                    custo_m_kg = (custo_massa_total / peso_obt_m * 1000) if peso_obt_m > 0 else 0.0
+                    st.metric("Custo Total da Receita", f"R$ {custo_massa_total:.2f}")
+                    st.metric("Custo por kg de Massa", f"R$ {custo_m_kg:.2f}")
+                with col_m2:
+                    prep_m = st.text_area("Modo de Preparo", value=rec_m.get("preparo", ""), key=f"prep_m_{sel_massa}")
+                    dec_m = st.text_area("Decoração & Padronização Estética", value=rec_m.get("decoracao", ""), key=f"dec_m_{sel_massa}")
+                    st.session_state['banco_massas_rec'][sel_massa]["preparo"] = prep_m
+                    st.session_state['banco_massas_rec'][sel_massa]["decoracao"] = dec_m
+
+        # --- SUB-ABA 2: RECHEIOS ---
+        with sub_b2:
+            st.markdown("##### ➕ Cadastrar Novo Recheio Estruturado")
+            with st.form("novo_recheio_form"):
+                novo_r_nome = st.text_input("Nome do Novo Recheio")
+                submit_r = st.form_submit_button("➕ Cadastrar Recheio")
+                if submit_r and novo_r_nome:
+                    if novo_r_nome not in st.session_state['banco_recheios_rec']:
+                        st.session_state['banco_recheios_rec'][novo_r_nome] = {
+                            "ingredientes": pd.DataFrame([{"Ingrediente": "Ingrediente Exemplo", "Preço Embalagem (R$)": 10.00, "Gramos Embalagem (g)": 1000.0, "Gramos Usados": 100.0}]),
+                            "peso_obtido": 1000.0,
+                            "preparo": "Descreva aqui o modo de preparo passo a passo.",
+                            "decoracao": "Padrão estético aceito para a produção."
+                        }
+                        st.success(f"Recheio '{novo_r_nome}' cadastrado! Atualize para editar.")
+                    else:
+                        st.warning("Recheio já cadastrado!")
+
+            st.write("---")
+            sel_recheio = st.selectbox("Selecione o Recheio para Visualizar/Editar os Ingredientes:", list(st.session_state['banco_recheios_rec'].keys()))
             
-            if st.button("💾 Salvar/Atualizar Receita na Fábrica", type="primary", key=f"btn_salvar_{cat_selecionada}_{rec_selecionada}"):
-                if not nome_nova:
-                    st.error("Por favor, digite um nome válido para a receita antes de salvar.")
-                else:
-                    st.session_state['receitas'][cat_selecionada][nome_nova] = {
-                        "ingredientes": ing_editado,
-                        "peso_final": peso_final_v,
-                        "preparo": preparo_editado,
-                        "decoracao": decoracao_editada
-                    }
-                    st.success(f"Receita '{nome_nova}' salva com sucesso no banco de dados!")
-                    st.rerun()
-                    
-        with col_ed2:
-            st.markdown("##### 🖨️ Ficha Técnica de Produção Oficial (Visual da Cozinha)")
-            st.write("Esta é a ficha pronta de fácil entendimento que vai direto para a área de produção:")
-            
-            # Formato de Ficha Técnica Visual com design de luxo
-            ingredientes_html = "".join([
-                f"<li><b>{row['Ingrediente']}:</b> {int(row['Gramos Usados na Receita'])}g</li>" 
-                for _, row in ing_editado.iterrows() if row['Ingrediente']
-            ])
-            
-            st.markdown(f"""
-                <div class="ficha-producao">
-                    <div class="ficha-header">
-                        <div class="ficha-title">K&G - FICHA DE PRODUÇÃO</div>
-                        <div class="ficha-subtitle">{cat_selecionada.upper()} | {nome_nova.upper()}</div>
-                    </div>
-                    <div class="ficha-section-title">⚖️ PESAGEM DE INGREDIENTES</div>
-                    <ul style="padding-left: 20px; font-size: 13px;">
-                        {ingredientes_html if ingredientes_html else "<li>Nenhum ingrediente adicionado</li>"}
-                    </ul>
-                    <div style="font-size: 12px; margin-top: 10px; color: #043927;">
-                        <b>Rendimento Esperado:</b> {int(peso_final_v)}g de base finalizada
-                    </div>
-                    
-                    <div class="ficha-section-title">🥣 MODO DE PREPARO</div>
-                    <div style="font-size: 12px; white-space: pre-wrap; line-height: 1.5; color: #555;">{preparo_editado if preparo_editado else "Passo a passo não descrito."}</div>
-                    
-                    <div class="ficha-section-title">🎨 PADRONIZAÇÃO & DECORAÇÃO</div>
-                    <div style="font-size: 12px; white-space: pre-wrap; line-height: 1.5; color: #555;">{decoracao_editada if decoracao_editada else "Instruções estéticas não descritas."}</div>
-                </div>
-            """, unsafe_allow_html=True)
+            if sel_recheio:
+                rec_r = st.session_state['banco_recheios_rec'][sel_recheio]
+                r_edit = st.data_editor(rec_r["ingredientes"], num_rows="dynamic", use_container_width=True, key=f"r_edit_{sel_recheio}")
+                st.session_state['banco_recheios_rec'][sel_recheio]["ingredientes"] = r_edit
+                
+                col_r1, col_r2 = st.columns(2)
+                with col_r1:
+                    peso_obt_r = st.number_input("Peso Final Obtido na Receita (g)", value=float(rec_r.get("peso_obtido", 1000.0)), key=f"peso_r_{sel_recheio}")
+                    st.session_state['banco_recheios_rec'][sel_recheio]["peso_obtido"] = peso_obt_r
+                    custo_recheio_total = calcular_custo_tabela_seguro(r_edit, "Preço Embalagem (R$)", "Gramos Embalagem (g)", "Gramos Usados")
+                    custo_r_kg = (custo_recheio_total / peso_obt_r * 1000) if peso_obt_r > 0 else 0.0
+                    st.metric("Custo Total do Recheio", f"R$ {custo_recheio_total:.2f}")
+                    st.metric("Custo por kg de Recheio", f"R$ {custo_r_kg:.2f}")
+                with col_r2:
+                    prep_r = st.text_area("Modo de Preparo", value=rec_r.get("preparo", ""), key=f"prep_r_{sel_recheio}")
+                    dec_r = st.text_area("Decoração & Padronização", value=rec_r.get("decoracao", ""), key=f"dec_r_{sel_recheio}")
+                    st.session_state['banco_recheios_rec'][sel_recheio]["preparo"] = prep_r
+                    st.session_state['banco_recheios_rec'][sel_recheio]["decoracao"] = dec_r
+
+        # --- SUB-ABA 3: CALDAS ---
+        with sub_b3:
+            st.markdown("##### ➕ Cadastrar Nova Calda")
+            with st.form("nova_calda_form"):
+                novo_c_nome = st.text_input("Nome da Nova Calda")
+                submit_c = st.form_submit_button("➕ Cadastrar Calda")
+                if submit_c and novo_c_nome:
+                    if novo_c_nome not in st.session_state['banco_caldas_rec']:
+                        st.session_state['banco_caldas_rec'][novo_c_nome] = {
+                            "ingredientes": pd.DataFrame([{"Ingrediente": "Açúcar", "Preço Embalagem (R$)": 4.50, "Gramos Embalagem (g)": 1000.0, "Gramos Usados": 100.0}]),
+                            "peso_obtido": 1000.0,
+                            "preparo": "Misturar e ferver.",
+                            "decoracao": "Calda fluida."
+                        }
+                        st.success(f"Calda '{novo_c_nome}' cadastrada!")
+                    else:
+                        st.warning("Calda já cadastrada!")
+
+            st.write("---")
+            sel_calda = st.selectbox("Selecione a Calda para Editar:", list(st.session_state['banco_caldas_rec'].keys()))
+            if sel_calda:
+                rec_c = st.session_state['banco_caldas_rec'][sel_calda]
+                c_edit = st.data_editor(rec_c["ingredientes"], num_rows="dynamic", use_container_width=True, key=f"c_edit_{sel_calda}")
+                st.session_state['banco_caldas_rec'][sel_calda]["ingredientes"] = c_edit
+                
+                col_c1, col_c2 = st.columns(2)
+                with col_c1:
+                    peso_obt_c = st.number_input("Peso Final Obtido (g)", value=float(rec_c.get("peso_obtido", 1000.0)), key=f"peso_c_{sel_calda}")
+                    st.session_state['banco_caldas_rec'][sel_calda]["peso_obtido"] = peso_obt_c
+                    custo_calda_total = calcular_custo_tabela_seguro(c_edit, "Preço Embalagem (R$)", "Gramos Embalagem (g)", "Gramos Usados")
+                    custo_c_kg = (custo_calda_total / peso_obt_c * 1000) if peso_obt_c > 0 else 0.0
+                    st.metric("Custo Total da Calda", f"R$ {custo_calda_total:.2f}")
+                    st.metric("Custo por kg", f"R$ {custo_c_kg:.2f}")
+                with col_c2:
+                    prep_c = st.text_area("Modo de Preparo", value=rec_c.get("preparo", ""), key=f"prep_c_{sel_calda}")
+                    dec_c = st.text_area("Padronização", value=rec_c.get("decoracao", ""), key=f"dec_c_{sel_calda}")
+                    st.session_state['banco_caldas_rec'][sel_calda]["preparo"] = prep_c
+                    st.session_state['banco_caldas_rec'][sel_calda]["decoracao"] = dec_c
+
+        # --- SUB-ABA 4: COBERTURAS ---
+        with sub_b4:
+            st.markdown("##### ➕ Cadastrar Nova Cobertura / Blindagem")
+            with st.form("nova_cob_form"):
+                novo_cob_nome = st.text_input("Nome da Nova Cobertura")
+                submit_cob = st.form_submit_button("➕ Cadastrar Cobertura")
+                if submit_cob and novo_cob_nome:
+                    if novo_cob_nome not in st.session_state['banco_coberturas_rec']:
+                        st.session_state['banco_coberturas_rec'][novo_cob_nome] = {
+                            "ingredientes": pd.DataFrame([{"Ingrediente": "Chocolate", "Preço Embalagem (R$)": 55.00, "Gramos Embalagem (g)": 1000.0, "Gramos Usados": 200.0}]),
+                            "peso_obtido": 1000.0,
+                            "preparo": "Modo de preparo.",
+                            "decoracao": "Instruções."
+                        }
+                        st.success(f"Cobertura '{novo_cob_nome}' cadastrada!")
+                    else:
+                        st.warning("Cobertura já cadastrada!")
+
+            st.write("---")
+            sel_cob = st.selectbox("Selecione a Cobertura para Editar:", list(st.session_state['banco_coberturas_rec'].keys()))
+            if sel_cob:
+                rec_cob = st.session_state['banco_coberturas_rec'][sel_cob]
+                cob_edit = st.data_editor(rec_cob["ingredientes"], num_rows="dynamic", use_container_width=True, key=f"cob_edit_{sel_cob}")
+                st.session_state['banco_coberturas_rec'][sel_cob]["ingredientes"] = cob_edit
+                
+                col_cob1, col_cob2 = st.columns(2)
+                with col_cob1:
+                    peso_obt_cob = st.number_input("Peso Final Obtido (g)", value=float(rec_cob.get("peso_obtido", 1000.0)), key=f"peso_cob_{sel_cob}")
+                    st.session_state['banco_coberturas_rec'][sel_cob]["peso_obtido"] = peso_obt_cob
+                    custo_cob_total = calcular_custo_tabela_seguro(cob_edit, "Preço Embalagem (R$)", "Gramos Embalagem (g)", "Gramos Usados")
+                    custo_cob_kg = (custo_cob_total / peso_obt_cob * 1000) if peso_obt_cob > 0 else 0.0
+                    st.metric("Custo Total da Cobertura", f"R$ {custo_cob_total:.2f}")
+                    st.metric("Custo por kg", f"R$ {custo_cob_kg:.2f}")
+                with col_cob2:
+                    prep_cob = st.text_area("Modo de Preparo", value=rec_cob.get("preparo", ""), key=f"prep_cob_{sel_cob}")
+                    dec_cob = st.text_area("Padronização", value=rec_cob.get("decoracao", ""), key=f"dec_cob_{sel_cob}")
+                    st.session_state['banco_coberturas_rec'][sel_cob]["preparo"] = prep_cob
+                    st.session_state['banco_coberturas_rec'][sel_cob]["decoracao"] = dec_cob
 
     # ==========================================
     # ABA 4: DOCES PERSONALIZADOS
@@ -429,27 +468,25 @@ if chave_usuario == "kg10k":
             peso_pasta_bwb = st.number_input("Peso da Pasta na Modelagem (g)", value=20.0)
 
     # ==========================================
-    # ABA 5: PRODUTOS COMPLETOS & CÁLCULO DE PROPORÇÃO
+    # ABA 5: PRODUTOS COMPLETOS & CÁLCULO DE PROPORÇÃO (CONECTADA ÀS BASES DA ABA 3)
     # ==========================================
     with tabs[5]:
-        st.markdown('<div class="section-title">📐 Engenharia de Estrutura de Bolos & Precificação de Venda</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title">📐 Engenharia de Estrutura de Bolos & Precificação Dinâmica de Venda</div>', unsafe_allow_html=True)
         
         col_pd1, col_pd2 = st.columns(2)
         with col_pd1:
-            nome_bolo_final = st.text_input("Nome do Bolo Completo", value="Bolo de Morango Especial com Chantiganache")
+            nome_bolo_final = st.text_input("Bolo Completo", value="Bolo de Morango com Suspiros e Chantiganache")
             peso_alvo = st.number_input("Peso Alvo Solicitado pelo Cliente (kg)", min_value=1.0, value=5.0)
-            tipo_forma_final = st.selectbox("Geometria da Forma", ["Redonda", "Retangular"])
-            margem_comercial = st.slider("Selecione a Margem Comercial de Segurança (%)", min_value=40, max_value=50, value=45)
+            tipo_forma_final = st.selectbox("Geometria da Forma", ["Redonda", "Retangular"], key="geom_forma_v5")
+            margem_comercial = st.slider("Selecione a Margem Comercial de Segurança (%)", min_value=40, max_value=50, value=45, key="margem_v5")
             
-            # Seletores dinâmicos conectando com a Fábrica de Bases (Aba 3)
-            st.markdown("##### 🥣 Composição de Itens a Partir da Fábrica:")
-            massa_sel = st.selectbox("Selecione a Massa Base", list(st.session_state['receitas']['Massas'].keys()))
-            recheio_sel = st.selectbox("Selecione o Recheio Base", list(st.session_state['receitas']['Recheios'].keys()))
-            calda_sel = st.selectbox("Selecione a Calda", list(st.session_state['receitas']['Caldas'].keys()))
-            cob_sel = st.selectbox("Selecione a Cobertura/Blindagem", list(st.session_state['receitas']['Coberturas'].keys()))
+            # Dropdowns Dinâmicos conectados com as chaves inseridas na Aba 3
+            sel_massa_composta = st.selectbox("Selecione a Massa Base:", list(st.session_state['banco_massas_rec'].keys()))
+            sel_recheio_composto = st.selectbox("Selecione o Recheio Estruturado:", list(st.session_state['banco_recheios_rec'].keys()))
+            sel_calda_composta = st.selectbox("Selecione a Calda de Regar:", list(st.session_state['banco_caldas_rec'].keys()))
+            sel_cobertura_composta = st.selectbox("Selecione a Cobertura/Blindagem:", list(st.session_state['banco_coberturas_rec'].keys()))
             
         with col_pd2:
-            # Lógica matemática proporcional de divisão de pesos estruturais
             peso_alvo_g = peso_alvo * 1000
             calc_massa_final = peso_alvo_g * 0.35
             calc_recheio_final = peso_alvo_g * 0.40
@@ -461,52 +498,43 @@ if chave_usuario == "kg10k":
                 st.metric("Forma Redonda Recomendada", f"{diametro_sugerido} cm de diâmetro (Altura de 10cm)")
             else:
                 st.metric("Forma Retangular Recomendada", "35x25 cm")
-                
-            # Cálculo de custos reais derivando das bases selecionadas
-            def obter_custo_kg_base(categoria, nome_rec):
-                try:
-                    df_base = st.session_state['receitas'][categoria][nome_rec]["ingredientes"]
-                    peso_base = st.session_state['receitas'][categoria][nome_rec]["peso_final"]
-                    total_base = calcular_custo_tabela_seguro(df_base, "Preço Embalagem (R$)", "Gramos Embalagem (g)", "Gramos Usados na Receita")
-                    return (total_base / peso_base) * 1000.0 if peso_base > 0 else 0.0
-                except Exception:
-                    return 0.0
-            
-            custo_massa_kg = obter_custo_kg_base("Massas", massa_sel)
-            custo_recheio_kg = obter_custo_kg_base("Recheios", recheio_sel)
-            custo_calda_kg = obter_custo_kg_base("Caldas", calda_sel)
-            custo_cob_kg = obter_custo_kg_base("Coberturas", cob_sel)
 
-        # CUSTO DINÂMICO AUTOMÁTICO DERIVADO DAS RECEITAS DA ABA 3
-        custo_massa_composto = (custo_massa_kg / 1000) * calc_massa_final
-        custo_recheio_composto = (custo_recheio_kg / 1000) * calc_recheio_final
-        custo_calda_composto = (custo_calda_kg / 1000) * calc_calda_final
+        # Busca dinâmica do custo real por kg de cada base calculada na Aba 3
+        custo_m_kg = get_recipe_cost_kg(st.session_state['banco_massas_rec'], sel_massa_composta)
+        custo_r_kg = get_recipe_cost_kg(st.session_state['banco_recheios_rec'], sel_recheio_composto)
+        custo_c_kg = get_recipe_cost_kg(st.session_state['banco_caldas_rec'], sel_calda_composta)
+        custo_cob_kg = get_recipe_cost_kg(st.session_state['banco_coberturas_rec'], sel_cobertura_composta)
+
+        # Cálculo do custo proporcional das camadas
+        custo_massa_composto = (custo_m_kg / 1000) * calc_massa_final
+        custo_recheio_composto = (custo_r_kg / 1000) * calc_recheio_final
+        custo_calda_composto = (custo_c_kg / 1000) * calc_calda_final
         custo_cob_composto = (custo_cob_kg / 1000) * calc_cobertura_final
-        custo_insumos_total = custo_massa_composto + custo_recheio_composto + custo_calda_composto + custo_cob_composto + 12.00
+        custo_insumos_total = custo_massa_composto + custo_recheio_composto + custo_calda_composto + custo_cob_composto + 12.00 # Caixa/Embalagem embutida
         
-        st.markdown("##### 📝 Balanço e Distribuição para Produção de Cozinha:")
+        st.markdown("##### 📝 Balanço Estrutural para Produção de Cozinha:")
         c_p1, c_p2, c_p3, c_p4 = st.columns(4)
-        with c_p1: st.metric("Massa Base", f"{int(calc_massa_final)} g", f"Custo: R$ {custo_massa_composto:.2f}")
-        with c_p2: st.metric("Recheio + Frutas", f"{int(calc_recheio_final)} g", f"Custo: R$ {custo_recheio_composto:.2f}")
-        with c_p3: st.metric("Calda de Regar", f"{int(calc_calda_final)} g", f"Custo: R$ {custo_calda_composto:.2f}")
-        with c_p4: st.metric("Blindagem / Cobertura", f"{int(calc_cobertura_final)} g", f"Custo: R$ {custo_cob_composto:.2f}")
+        with c_p1: st.metric(f"Massa ({sel_massa_composta})", f"{int(calc_massa_final)} g", f"Custo: R$ {custo_massa_composto:.2f}")
+        with c_p2: st.metric(f"Recheio ({sel_recheio_composto})", f"{int(calc_recheio_final)} g", f"Custo: R$ {custo_recheio_composto:.2f}")
+        with c_p3: st.metric(f"Calda ({sel_calda_composta})", f"{int(calc_calda_final)} g", f"Custo: R$ {custo_calda_composto:.2f}")
+        with c_p4: st.metric(f"Cobertura ({sel_cobertura_composta})", f"{int(calc_cobertura_final)} g", f"Custo: R$ {custo_cob_composto:.2f}")
 
-        # PRECIFICAÇÃO E TAXAS FINANCEIRAS
-        st.markdown("### 💰 Estrutura de Preço de Venda Comercial")
+        # PRECIFICAÇÃO DE VENDAS COM COBERTURA DE TAXAS
+        st.markdown("### 💰 Tabela de Preço de Venda Comercial")
         divisor_margem = (100 - margem_comercial) / 100
         preco_venda_base = custo_insumos_total / divisor_margem
         
-        v_debito = preco_venda_base / (1 - 0.0199)
-        v_credito = preco_venda_base / (1 - 0.0499)
-        v_ifood = preco_venda_base / 0.73
+        v_debito = preco_venda_base / (1 - 0.0199) # Taxa máquina débito repassada
+        v_credito = preco_venda_base / (1 - 0.0499) # Taxa máquina crédito repassada
+        v_ifood = preco_venda_base / 0.73 # Cobre 27% de taxas do iFood mantendo lucro intacto
 
         cv1, cv2, cv3, cv4 = st.columns(4)
-        with cv1: st.markdown(f"<div class='preco-box'><b>🛍️ DINHEIRO/PIX</b><br><span style='font-size:20px; font-weight:bold;'>R$ {preco_venda_base:.2f}</span><br>Lucro Protegido</div>", unsafe_allow_html=True)
+        with cv1: st.markdown(f"<div class='preco-box'><b>🛍️ PIX / DINHEIRO</b><br><span style='font-size:20px; font-weight:bold;'>R$ {preco_venda_base:.2f}</span><br>Lucro Limpo de {margem_comercial}%</div>", unsafe_allow_html=True)
         with cv2: st.markdown(f"<div class='preco-box' style='background:#0B533A;'><b>💳 DÉBITO MAQ.</b><br><span style='font-size:20px; font-weight:bold;'>R$ {v_debito:.2f}</span><br>Taxa 1.99% inclusa</div>", unsafe_allow_html=True)
         with cv3: st.markdown(f"<div class='preco-box' style='background:#0B533A;'><b>💳 CRÉDITO MAQ.</b><br><span style='font-size:20px; font-weight:bold;'>R$ {v_credito:.2f}</span><br>Taxa 4.99% inclusa</div>", unsafe_allow_html=True)
-        with cv4: st.markdown(f"<div class='preco-box' style='background:#901414;'><b>🛵 CARDÁPIO IFOOD</b><br><span style='font-size:20px; font-weight:bold;'>R$ {v_ifood:.2f}</span><br>Margem Assegurada</div>", unsafe_allow_html=True)
+        with cv4: st.markdown(f"<div class='preco-box' style='background:#901414;'><b>🛵 CARDÁPIO IFOOD</b><br><span style='font-size:20px; font-weight:bold;'>R$ {v_ifood:.2f}</span><br>Taxas de Delivery Cobertas</div>", unsafe_allow_html=True)
 
-        foto_bolo = st.file_uploader("📸 Enviar Foto do Produto Finalizado", type=["jpg", "png", "jpeg"])
+        foto_bolo = st.file_uploader("📸 Enviar Foto do Produto Finalizado", type=["jpg", "png", "jpeg"], key="uploader_v5")
 
     # ==========================================
     # ABA 6: EMBALAGENS & IMPRESSÃO
