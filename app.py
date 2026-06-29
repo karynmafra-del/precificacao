@@ -6,7 +6,6 @@ import json
 import os
 from datetime import datetime, timedelta
 
-# Configuração da página - Streamlit puro
 st.set_page_config(
     page_title="K&G Arte em Confeitaria",
     page_icon="✨",
@@ -355,13 +354,12 @@ def renderizar_tabela_segura(df_dados, col_config_dict, chave_unica):
 chave_usuario = st.text_input("Insira a sua Chave de Acesso para liberar o sistema:", type="password")
 
 if chave_usuario == "kg10k":
-    st.success("Acesso Autorizado! Seja bem-vinda ao seu sistema, Karyn.")
+    st.success("Acesso Autorizado! Seja bem-vinda de volta, Karyn.")
     
     st.markdown("""
         <div class="safety-alert-box">
             <b>⚠️ MEDIDA DE SEGURANÇA SUPREMA K&G:</b><br>
-            Os servidores da nuvem limpam a memória temporária em atualizações ou reinícios.<br>
-            <b>Sempre clique em '💾 Baixar Backup de Segurança' na barra lateral</b> para salvar sua base de dados física com todas as suas receitas e clientes atualizados!
+            Sempre que finalizar um novo cadastro de receita ou cliente, clique no botão <b>'💾 Baixar Backup de Segurança'</b> na barra lateral para salvar sua planilha física no seu celular ou computador!
         </div>
     """, unsafe_allow_html=True)
 
@@ -371,7 +369,7 @@ if chave_usuario == "kg10k":
 
     if not dados_carregados and 'banco_massas_rec' not in st.session_state:
         st.session_state['banco_massas_rec'] = {
-            "Massa Branca Amanteigada": {
+            "Massa Branca Amanteigada K&G": {
                 "ingredientes": pd.DataFrame([
                     {"Ingrediente": "Ovos Frescos", "Qtd Usada": 4.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
                     {"Ingrediente": "Manteiga sem Sal", "Qtd Usada": 150.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 12.00},
@@ -383,6 +381,32 @@ if chave_usuario == "kg10k":
                 "peso_obtido": 1000.0,
                 "preparo": "Bater manteiga com açúcar até esbranquiçar. Adicionar ovos um a um. Alternar trigo e leite.",
                 "perda_coccao": 8.0
+            },
+            "Massa de Chocolate Chiffon 50%": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 5.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
+                    {"Ingrediente": "Açúcar Refinado", "Qtd Usada": 200.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 4.50},
+                    {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 220.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Cacau em Pó 50%", "Qtd Usada": 60.0, "Unidade": "g", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 25.00},
+                    {"Ingrediente": "Óleo de Girassol", "Qtd Usada": 100.0, "Unidade": "ml", "Qtd na Embalagem": 900.0, "Preço Embalagem (R$)": 9.50},
+                    {"Ingrediente": "Água Morna", "Qtd Usada": 150.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00},
+                    {"Ingrediente": "Fermento Químico", "Qtd Usada": 15.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 6.00}
+                ]),
+                "peso_obtido": 1100.0,
+                "preparo": "Bater as claras em neve. Misturar as gemas com óleo, açúcar e cacau. Adicionar trigo, fermento e as claras em neve delicadamente.",
+                "perda_coccao": 10.0
+            },
+            "Massa de Empada e Quiche Amanteigada": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 500.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Manteiga sem Sal (Gelada)", "Qtd Usada": 250.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 12.00},
+                    {"Ingrediente": "Gema de Ovo", "Qtd Usada": 2.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
+                    {"Ingrediente": "Água Gelada", "Qtd Usada": 50.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00},
+                    {"Ingrediente": "Sal Refinado", "Qtd Usada": 10.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 3.00}
+                ]),
+                "peso_obtido": 800.0,
+                "preparo": "Misturar trigo e sal, incorporar a manteiga em cubos com as pontas dos dedos até obter textura de areia. Unir com as gemas e água gelada.",
+                "perda_coccao": 5.0
             }
         }
 
@@ -398,6 +422,28 @@ if chave_usuario == "kg10k":
                 "peso_obtido": 750.0,
                 "preparo": "Mexer em fogo brando até que desgrude do fundo da panela.",
                 "perda_coccao": 12.0
+            },
+            "Frango Cremoso com Catupiry": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Peito de Frango Desfiado", "Qtd Usada": 600.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 18.00},
+                    {"Ingrediente": "Catupiry Original", "Qtd Usada": 250.0, "Unidade": "g", "Qtd na Embalagem": 400.0, "Preço Embalagem (R$)": 19.90},
+                    {"Ingrediente": "Cebola Picada", "Qtd Usada": 80.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 6.00},
+                    {"Ingrediente": "Azeite de Oliva", "Qtd Usada": 30.0, "Unidade": "ml", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 28.00},
+                    {"Ingrediente": "Molho de Tomate Rústico", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 340.0, "Preço Embalagem (R$)": 4.50}
+                ]),
+                "peso_obtido": 1000.0,
+                "preparo": "Refogar a cebola no azeite, juntar o frango e temperos. Adicionar o molho. Desligar e misturar o catupiry.",
+                "perda_coccao": 5.0
+            },
+            "Geleia Artesanal de Morango": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Morangos Frescos", "Qtd Usada": 500.0, "Unidade": "g", "Qtd na Embalagem": 250.0, "Preço Embalagem (R$)": 6.00},
+                    {"Ingrediente": "Açúcar Refinado", "Qtd Usada": 200.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 4.50},
+                    {"Ingrediente": "Suco de Limão Espremido", "Qtd Usada": 15.0, "Unidade": "ml", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 3.00}
+                ]),
+                "peso_obtido": 400.0,
+                "preparo": "Misturar morangos, açúcar e limão na panela. Cozinhar em fogo brando até obter ponto de geleia brilhante.",
+                "perda_coccao": 30.0
             }
         }
 
@@ -983,7 +1029,7 @@ if chave_usuario == "kg10k":
             st.markdown(f"""
                 <div class="print-box">
                     <div style="text-align: center; border-bottom: 2px solid #043927; padding-bottom: 10px;">
-                        <span style="font-size: 20px; font-weight: bold; color: #043927;">💎 FICHA DE PRODUÇÃO UNIFICADA - K&G ARTE EM CONFEITARIA 💎</span><br>
+                        <span style="font-size: 20px; font-weight: bold; color: #043927;">💎 FICHA DE PRODUCTION UNIFICADA - K&G ARTE EM CONFEITARIA 💎</span><br>
                         <span style="font-size: 12px; letter-spacing: 1px;">PADRONIZAÇÃO E ENGENHARIA DE PRODUTO</span>
                     </div>
                     <br>
