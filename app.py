@@ -13,7 +13,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# Estilização de Elite K&G (Verde Esmeralda, Ouro e Customização das Abas em Rosé Nude)
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght=400;700&family=Poppins:wght=300;400;600&display=swap');
@@ -38,6 +37,16 @@ st.markdown("""
         .preco-box { background: #043927; color: #FAF6F0; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #D4AF37; }
         .alerta-aniv { background: #FAF0F2; border-left: 5px solid #D4AF37; padding: 12px; border-radius: 4px; margin-bottom: 15px; }
         
+        /* Painel de Alerta de Segurança de Backup */
+        .safety-alert-box {
+            background-color: #FFF5F5;
+            border-left: 6px solid #E53E3E;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #C53030;
+        }
+        
         /* Customização das Abas em Rosé Nude */
         button[data-baseweb="tab"] {
             color: #555555 !important;
@@ -61,11 +70,10 @@ st.markdown("""
 st.markdown("""
     <div class="brand-header">
         <div class="brand-title">K&G Arte em Confeitaria</div>
-        <div class="brand-subtitle">💎 Sistema ERP & CRM Integrado de Alta Confeitaria 💎</div>
+        <div class="brand-subtitle">💎 Sistema ERP & CRM Integrado de Alta Confeitaria & Salgados 💎</div>
     </div>
 """, unsafe_allow_html=True)
 
-# --- FUNÇÃO EXECUTIVA DE LIMPEZA E TRATAMENTO DE VÍRGULAS EM NÚMEROS ---
 def limpar_e_converter_coluna(df, coluna, padrao=0.0):
     if df is None or df.empty or coluna not in df.columns:
         return pd.Series([padrao] * (len(df) if df is not None else 1))
@@ -75,7 +83,6 @@ def limpar_e_converter_coluna(df, coluna, padrao=0.0):
     except Exception:
         return pd.Series([padrao] * len(df))
 
-# --- VACINA AUTO-ADAPTATIVA DE MEMÓRIA (CORRIGE COLUNAS ANTIGAS ON-THE-FLY) ---
 def corrigir_colunas_df(df):
     if df is None:
         return pd.DataFrame(columns=["Ingrediente", "Qtd Usada", "Unidade", "Qtd na Embalagem", "Preço Embalagem (R$)"])
@@ -110,25 +117,23 @@ def corrigir_colunas_df(df):
                 
     return df_corrigido[colunas_obrigatorias]
 
-# --- CONFIGURAÇÃO SUPREMA DE DESIGN DAS COLUNAS COM PROTEÇÃO CONTRA VERSÕES ANTIGAS ---
 config_colunas_ingredientes = {}
 if hasattr(st, "column_config"):
     try:
         config_colunas_ingredientes = {
             "Ingrediente": st.column_config.TextColumn(
                 "🧁 Ingrediente / Insumo",
-                placeholder="Clique para digitar... Ex: Leite Moça",
+                placeholder="Ex: Farinha Venturelli",
                 required=True,
                 width="medium"
             ),
             "Qtd Usada": st.column_config.NumberColumn(
-                "⚖️ Qtd Usada na Receita",
+                "⚖️ Qtd Usada",
                 placeholder="0.0",
                 min_value=0.0,
                 step=0.1,
                 required=True,
-                format="%.1f",
-                help="Quantidade líquida colocada na receita"
+                format="%.1f"
             ),
             "Unidade": st.column_config.SelectboxColumn(
                 "📏 Unidade",
@@ -137,13 +142,12 @@ if hasattr(st, "column_config"):
                 default="g"
             ),
             "Qtd na Embalagem": st.column_config.NumberColumn(
-                "📦 Qtd na Embalagem",
+                "📦 Qtd Embalagem",
                 placeholder="1000",
                 min_value=0.1,
                 step=1.0,
                 required=True,
-                format="%.1f",
-                help="Peso/Volume total da embalagem fechada do mercado"
+                format="%.1f"
             ),
             "Preço Embalagem (R$)": st.column_config.NumberColumn(
                 "💰 Preço Embalagem",
@@ -151,14 +155,12 @@ if hasattr(st, "column_config"):
                 min_value=0.0,
                 step=0.01,
                 required=True,
-                format="R$ %.2f",
-                help="Preço total pago na embalagem fechada"
+                format="R$ %.2f"
             )
         }
     except Exception:
         config_colunas_ingredientes = {}
 
-# --- CONVERSÃO INTELIGENTE DE UNIDADES PARA CÁLCULO DE PESO BRUTO REAL ---
 def calcular_peso_bruto_ingredientes(df):
     if df is None or df.empty:
         return 0.0
@@ -201,7 +203,6 @@ def calcular_peso_bruto_ingredientes(df):
     except Exception:
         return 0.0
 
-# --- CÁLCULO SEGURO E DINÂMICO DE PRECIFICAÇÃO (À PROVA DE FALHAS) ---
 def calcular_custo_tabela_seguro(df, col_preco, col_embalagem, col_usado):
     if df is None or df.empty:
         return 0.0
@@ -239,7 +240,6 @@ def get_recipe_cost_kg(banco, name):
     except Exception:
         return 0.0
 
-# --- SISTEMA DE PERSISTÊNCIA E BACKUP EM DISCO ---
 def salvar_dados_disco():
     try:
         if 'banco_massas_rec' in st.session_state:
@@ -360,14 +360,10 @@ def importar_backup_json(json_str):
     except Exception:
         return False
 
-# --- FUNÇÃO CENTRAL DE EDIÇÃO SEGURA COM FALLBACK PARA VERSÕES SEM DATA_EDITOR ---
 def renderizar_tabela_segura(df_dados, col_config_dict, chave_unica):
-    # Trata dados nulos e corrige colunas antes de renderizar
     df_dados_corrigido = corrigir_colunas_df(df_dados)
     
-    # 1. Verifica se st.data_editor existe no Streamlit instalado no servidor
     if hasattr(st, "data_editor"):
-        # Se st.column_config estiver disponível no servidor, passa a configuração de design
         if col_config_dict and len(col_config_dict) > 0:
             return st.data_editor(
                 df_dados_corrigido,
@@ -383,47 +379,8 @@ def renderizar_tabela_segura(df_dados, col_config_dict, chave_unica):
                 use_container_width=True,
                 key=chave_unica
             )
-            
-    # 2. Se não existir st.data_editor, verifica st.experimental_data_editor (versões intermediárias)
-    elif hasattr(st, "experimental_data_editor"):
-        return st.experimental_data_editor(
-            df_dados_corrigido,
-            num_rows="dynamic",
-            use_container_width=True,
-            key=chave_unica
-        )
-        
-    # 3. Fallback absoluto para versões super antigas de Streamlit: Renderiza tabela editável simulada por formulários
     else:
-        st.warning("⚠️ Seu servidor está rodando uma versão muito antiga do Streamlit. Algumas interações de planilha podem parecer básicas, mas estão totalmente funcionais.")
         return st.data_editor(df_dados_corrigido, num_rows="dynamic", use_container_width=True, key=chave_unica)
-
-# --- ADICIONAR INGREDIENTE AO BANCO DE DADOS ---
-def adicionar_ingrediente_banco(banco_key, receita_nome, ingrediente, unidade, preco, qtd_emb, qtd_usada):
-    try:
-        preco_val = float(str(preco).replace(',', '.').strip()) if preco else 0.0
-    except:
-        preco_val = 0.0
-    try:
-        qtd_emb_val = float(str(qtd_emb).replace(',', '.').strip()) if qtd_emb else 1.0
-    except:
-        qtd_emb_val = 1.0
-    try:
-        qtd_usada_val = float(str(qtd_usada).replace(',', '.').strip()) if qtd_usada else 0.0
-    except:
-        qtd_usada_val = 0.0
-        
-    new_row = {
-        "Ingrediente": ingrediente,
-        "Qtd Usada": qtd_usada_val,
-        "Unidade": unidade,
-        "Qtd na Embalagem": qtd_emb_val,
-        "Preço Embalagem (R$)": preco_val
-    }
-    
-    df = st.session_state[banco_key][receita_nome]["ingredientes"]
-    df = corrigir_colunas_df(df)
-    st.session_state[banco_key][receita_nome]["ingredientes"] = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
 
 # 🔒 CHAVE DE ACESSO GLOBAL DO SISTEMA
 chave_usuario = st.text_input("Insira a sua Chave de Acesso para liberar o sistema:", type="password")
@@ -431,81 +388,267 @@ chave_usuario = st.text_input("Insira a sua Chave de Acesso para liberar o siste
 if chave_usuario == "kg10k":
     st.success("Acesso Autorizado! Seja bem-vinda ao seu sistema, Karyn.")
 
+    st.markdown("""
+        <div class="safety-alert-box">
+            <b>⚠️ MEDIDA DE SEGURANÇA SUPREMA K&G:</b><br>
+            Os servidores da nuvem limpam a memória temporária em atualizações ou reinícios.<br>
+            <b>Sempre clique em '💾 Baixar Backup de Segurança' na barra lateral</b> para salvar sua base de dados física com todas as suas receitas e clientes atualizados!
+        </div>
+    """, unsafe_allow_html=True)
+
     # Tenta carregar os dados salvos em disco automaticamente antes de inicializar o padrão
     dados_carregados = False
     if 'banco_massas_rec' not in st.session_state:
         dados_carregados = carregar_dados_disco()
 
-    # Se não tiver arquivo salvo em disco, cria a base padrão
+    # Se não tiver arquivo salvo em disco, cria a base padrão recheada com TODAS as suas receitas novas!
     if not dados_carregados and 'banco_massas_rec' not in st.session_state:
         st.session_state['banco_massas_rec'] = {
-            "Massa Choc Premium": {
+            "Massa Branca (MBL)": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 250.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 25.00},
-                    {"Ingrediente": "Chocolate em Pó 50%", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 70.00},
-                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 4.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 25.00},
-                    {"Ingrediente": "Creme de leite", "Qtd Usada": 200.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 3.50}
-                ], columns=["Ingrediente", "Qtd Usada", "Unidade", "Qtd na Embalagem", "Preço Embalagem (R$)"]),
-                "peso_obtido": 1000.0,
-                "preparo": "Bater claras em neve, juntar secos aos poucos na velocidade baixa da planetária.",
-                "perda_coccao": 10.0
-            },
-            "Pão de Ló de Baunilha": {
-                "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 300.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 4.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
+                    {"Ingrediente": "Óleo de Soja", "Qtd Usada": 150.0, "Unidade": "ml", "Qtd na Embalagem": 900.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Leite Integral", "Qtd Usada": 150.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.50},
+                    {"Ingrediente": "Iogurte Natural", "Qtd Usada": 170.0, "Unidade": "g", "Qtd na Embalagem": 170.0, "Preço Embalagem (R$)": 3.20},
+                    {"Ingrediente": "Leite Ninho Pó", "Qtd Usada": 30.0, "Unidade": "g", "Qtd na Embalagem": 380.0, "Preço Embalagem (R$)": 16.50},
                     {"Ingrediente": "Açúcar Refinado", "Qtd Usada": 250.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 4.50},
-                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 5.0, "Unidade": "un", "Qtd na Embalagem": 12.0, "Preço Embalagem (R$)": 12.00}
-                ], columns=["Ingrediente", "Qtd Usada", "Unidade", "Qtd na Embalagem", "Preço Embalagem (R$)"]),
+                    {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 280.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Fermento Químico", "Qtd Usada": 16.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 6.00}
+                ]),
                 "peso_obtido": 1000.0,
-                "preparo": "Emulsionar ovos e açúcar, peneirar farinha levemente e assar a 180°C.",
-                "perda_coccao": 10.0
+                "preparo": "Bater no liquidificador os ovos, óleo, leite, iogurte e açúcar. Pulsar levemente com a farinha e o fermento.",
+                "perda_coccao": 8.0
+            },
+            "Massa de Chocolate (MBL)": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 4.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
+                    {"Ingrediente": "Óleo de Soja", "Qtd Usada": 150.0, "Unidade": "ml", "Qtd na Embalagem": 900.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Leite Integral", "Qtd Usada": 150.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.50},
+                    {"Ingrediente": "Creme de Leite", "Qtd Usada": 200.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 4.00},
+                    {"Ingrediente": "Chocolate em Pó 50%", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 65.00},
+                    {"Ingrediente": "Açúcar Refinado", "Qtd Usada": 250.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 4.50},
+                    {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 250.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Fermento Químico", "Qtd Usada": 16.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 6.00}
+                ]),
+                "peso_obtido": 1100.0,
+                "preparo": "Bater os líquidos e o chocolate em pó. Misturar a farinha no modo pulsar.",
+                "perda_coccao": 8.0
+            },
+            "Massa Red-Velvet": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 4.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
+                    {"Ingrediente": "Óleo de Soja", "Qtd Usada": 150.0, "Unidade": "ml", "Qtd na Embalagem": 900.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Leite Integral", "Qtd Usada": 150.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.50},
+                    {"Ingrediente": "Iogurte Natural", "Qtd Usada": 170.0, "Unidade": "g", "Qtd na Embalagem": 170.0, "Preço Embalagem (R$)": 3.20},
+                    {"Ingrediente": "Chocolate em Pó 50%", "Qtd Usada": 30.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 65.00},
+                    {"Ingrediente": "Pasta Frutas Silvestres", "Qtd Usada": 15.0, "Unidade": "g", "Qtd na Embalagem": 250.0, "Preço Embalagem (R$)": 35.00},
+                    {"Ingrediente": "Corante Vermelho Gel", "Qtd Usada": 5.0, "Unidade": "g", "Qtd na Embalagem": 50.0, "Preço Embalagem (R$)": 12.00},
+                    {"Ingrediente": "Açúcar Refinado", "Qtd Usada": 250.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 4.50},
+                    {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 280.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Limão (Buttermilk)", "Qtd Usada": 10.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 10.00},
+                    {"Ingrediente": "Fermento Químico", "Qtd Usada": 16.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 6.00}
+                ]),
+                "peso_obtido": 1100.0,
+                "preparo": "Fazer o buttermilk com leite e limão. Bater líquidos, pasta saborizante e corante. Unir aos secos.",
+                "perda_coccao": 8.0
+            },
+            "Massa Salgados de Forno (Batata)": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 900.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Batata Asterix cozida", "Qtd Usada": 300.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 7.00},
+                    {"Ingrediente": "Açúcar Refinado", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 4.50},
+                    {"Ingrediente": "Margarina Qualy", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 6.50},
+                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 3.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
+                    {"Ingrediente": "Sal Refinado", "Qtd Usada": 15.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 3.00},
+                    {"Ingrediente": "Lecitina de Soja Líquida", "Qtd Usada": 10.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 45.00},
+                    {"Ingrediente": "Melhorador de Farinha", "Qtd Usada": 10.0, "Unidade": "g", "Qtd na Embalagem": 300.0, "Preço Embalagem (R$)": 15.00},
+                    {"Ingrediente": "Açúcar Invertido", "Qtd Usada": 25.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 22.00},
+                    {"Ingrediente": "Fermento Seco para Pães", "Qtd Usada": 20.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 10.00},
+                    {"Ingrediente": "Água Filtrada", "Qtd Usada": 250.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.0}
+                ]),
+                "peso_obtido": 1870.0,
+                "preparo": "Misturar ingredientes exceto trigo. Adicionar o trigo aos poucos. Sove até desgrudar das mãos. Deixar descansar.",
+                "perda_coccao": 5.0
+            },
+            "Massa Brisée (Quiche e Empadão)": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 1000.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Margarina Qualy", "Qtd Usada": 600.0, "Unidade": "g", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 6.50},
+                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 2.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
+                    {"Ingrediente": "Sal Refinado", "Qtd Usada": 10.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 3.00}
+                ]),
+                "peso_obtido": 1660.0,
+                "preparo": "Misturar ingredientes frios rapidamente com a ponta dos dedos (método sablage) para formar a massa 'podre'. Não sovar demais.",
+                "perda_coccao": 0.0
+            },
+            "Massa Coxinha (Frango)": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 600.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Sal Refinado", "Qtd Usada": 5.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 3.00},
+                    {"Ingrediente": "Maionese Hellmanns", "Qtd Usada": 200.0, "Unidade": "g", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 14.50},
+                    {"Ingrediente": "Caldo Knorr de Galinha", "Qtd Usada": 20.0, "Unidade": "g", "Qtd na Embalagem": 114.0, "Preço Embalagem (R$)": 6.00},
+                    {"Ingrediente": "Páprica Doce", "Qtd Usada": 2.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 5.00},
+                    {"Ingrediente": "Água do cozimento Frango", "Qtd Usada": 600.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00},
+                    {"Ingrediente": "Leite Integral", "Qtd Usada": 400.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.50},
+                    {"Ingrediente": "Batata Asterix cozida", "Qtd Usada": 400.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 7.00},
+                    {"Ingrediente": "Margarina Qualy", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 6.50},
+                    {"Ingrediente": "Alho Picado", "Qtd Usada": 20.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 12.00}
+                ]),
+                "peso_obtido": 2400.0,
+                "preparo": "Ferver líquidos, temperos, maionese e batata. Jogar o trigo de uma vez e cozinhar até soltar do fundo da panela.",
+                "perda_coccao": 0.0
             }
         }
 
     if 'banco_recheios_rec' not in st.session_state:
         st.session_state['banco_recheios_rec'] = {
-            "Brigadeiro de Ninho": {
+            "Recheio Frango Cremoso": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Leite Condensado Itambé", "Qtd Usada": 1.0, "Unidade": "un", "Qtd na Embalagem": 1.0, "Preço Embalagem (R$)": 6.80},
-                    {"Ingrediente": "Creme de Leite", "Qtd Usada": 1.0, "Unidade": "un", "Qtd na Embalagem": 1.0, "Preço Embalagem (R$)": 4.20},
-                    {"Ingrediente": "Leite Ninho", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 400.0, "Preço Embalagem (R$)": 18.50}
-                ], columns=["Ingrediente", "Qtd Usada", "Unidade", "Qtd na Embalagem", "Preço Embalagem (R$)"]),
-                "peso_obtido": 695.0,
-                "preparo": "Levar ao fogo mexendo sem parar até atingir ponto de bloco firme para estruturação de bolos.",
+                    {"Ingrediente": "Frango Desfiado (Sassami)", "Qtd Usada": 715.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 22.00},
+                    {"Ingrediente": "Margarina Qualy", "Qtd Usada": 75.0, "Unidade": "g", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 6.50},
+                    {"Ingrediente": "Azeite de Oliva", "Qtd Usada": 7.0, "Unidade": "ml", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 25.00},
+                    {"Ingrediente": "Páprica Doce", "Qtd Usada": 3.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 5.00},
+                    {"Ingrediente": "Colorau", "Qtd Usada": 2.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 4.00},
+                    {"Ingrediente": "Caldo Knorr de Galinha", "Qtd Usada": 10.0, "Unidade": "g", "Qtd na Embalagem": 114.0, "Preço Embalagem (R$)": 6.00},
+                    {"Ingrediente": "Sal Refinado", "Qtd Usada": 5.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 3.00},
+                    {"Ingrediente": "Massa de Tomate", "Qtd Usada": 120.0, "Unidade": "g", "Qtd na Embalagem": 300.0, "Preço Embalagem (R$)": 4.50},
+                    {"Ingrediente": "Limão", "Qtd Usada": 50.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 10.00},
+                    {"Ingrediente": "Ketchup", "Qtd Usada": 50.0, "Unidade": "g", "Qtd na Embalagem": 400.0, "Preço Embalagem (R$)": 8.00},
+                    {"Ingrediente": "Requeijão Catupiry", "Qtd Usada": 75.0, "Unidade": "g", "Qtd na Embalagem": 400.0, "Preço Embalagem (R$)": 12.50},
+                    {"Ingrediente": "Creme de Leite", "Qtd Usada": 50.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 4.00},
+                    {"Ingrediente": "Cheirinho Verde", "Qtd Usada": 50.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 4.00}
+                ]),
+                "peso_obtido": 1300.0,
+                "preparo": "Refogar frango desfiado com gorduras e temperos, adicionar líquidos, molho e finalizar com cremes e tempero verde.",
+                "perda_coccao": 0.0
+            },
+            "Recheio Costela ao Molho Madeira": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Costela Bovina Desfiada", "Qtd Usada": 940.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 32.00},
+                    {"Ingrediente": "Água da Costela", "Qtd Usada": 250.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00},
+                    {"Ingrediente": "Molho Madeira Pronto", "Qtd Usada": 300.0, "Unidade": "g", "Qtd na Embalagem": 300.0, "Preço Embalagem (R$)": 11.50},
+                    {"Ingrediente": "Requeijão Catupiry", "Qtd Usada": 80.0, "Unidade": "g", "Qtd na Embalagem": 400.0, "Preço Embalagem (R$)": 12.50},
+                    {"Ingrediente": "Molho Barbecue", "Qtd Usada": 30.0, "Unidade": "g", "Qtd na Embalagem": 400.0, "Preço Embalagem (R$)": 9.50},
+                    {"Ingrediente": "Farinha de Trigo", "Qtd Usada": 50.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50}
+                ]),
+                "peso_obtido": 1650.0,
+                "preparo": "Triturar levemente a costela cozida. Juntar o molho madeira, barbecue, caldo e engrossar com trigo.",
+                "perda_coccao": 0.0
+            },
+            "Molho de Camarão Cremoso": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Camarão Descascado", "Qtd Usada": 400.0, "Unidade": "g", "Qtd na Embalagem": 400.0, "Preço Embalagem (R$)": 48.00},
+                    {"Ingrediente": "Azeite de Oliva", "Qtd Usada": 30.0, "Unidade": "ml", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 25.00},
+                    {"Ingrediente": "Alho Picado", "Qtd Usada": 20.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 12.00},
+                    {"Ingrediente": "Páprica Doce", "Qtd Usada": 5.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 5.00},
+                    {"Ingrediente": "Sazon de Legumes", "Qtd Usada": 5.0, "Unidade": "g", "Qtd na Embalagem": 60.0, "Preço Embalagem (R$)": 5.50},
+                    {"Ingrediente": "Requeijão Catupiry", "Qtd Usada": 80.0, "Unidade": "g", "Qtd na Embalagem": 400.0, "Preço Embalagem (R$)": 12.50},
+                    {"Ingrediente": "Pimentão Amarelo", "Qtd Usada": 80.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 14.00},
+                    {"Ingrediente": "Pimentão Vermelho", "Qtd Usada": 80.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 14.00},
+                    {"Ingrediente": "Leite Integral", "Qtd Usada": 200.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.50},
+                    {"Ingrediente": "Farinha de Trigo", "Qtd Usada": 30.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50}
+                ]),
+                "peso_obtido": 1200.0,
+                "preparo": "Refogar alho, pimentões e camarão. Incorporar leite, trigo e requeijão para dar bastante consistência.",
+                "perda_coccao": 0.0
+            },
+            "Creme Base de Quiches": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Leite Integral", "Qtd Usada": 300.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.50},
+                    {"Ingrediente": "Queijo Ricota fresca", "Qtd Usada": 400.0, "Unidade": "g", "Qtd na Embalagem": 400.0, "Preço Embalagem (R$)": 9.50},
+                    {"Ingrediente": "Creme de Leite", "Qtd Usada": 400.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 4.00},
+                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 4.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
+                    {"Ingrediente": "Sal Refinado", "Qtd Usada": 8.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 3.00},
+                    {"Ingrediente": "Noz Moscada", "Qtd Usada": 1.0, "Unidade": "g", "Qtd na Embalagem": 50.0, "Preço Embalagem (R$)": 14.00}
+                ]),
+                "peso_obtido": 1300.0,
+                "preparo": "Bater tudo no liquidificador até homogeneizar por completo. Aplicar frio sobre as bases das quiches.",
+                "perda_coccao": 0.0
+            },
+            "Base de Brigadeiro Branco": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Leite Integral", "Qtd Usada": 100.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.50},
+                    {"Ingrediente": "Cobertura Branca", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 28.00},
+                    {"Ingrediente": "Leite Condensado", "Qtd Usada": 395.0, "Unidade": "g", "Qtd na Embalagem": 395.0, "Preço Embalagem (R$)": 6.80},
+                    {"Ingrediente": "Creme de Leite", "Qtd Usada": 600.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 4.00}
+                ]),
+                "peso_obtido": 800.0,
+                "preparo": "Fogo médio até atingir 100.5°C para fatias e 98°C para compotas/sobremesas.",
                 "perda_coccao": 15.0
+            },
+            "Gelatto de Ninho": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Manteiga sem Sal", "Qtd Usada": 200.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 12.00},
+                    {"Ingrediente": "Leite Ninho Integral", "Qtd Usada": 250.0, "Unidade": "g", "Qtd na Embalagem": 380.0, "Preço Embalagem (R$)": 16.50},
+                    {"Ingrediente": "Creme de Leite", "Qtd Usada": 300.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 4.00},
+                    {"Ingrediente": "Leite Condensado", "Qtd Usada": 395.0, "Unidade": "g", "Qtd na Embalagem": 395.0, "Preço Embalagem (R$)": 6.80}
+                ]),
+                "peso_obtido": 1145.0,
+                "preparo": "Bater manteiga e leite condensado na planetária. Juntar Ninho e por último incorporar o creme de leite gelado.",
+                "perda_coccao": 0.0
             }
         }
 
     if 'banco_caldas_rec' not in st.session_state:
         st.session_state['banco_caldas_rec'] = {
-            "Calda Básica de Açúcar": {
+            "Calda Exclusiva Glaceada (Glaçúcar)": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Açúcar Refinado", "Qtd Usada": 150.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 4.50},
-                    {"Ingrediente": "Água Filtrada", "Qtd Usada": 500.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.0}
-                ], columns=["Ingrediente", "Qtd Usada", "Unidade", "Qtd na Embalagem", "Preço Embalagem (R$)"]),
-                "peso_obtido": 650.0,
-                "preparo": "Ferver água e açúcar até reduzir ligeiramente e homogeneizar. Deixar esfriar."
+                    {"Ingrediente": "Açúcar Glaçúcar", "Qtd Usada": 500.0, "Unidade": "g", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Água Quente Fervente", "Qtd Usada": 500.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00}
+                ]),
+                "peso_obtido": 1000.0,
+                "preparo": "Verter a água fervente sobre o Glaçúcar e mexer até obter consistência para glaçar bolos."
             },
-            "Calda de Leite de Coco": {
+            "Calda Leite de Coco (Bolo Gelado)": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Leite de Coco", "Qtd Usada": 200.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 6.50},
-                    {"Ingrediente": "Leite Condensado Itambé", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 395.0, "Preço Embalagem (R$)": 6.80},
-                    {"Ingrediente": "Água Filtrada", "Qtd Usada": 100.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.0}
-                ], columns=["Ingrediente", "Qtd Usada", "Unidade", "Qtd na Embalagem", "Preço Embalagem (R$)"]),
-                "peso_obtido": 400.0,
-                "preparo": "Misturar todos os ingredientes a frio na bisnaga aplicadora."
+                    {"Ingrediente": "Leite Condensado", "Qtd Usada": 395.0, "Unidade": "g", "Qtd na Embalagem": 395.0, "Preço Embalagem (R$)": 6.80},
+                    {"Ingrediente": "Leite de Coco", "Qtd Usada": 500.0, "Unidade": "ml", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 12.00},
+                    {"Ingrediente": "Água Filtrada", "Qtd Usada": 1000.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00}
+                ]),
+                "peso_obtido": 1895.0,
+                "preparo": "Misturar a frio na bisnaga aplicadora."
             }
         }
 
     if 'banco_coberturas_rec' not in st.session_state:
         st.session_state['banco_coberturas_rec'] = {
-            "Chantiganache ao Leite": {
+            "Chantininho Estruturado": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Chocolate Nobre ao Leite", "Qtd Usada": 500.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 55.00},
-                    {"Ingrediente": "Creme de Leite", "Qtd Usada": 200.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 4.20}
-                ], columns=["Ingrediente", "Qtd Usada", "Unidade", "Qtd na Embalagem", "Preço Embalagem (R$)"]),
-                "peso_obtido": 700.0,
-                "preparo": "Derreter o chocolate nobre e emulsionar com creme de leite. Bater levemente para obter textura fosca."
+                    {"Ingrediente": "Chantilly ChantyMix", "Qtd Usada": 1000.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 18.50},
+                    {"Ingrediente": "Leite Ninho Integral", "Qtd Usada": 200.0, "Unidade": "g", "Qtd na Embalagem": 380.0, "Preço Embalagem (R$)": 16.50},
+                    {"Ingrediente": "Emulsificante", "Qtd Usada": 15.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 9.50},
+                    {"Ingrediente": "Merengue Powder", "Qtd Usada": 20.0, "Unidade": "g", "Qtd na Embalagem": 150.0, "Preço Embalagem (R$)": 14.00}
+                ]),
+                "peso_obtido": 1235.0,
+                "preparo": "Misturar todos os ingredientes frios e bater em velocidade média até formar o buraco no meio."
+            },
+            "Maionese do Paulão": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 3.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
+                    {"Ingrediente": "Alho Fresco", "Qtd Usada": 20.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 12.00},
+                    {"Ingrediente": "Farinha de Trigo", "Qtd Usada": 80.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Cebola Roxa", "Qtd Usada": 80.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 6.00},
+                    {"Ingrediente": "Vinagre de Vinho", "Qtd Usada": 5.0, "Unidade": "ml", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 4.50},
+                    {"Ingrediente": "Suco de Limão", "Qtd Usada": 15.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 10.00},
+                    {"Ingrediente": "Sal Refinado", "Qtd Usada": 10.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 3.00},
+                    {"Ingrediente": "Óleo de Soja (fio a fio)", "Qtd Usada": 600.0, "Unidade": "ml", "Qtd na Embalagem": 900.0, "Preço Embalagem (R$)": 8.50}
+                ]),
+                "peso_obtido": 1050.0,
+                "preparo": "Bater no liquidificador os ovos, temperos e trigo. Adicionar óleo em fio lentamente até dar o ponto firme."
+            },
+            "Molho Alfredo (Croque Monsieur)": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Alho Picado", "Qtd Usada": 10.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 12.00},
+                    {"Ingrediente": "Manteiga sem Sal", "Qtd Usada": 30.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 12.00},
+                    {"Ingrediente": "Sal Refinado", "Qtd Usada": 10.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 3.00},
+                    {"Ingrediente": "Creme de Leite", "Qtd Usada": 200.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 4.00},
+                    {"Ingrediente": "Requeijão Catupiry", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 400.0, "Preço Embalagem (R$)": 12.50},
+                    {"Ingrediente": "Leite Integral", "Qtd Usada": 700.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.50},
+                    {"Ingrediente": "Farinha de Trigo", "Qtd Usada": 40.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Queijo Parmesão", "Qtd Usada": 50.0, "Unidade": "g", "Qtd na Embalagem": 50.0, "Preço Embalagem (R$)": 6.50}
+                ]),
+                "peso_obtido": 1140.0,
+                "preparo": "Derreter manteiga com alho, juntar o leite, dissolver o trigo, ferver e finalizar com requeijão e queijo parmesão."
             }
         }
 
@@ -521,8 +664,8 @@ if chave_usuario == "kg10k":
 
     if 'banco_crm' not in st.session_state:
         st.session_state['banco_crm'] = pd.DataFrame([
-            {"Cliente VIP": "Juliana Mendes Rossi", "WhatsApp": "(41) 99123-4567", "E-mail": "juliana@rossi.com", "Aniv. Cliente": "12/06", "Aniv. Marido": "18/10", "Aniv. Filhos": "Gabriel (04/02)", "Data Casamento": "22/11", "Restrições": "NÃO PODE CONTER AMENDOIM!", "Últimos Pedidos": "KG-2026-1042"},
-            {"Cliente VIP": "Carlos Henrique Rocha", "WhatsApp": "(41) 98877-6655", "E-mail": "carlos@rocha.com", "Aniv. Cliente": "29/08", "Aniv. Marido": "-", "Aniv. Filhos": "Sofia (15/05)", "Data Casamento": "-", "Restrições": "Não gosta de suspiro de jeito nenhum.", "Últimos Pedidos": "KG-2026-8841"}
+            {"Cliente VIP": "Juliana Mendes Rossi", "WhatsApp": "(41) 99123-4567", "E-mail": "juliana@rossi.com", "Aniv. Cliente": "12/06", "Aniv. Marido": "18/10", "Aniv. Filhos": "Gabriel (04/02)", "Data Casamento": "22/11", "Restrições": "ALERGIA GRAVE A AMENDOIM!", "Últimos Pedidos": "KG-2026-1042"},
+            {"Cliente VIP": "Carlos Henrique Rocha", "WhatsApp": "(41) 98877-6655", "E-mail": "carlos@rocha.com", "Aniv. Cliente": "29/08", "Aniv. Marido": "-", "Aniv. Filhos": "Sofia (15/05)", "Data Casamento": "-", "Restrições": "Sem cebola ou alho cru", "Últimos Pedidos": "KG-2026-8841"}
         ])
 
     if 'df_fixos' not in st.session_state:
@@ -704,19 +847,34 @@ if chave_usuario == "kg10k":
     with tabs[2]:
         st.markdown('<div class="section-title">👥 CRM: Central de Relacionamento e Busca Ativa de Clientes VIP</div>', unsafe_allow_html=True)
         mes_atual = datetime.now().strftime("%m")
-        st.markdown(f"<div class='alerta-aniv'>🎉 <b>ALERTA DE MARKETING K&G:</b> Juliana Mendes faz aniversário este mês (12/{mes_atual})! Dispare uma mensagem especial e carinhosa.</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='alerta-aniv'>🎉 <b>ALERTA DE MARKETING K&G:</b> Juliana Mendes Rossi faz aniversário este mês (12/{mes_atual})! Dispare uma mensagem especial de fidelização.</div>", unsafe_allow_html=True)
         
         busca = st.text_input("🔍 Busca Ativa por Nome, Telefone, Códigos de Pedidos ou Alergias:")
         
-        df_crm_ed = st.data_editor(st.session_state['banco_crm'], num_rows="dynamic", use_container_width=True, key="crm_base_key")
-        st.session_state['banco_crm'] = df_crm_ed
+        df_mostrar_crm = st.session_state['banco_crm']
+        if busca:
+            df_mostrar_crm = df_mostrar_crm[
+                df_mostrar_crm["Cliente VIP"].astype(str).str.contains(busca, case=False, na=False) |
+                df_mostrar_crm["WhatsApp"].astype(str).str.contains(busca, na=False) |
+                df_mostrar_crm["Restrições"].astype(str).str.contains(busca, case=False, na=False) |
+                df_mostrar_crm["Últimos Pedidos"].astype(str).str.contains(busca, na=False)
+            ]
+        
+        df_crm_ed = st.data_editor(df_mostrar_crm, num_rows="dynamic", use_container_width=True, key="crm_base_key")
+        
+        # Sincroniza as alterações de volta para o banco global
+        if st.button("💾 Salvar Alterações no CRM"):
+            for idx, row in df_crm_ed.iterrows():
+                st.session_state['banco_crm'].loc[idx] = row
+            st.success("CRM Atualizado com sucesso!")
+            salvar_dados_disco()
 
     # ==========================================
     # ABA 3: FÁBRICA DE BASES
     # ==========================================
     with tabs[3]:
         st.markdown('<div class="section-title">🥣 Fábrica de Bases: Gestão Ilimitada de Receitas e Custos</div>', unsafe_allow_html=True)
-        sub_b1, sub_b2, sub_b3, sub_b4 = st.tabs(["🍞 Massas de Bolo", "🍓 Recheios Estruturados", "💧 Caldas para Regar", "✨ Coberturas e Blindagens"])
+        sub_b1, sub_b2, sub_b3, sub_b4 = st.tabs(["🍞 Massas (Doces & Salgadas)", "🍓 Recheios, Cremes & Geleias", "💧 Caldas para Regar", "✨ Coberturas & Molhos"])
         
         # --- SUB-ABA 1: MASSAS ---
         with sub_b1:
@@ -745,7 +903,7 @@ if chave_usuario == "kg10k":
                 rec_m = st.session_state['banco_massas_rec'][sel_massa]
                 
                 st.markdown("##### 📋 Ingredientes Cadastrados")
-                st.caption("💡 **Dica de Ouro da K&G:** Clique no botão `+` (no canto inferior da tabela) para adicionar novas linhas de ingredientes com preenchimento de colunas automático!")
+                st.caption("💡 **Dica de Ouro da K&G:** Adicione ou edite linhas na tabela e preencha o rendimento real obtido em balança!")
                 
                 m_edit = renderizar_tabela_segura(
                     rec_m["ingredientes"],
@@ -763,10 +921,14 @@ if chave_usuario == "kg10k":
                     perda_massa_pct = st.slider("Fator de Perda/Evaporação no Forno (%)", min_value=0.0, max_value=30.0, value=float(rec_m.get("perda_coccao", 10.0)), step=0.5, key=f"perda_m_{sel_massa}")
                     st.session_state['banco_massas_rec'][sel_massa]["perda_coccao"] = perda_massa_pct
                     
-                    peso_obt_m = peso_bruto_m * (1 - perda_massa_pct / 100.0)
-                    st.session_state['banco_massas_rec'][sel_massa]["peso_obtido"] = peso_obt_m
+                    peso_obt_m = peso_bruto_m * (1 - perda_massa_pct / 100.0) if perda_massa_pct > 0 else peso_bruto_m
+                    # Se o usuário informou peso obtido fixo no banco
+                    if rec_m.get("peso_obtido", 1000.0) != 1000.0 and peso_obt_m == 0.0:
+                        peso_obt_m = rec_m.get("peso_obtido")
                     
-                    st.info(f"⚖️ **Peso Bruto dos Ingredientes:** {peso_bruto_m:.1f} g  \n📉 **Peso Líquido Assado:** {peso_obt_m:.1f} g")
+                    st.session_state['banco_massas_rec'][sel_massa]["peso_obtido"] = peso_obt_m if peso_obt_m > 0 else 1000.0
+                    
+                    st.info(f"⚖️ **Peso Bruto dos Ingredientes:** {peso_bruto_m:.1f} g  \n📉 **Peso Líquido Calculado:** {peso_obt_m:.1f} g")
                     
                     custo_massa_total = calcular_custo_tabela_seguro(m_edit, "Preço Embalagem (R$)", "Qtd na Embalagem", "Qtd Usada")
                     custo_m_kg = (custo_massa_total / peso_obt_m * 1000) if peso_obt_m > 0 else 0.0
@@ -787,7 +949,7 @@ if chave_usuario == "kg10k":
 
         # --- SUB-ABA 2: RECHEIOS ---
         with sub_b2:
-            st.markdown("##### ➕ Cadastrar Novo Recheio Estruturado")
+            st.markdown("##### ➕ Cadastrar Novo Recheio ou Creme")
             with st.form("novo_recheio_form"):
                 novo_r_nome = st.text_input("Nome do Novo Recheio")
                 submit_r = st.form_submit_button("➕ Cadastrar Recheio")
@@ -812,8 +974,6 @@ if chave_usuario == "kg10k":
                 rec_r = st.session_state['banco_recheios_rec'][sel_recheio]
                 
                 st.markdown("##### 📋 Ingredientes Cadastrados")
-                st.caption("💡 **Dica de Ouro da K&G:** Clique no botão `+` (no canto inferior da tabela) para adicionar novas linhas de ingredientes com preenchimento de colunas automático!")
-                
                 r_edit = renderizar_tabela_segura(
                     rec_r["ingredientes"],
                     config_colunas_ingredientes,
@@ -830,10 +990,10 @@ if chave_usuario == "kg10k":
                     perda_recheio_pct = st.slider("Fator de Perda/Evaporação na Panela (%)", min_value=0.0, max_value=40.0, value=float(rec_r.get("perda_coccao", 15.0)), step=0.5, key=f"perda_r_{sel_recheio}")
                     st.session_state['banco_recheios_rec'][sel_recheio]["perda_coccao"] = perda_recheio_pct
                     
-                    peso_obt_r = peso_bruto_r * (1 - perda_recheio_pct / 100.0)
-                    st.session_state['banco_recheios_rec'][sel_recheio]["peso_obtido"] = peso_obt_r
+                    peso_obt_r = peso_bruto_r * (1 - perda_recheio_pct / 100.0) if perda_recheio_pct > 0 else peso_bruto_r
+                    st.session_state['banco_recheios_rec'][sel_recheio]["peso_obtido"] = peso_obt_r if peso_obt_r > 0 else 1000.0
                     
-                    st.info(f"⚖️ **Peso Bruto dos Ingredientes:** {peso_bruto_r:.1f} g  \n📉 **Peso Líquido Apurado:** {peso_obt_r:.1f} g")
+                    st.info(f"⚖️ **Peso Bruto dos Ingredientes:** {peso_bruto_r:.1f} g  \n📉 **Peso Líquido Final:** {peso_obt_r:.1f} g")
                     
                     custo_recheio_total = calcular_custo_tabela_seguro(r_edit, "Preço Embalagem (R$)", "Qtd na Embalagem", "Qtd Usada")
                     custo_r_kg = (custo_recheio_total / peso_obt_r * 1000) if peso_obt_r > 0 else 0.0
@@ -877,8 +1037,6 @@ if chave_usuario == "kg10k":
                 rec_c = st.session_state['banco_caldas_rec'][sel_calda]
                 
                 st.markdown("##### 📋 Ingredientes Cadastrados")
-                st.caption("💡 **Dica de Ouro da K&G:** Clique no botão `+` (no canto inferior da tabela) para adicionar novas linhas de ingredientes com preenchimento de colunas automático!")
-                
                 c_edit = renderizar_tabela_segura(
                     rec_c["ingredientes"],
                     config_colunas_ingredientes,
@@ -911,12 +1069,12 @@ if chave_usuario == "kg10k":
                         salvar_dados_disco()
                         st.rerun()
 
-        # --- SUB-ABA 4: COBERTURAS ---
+        # --- SUB-ABA 4: COBERTURAS & ADICIONAIS ---
         with sub_b4:
-            st.markdown("##### ➕ Cadastrar Nova Cobertura / Blindagem")
+            st.markdown("##### ➕ Cadastrar Nova Cobertura / Molho / Adicional")
             with st.form("nova_cob_form"):
-                novo_cob_nome = st.text_input("Nome da Nova Cobertura")
-                submit_cob = st.form_submit_button("➕ Cadastrar Cobertura")
+                novo_cob_nome = st.text_input("Nome do Adicional")
+                submit_cob = st.form_submit_button("➕ Cadastrar")
                 if submit_cob and novo_cob_nome:
                     if novo_cob_nome not in st.session_state['banco_coberturas_rec']:
                         st.session_state['banco_coberturas_rec'][novo_cob_nome] = {
@@ -924,20 +1082,18 @@ if chave_usuario == "kg10k":
                             "peso_obtido": 1000.0,
                             "preparo": "Modo de preparo."
                         }
-                        st.success(f"Cobertura '{novo_cob_nome}' cadastrada!")
+                        st.success(f"Elemento '{novo_cob_nome}' cadastrado!")
                         salvar_dados_disco()
                         st.rerun()
                     else:
-                        st.warning("Cobertura já cadastrada!")
+                        st.warning("Já cadastrado!")
 
             st.write("---")
-            sel_cob = st.selectbox("Selecione a Cobertura para Editar:", list(st.session_state['banco_coberturas_rec'].keys()))
+            sel_cob = st.selectbox("Selecione a Cobertura/Molho para Editar:", list(st.session_state['banco_coberturas_rec'].keys()))
             if sel_cob:
                 rec_cob = st.session_state['banco_coberturas_rec'][sel_cob]
                 
                 st.markdown("##### 📋 Ingredientes Cadastrados")
-                st.caption("💡 **Dica de Ouro da K&G:** Clique no botão `+` (no canto inferior da tabela) para adicionar novas linhas de ingredientes com preenchimento de colunas automático!")
-                
                 cob_edit = renderizar_tabela_segura(
                     rec_cob["ingredientes"],
                     config_colunas_ingredientes,
@@ -955,7 +1111,7 @@ if chave_usuario == "kg10k":
                     
                     custo_cob_total = calcular_custo_tabela_seguro(cob_edit, "Preço Embalagem (R$)", "Qtd na Embalagem", "Qtd Usada")
                     custo_cob_kg = (custo_cob_total / peso_obt_cob * 1000) if peso_obt_cob > 0 else 0.0
-                    st.metric("Custo Total da Cobertura", f"R$ {custo_cob_total:.2f}")
+                    st.metric("Custo Total", f"R$ {custo_cob_total:.2f}")
                     st.metric("Custo por kg/unidade", f"R$ {custo_cob_kg:.2f}")
                 with col_cob2:
                     prep_cob = st.text_area("🥣 Modo de Preparo e Emulsão", value=rec_cob.get("preparo", ""), key=f"prep_cob_{sel_cob}")
@@ -963,7 +1119,7 @@ if chave_usuario == "kg10k":
                     
                     st.write("---")
                     st.markdown("##### 🗑️ Excluir esta Receita")
-                    conf_del_cob = st.checkbox("Desejo excluir esta receita de cobertura permanentemente.", key=f"conf_del_cob_{sel_cob}")
+                    conf_del_cob = st.checkbox("Desejo excluir esta receita permanentemente.", key=f"conf_del_cob_{sel_cob}")
                     if st.button("🗑️ Excluir Permanentemente", key=f"btn_del_cob_{sel_cob}", type="primary", disabled=not conf_del_cob):
                         del st.session_state['banco_coberturas_rec'][sel_cob]
                         st.success("Receita excluída com sucesso!")
@@ -971,7 +1127,7 @@ if chave_usuario == "kg10k":
                         st.rerun()
 
     # ==========================================
-    # ABA 4: DOCES PERSONALIZADOS
+    # ABA 4: DOCES & SALGADOS PERSONALIZADOS
     # ==========================================
     with tabs[4]:
         st.markdown('<div class="section-title">🍫 Doces Personalizados e Formas Especiais</div>', unsafe_allow_html=True)
@@ -985,67 +1141,100 @@ if chave_usuario == "kg10k":
             peso_pasta_bwb = st.number_input("Peso da Pasta na Modelagem (g)", value=20.0)
 
     # ==========================================
-    # ABA 5: PRODUTOS COMPLETOS & FICHA TÉCNICA COM DECÓR E PADRONIZAÇÃO ESTÉTICA
+    # ABA 5: PRODUTOS COMPLETOS & FICHA TÉCNICA DINÂMICA
     # ==========================================
     with tabs[5]:
-        st.markdown('<div class="section-title">📐 Engenharia de Estrutura de Bolos & Precificação Dinâmica de Venda</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title">📐 Engenharia Estrutural e Precificação Dinâmica de Vendas</div>', unsafe_allow_html=True)
         
         col_pd1, col_pd2 = st.columns(2)
         with col_pd1:
-            nome_bolo_final = st.text_input("Nome do Bolo Completo", value="Bolo de Morango com Suspiros e Chantiganache")
-            peso_alvo = st.number_input("Peso Alvo Solicitado pelo Cliente (kg)", min_value=1.0, value=5.0)
-            tipo_forma_final = st.selectbox("Geometria da Forma", ["Redonda", "Retangular"], key="geom_forma_v5")
-            margem_comercial = st.slider("Selecione a Margem Comercial de Segurança (%)", min_value=40, max_value=50, value=45, key="margem_v5")
+            nome_bolo_final = st.text_input("Nome do Produto Completo", value="Coxinha Especial de Frango Cremoso com Catupiry")
+            tipo_produto_completo = st.selectbox("Tipo de Produto Comercial", ["Bolo Completo", "Quiche / Empadão", "Coxinha / Salgado de Forno"])
+            peso_alvo = st.number_input("Peso Alvo Solicitado pelo Cliente (kg)", min_value=0.1, value=1.0)
+            tipo_forma_final = st.selectbox("Geometria da Forma de Assar", ["Redonda", "Marmita Retangular", "Unidade Individual / Sem Forma"], key="geom_forma_v5")
+            margem_comercial = st.slider("Selecione a Margem Comercial de Segurança (%)", min_value=30, max_value=80, value=45, key="margem_v5")
             
             sel_massa_composta = st.selectbox("Selecione a Massa Base:", list(st.session_state['banco_massas_rec'].keys()))
-            sel_recheio_composto = st.selectbox("Selecione o Recheio Estruturado:", list(st.session_state['banco_recheios_rec'].keys()))
-            sel_calda_composta = st.selectbox("Selecione a Calda de Regar:", list(st.session_state['banco_caldas_rec'].keys()))
-            sel_cobertura_composta = st.selectbox("Selecione a Cobertura/Blindagem:", list(st.session_state['banco_coberturas_rec'].keys()))
+            sel_recheio_composto = st.selectbox("Selecione o Recheio Base:", list(st.session_state['banco_recheios_rec'].keys()))
+            
+            # De acordo com o tipo, habilitamos calda/cobertura
+            if tipo_produto_completo == "Bolo Completo":
+                sel_calda_composta = st.selectbox("Selecione a Calda de Regar:", list(st.session_state['banco_caldas_rec'].keys()))
+                sel_cobertura_composto = st.selectbox("Selecione a Cobertura/Blindagem:", list(st.session_state['banco_coberturas_rec'].keys()))
+            else:
+                st.write("*(Caldas e coberturas de bolo ocultadas para produtos salgados)*")
+                sel_calda_composta = None
+                sel_cobertura_composto = None
             
         with col_pd2:
             peso_alvo_g = peso_alvo * 1000
-            calc_massa_final = peso_alvo_g * 0.35
-            calc_recheio_final = peso_alvo_g * 0.40
-            calc_calda_final = peso_alvo_g * 0.10
-            calc_cobertura_final = peso_alvo_g * 0.15
+            
+            # Proporções de balanceamento estrutural de acordo com a categoria
+            if tipo_produto_completo == "Bolo Completo":
+                calc_massa_final = peso_alvo_g * 0.35
+                calc_recheio_final = peso_alvo_g * 0.40
+                calc_calda_final = peso_alvo_g * 0.10
+                calc_cobertura_final = peso_alvo_g * 0.15
+            elif tipo_produto_completo == "Quiche / Empadão":
+                calc_massa_final = peso_alvo_g * 0.45
+                calc_recheio_final = peso_alvo_g * 0.55
+                calc_calda_final = 0.0
+                calc_cobertura_final = 0.0
+            else: # Coxinha / Salgado de Forno
+                calc_massa_final = peso_alvo_g * 0.55
+                calc_recheio_final = peso_alvo_g * 0.45
+                calc_calda_final = 0.0
+                calc_cobertura_final = 0.0
             
             if tipo_forma_final == "Redonda":
                 diametro_sugerido = math.ceil(2 * math.sqrt(peso_alvo_g / (3.14 * 10 * 0.6)))
-                forma_recomenda_txt = f"Forma Redonda de {diametro_sugerido} cm de diâmetro (Altura padrão de 10cm)"
-                st.metric("Forma Redonda Recomendada", f"{diametro_sugerido} cm de diâmetro (Altura de 10cm)")
+                forma_recomenda_txt = f"Forma Redonda de {diametro_sugerido} cm (Altura padrão de 10cm)"
+                st.metric("Forma Redonda Recomendada", f"{diametro_sugerido} cm de diâmetro")
+            elif tipo_forma_final == "Marmita Retangular":
+                forma_recomenda_txt = "Marmita Alumínio WYDA de 220ml com tampa pet"
+                st.metric("Embalagem Recomendada", "Marmita WYDA 220ml")
             else:
-                forma_recomenda_txt = "Forma Retangular Comercial de 35x25 cm"
-                st.metric("Forma Retangular Recomendada", "35x25 cm")
+                forma_recomenda_txt = "Assadeira de Fundo Falso 9.5x2.5cm"
+                st.metric("Assadeira Recomendada", "Assadeira 9.5x2.5cm")
 
             # --- SEÇÃO SUPREMA DE ESTÉTICA E DECORAÇÃO DO PRODUTO COMPLETO ---
-            st.markdown("##### 🎨 Decoração & Padronização Estética do Produto Completo")
+            st.markdown("##### 🎨 Acabamento, Finalização Estética e Maçarico")
             decor_final_input = st.text_area(
-                "Descreva o acabamento visual de alto padrão para a finalização deste bolo:",
-                value=st.session_state.get('decoracao_bolo_completo', "Chantininho rosé nude espatulado rústico, quinas imperfeitas com pó de ouro egípcio e morangos frescos higienizados no topo com brilho de confeiteiro."),
+                "Descreva a finalização e apresentação visual para a bancada:",
+                value=st.session_state.get('decoracao_bolo_completo', "Empanado com mistura de amido e água na farinha Panko de alta aderência para uma casca ultrafina e crocante."),
                 height=110,
                 key="decoracao_final_area"
             )
             st.session_state['decoracao_bolo_completo'] = decor_final_input
 
-        # Busca dinâmica do custo real por kg de cada base calculada de forma 100% AUTOMÁTICA
+        # Busca dinâmica de custos por kg de cada base calculada na memória
         custo_m_kg = get_recipe_cost_kg(st.session_state['banco_massas_rec'], sel_massa_composta)
         custo_r_kg = get_recipe_cost_kg(st.session_state['banco_recheios_rec'], sel_recheio_composto)
-        custo_c_kg = get_recipe_cost_kg(st.session_state['banco_caldas_rec'], sel_calda_composta)
-        custo_cob_kg = get_recipe_cost_kg(st.session_state['banco_coberturas_rec'], sel_cobertura_composta)
+        
+        custo_c_kg = get_recipe_cost_kg(st.session_state['banco_caldas_rec'], sel_calda_composta) if sel_calda_composta else 0.0
+        custo_cob_kg = get_recipe_cost_kg(st.session_state['banco_coberturas_rec'], sel_cobertura_composto) if sel_cobertura_composto else 0.0
 
         # Cálculo do custo proporcional das camadas
         custo_massa_composto = (custo_m_kg / 1000) * calc_massa_final
         custo_recheio_composto = (custo_r_kg / 1000) * calc_recheio_final
-        custo_calda_composto = (custo_c_kg / 1000) * calc_calda_final
-        custo_cob_composto = (custo_cob_kg / 1000) * calc_cobertura_final
-        custo_insumos_total = custo_massa_composto + custo_recheio_composto + custo_calda_composto + custo_cob_composto + 12.00 # 12 reais fixos de embalagem padrão/tabuleiro
+        custo_calda_composto = (custo_c_kg / 1000) * calc_calda_final if sel_calda_composta else 0.0
+        custo_cob_composto = (custo_cob_kg / 1000) * calc_cobertura_final if sel_cobertura_composto else 0.0
+        custo_insumos_total = custo_massa_composto + custo_recheio_composto + custo_calda_composto + custo_cob_composto + 4.50 # R$ 4,50 fixos de embalagem / tabuleiro comercial
         
-        st.markdown("##### 📝 Balanço Estrutural para Production de Cozinha:")
+        st.markdown("##### 📝 Balanço Estrutural para Bancada de Produção:")
         c_p1, c_p2, c_p3, c_p4 = st.columns(4)
         with c_p1: st.metric(f"Massa ({sel_massa_composta})", f"{int(calc_massa_final)} g", f"Custo: R$ {custo_massa_composto:.2f}")
         with c_p2: st.metric(f"Recheio ({sel_recheio_composto})", f"{int(calc_recheio_final)} g", f"Custo: R$ {custo_recheio_composto:.2f}")
-        with c_p3: st.metric(f"Calda ({sel_calda_composta})", f"{int(calc_calda_final)} g", f"Custo: R$ {custo_calda_composto:.2f}")
-        with c_p4: st.metric(f"Cobertura ({sel_cobertura_composta})", f"{int(calc_cobertura_final)} g", f"Custo: R$ {custo_cob_composto:.2f}")
+        with c_p3: 
+            if calc_calda_final > 0:
+                st.metric(f"Calda ({sel_calda_composta})", f"{int(calc_calda_final)} g", f"Custo: R$ {custo_calda_composto:.2f}")
+            else:
+                st.metric("Calda", "Isento")
+        with c_p4:
+            if calc_cobertura_final > 0:
+                st.metric(f"Cobertura ({sel_cobertura_composto})", f"{int(calc_cobertura_final)} g", f"Custo: R$ {custo_cob_composto:.2f}")
+            else:
+                st.metric("Cobertura", "Isento")
 
         # PRECIFICAÇÃO DE VENDAS COM COBERTURA DE TAXAS
         st.markdown("### 💰 Tabela de Preço de Venda Comercial")
@@ -1072,33 +1261,33 @@ if chave_usuario == "kg10k":
                     </div>
                     <br>
                     <b>🍰 PRODUTO:</b> {nome_bolo_final.upper()}<br>
-                    <b>⚖️ PESO ALVO DE ENCOMENDA:</b> {peso_alvo:.1f} kg ({peso_alvo_g:.0f}g)<br>
-                    <b>📐 FORMA RECOMENDADA:</b> {forma_recomenda_txt}<br>
+                    <b>⚖️ PESO ALVO DE ENCOMENDA:</b> {peso_alvo:.2f} kg ({peso_alvo_g:.0f}g)<br>
+                    <b>📐 FORMA/EMBALAGEM RECOMENDADA:</b> {forma_recomenda_txt}<br>
                     -------------------------------------------------------------------------<br>
                     <b>🧁 COMPOSIÇÃO E PESOS DE MONTAGEM (BANCADA):</b><br>
                     * Massa ({sel_massa_composta}): <b>{int(calc_massa_final)} g</b><br>
                     * Recheio ({sel_recheio_composto}): <b>{int(calc_recheio_final)} g</b><br>
-                    * Calda ({sel_calda_composta}): <b>{int(calc_calda_final)} g</b><br>
-                    * Cobertura/Blindagem ({sel_cobertura_composta}): <b>{int(calc_cobertura_final)} g</b><br>
+                    {"* Calda (" + str(sel_calda_composta) + "): <b>" + str(int(calc_calda_final)) + " g</b><br>" if calc_calda_final > 0 else ""}
+                    {"* Cobertura/Molho (" + str(sel_cobertura_composto) + "): <b>" + str(int(calc_cobertura_final)) + " g</b><br>" if calc_cobertura_final > 0 else ""}
                     -------------------------------------------------------------------------<br>
-                    <b>🎨 DECORAÇÃO & PADRONIZAÇÃO ESTÉTICA (PRODUTO FINAL):</b><br>
+                    <b>🎨 DECORAÇÃO, ACABAMENTO & PADRONIZAÇÃO ESTÉTICA (PRODUTO FINAL):</b><br>
                     <i>{st.session_state['decoracao_bolo_completo']}</i><br>
                     -------------------------------------------------------------------------<br>
                     <b>💸 PREÇO DE VENDA PIX/DINHEIRO: R$ {preco_venda_base:.2f}</b><br>
-                    <span style="font-size: 11px;">*Certifique-se de higienizar as decorações e aplicar o brilho somente na hora da entrega para manter o frescor de vitrine.</span>
+                    <span style="font-size: 11px;">*Certifique-se de aplicar o choque térmico ou o maçarico somente no momento da expedição para garantir a integridade rústica.</span>
                 </div>
             """, unsafe_allow_html=True)
 
-        foto_bolo = st.file_uploader("📸 Enviar Foto do Produto Finalizado", type=["jpg", "png", "jpeg"], key="uploader_v5")
-
     # ==========================================
-    # ABA 6: EMBALAGENS & IMPRESSÃO
+    # ABA 6: EMBALAGENS & IMPRESSÃO PORTÁTIL
     # ==========================================
     with tabs[6]:
         st.markdown('<div class="section-title">📦 Gestão de Embalagens, Laços, Fitas e Envio para Portátil</div>', unsafe_allow_html=True)
         df_emb = st.data_editor(pd.DataFrame([
-            {"Embalagem": "Caixa Branca com Visor", "Preço Embalagem (R$)": 12.00, "Unidades no Cento/Pacote": 1, "Usada no Produto": 1},
-            {"Embalagem": "Fita Cetim Ouro (metros)", "Preço Embalagem (R$)": 15.00, "Unidades no Cento/Pacote": 10, "Usada no Produto": 1}
+            {"Embalagem": "Marmita Wyda 220ml com tampa", "Preço Embalagem (R$)": 1.20, "Unidades no Cento/Pacote": 100, "Usada no Produto": 1},
+            {"Embalagem": "Hamburgueira H03 Ultratherm", "Preço Embalagem (R$)": 0.85, "Unidades no Cento/Pacote": 100, "Usada no Produto": 1},
+            {"Embalagem": "Pote Galvanotek G742m 250ml", "Preço Embalagem (R$)": 1.50, "Unidades no Cento/Pacote": 50, "Usada no Produto": 1},
+            {"Embalagem": "Plástico Celofane Folha 15x15", "Preço Embalagem (R$)": 0.05, "Unidades no Cento/Pacote": 100, "Usada no Produto": 1}
         ]), num_rows="dynamic", use_container_width=True, key="emb_key")
         
         texto_impressora = st.text_area("Texto para sair na Impressora Portátil Bluetooth:", f"K&G Arte em Confeitaria\n{nome_bolo_final}\nConsuma com Prazer!")
@@ -1109,8 +1298,8 @@ if chave_usuario == "kg10k":
     with tabs[7]:
         st.markdown('<div class="section-title">🥦 Rotulagem Frontal e Lupa Legal de Advertência da ANVISA</div>', unsafe_allow_html=True)
         
-        lupa_acucar = st.checkbox("Este bolo ultrapassa 15g de Açúcares por 100g de produto?", value=True)
-        lupa_gordura = st.checkbox("Este bolo ultrapassa 6g de Gorduras por 100g de produto?", value=False)
+        lupa_acucar = st.checkbox("Este produto ultrapassa 15g de Açúcares por 100g de produto?", value=True)
+        lupa_gordura = st.checkbox("Este produto ultrapassa 6g de Gorduras por 100g de produto?", value=False)
         
         if lupa_acucar or lupa_gordura:
             texto_lupa = "<div class='lupa-box'>🔍 <b>ROTULAGEM FRONTAL OBRIGATÓRIA (RDC 429):</b><br>"
@@ -1141,9 +1330,11 @@ if chave_usuario == "kg10k":
         st.markdown('<div class="section-title">🛒 Estoque Crítico de Matérias-Primas e Alertas</div>', unsafe_allow_html=True)
         
         estoque_base = pd.DataFrame([
-            {"Item de Estoque": "Leite Condensado Itambé", "Quantidade em Estoque (Un)": 5, "Estoque Mínimo de Segurança (Un)": 24},
-            {"Item de Estoque": "Creme de Leite", "Quantidade em Estoque (Un)": 15, "Estoque Mínimo de Segurança (Un)": 24},
-            {"Item de Estoque": "Chocolate Nobre ao Leite", "Quantidade em Estoque (Un)": 12, "Estoque Mínimo de Segurança (Un)": 5}
+            {"Item de Estoque": "Frango Sassami (kg)", "Quantidade em Estoque (Un)": 5.0, "Estoque Mínimo de Segurança (Un)": 15.0},
+            {"Item de Estoque": "Costela Bovina Dianteira (kg)", "Quantidade em Estoque (Un)": 2.5, "Estoque Mínimo de Segurança (Un)": 10.0},
+            {"Item de Estoque": "Camarão Descascado CostaSul", "Quantidade em Estoque (Un)": 4.0, "Estoque Mínimo de Segurança (Un)": 12.0},
+            {"Item de Estoque": "Farinha Panko (kg)", "Quantidade em Estoque (Un)": 2.0, "Estoque Mínimo de Segurança (Un)": 8.0},
+            {"Item de Estoque": "Requeijão Catupiry (g)", "Quantidade em Estoque (Un)": 800.0, "Estoque Mínimo de Segurança (Un)": 2400.0}
         ])
         
         df_est_edit = st.data_editor(estoque_base, num_rows="dynamic", use_container_width=True, key="estoque_crit_key")
@@ -1166,15 +1357,10 @@ if chave_usuario == "kg10k":
         
         fornecedores_cwb = pd.DataFrame([
             {"Fornecedor": "Central do Chocolate CWB", "Telefone": "(41) 3222-1200", "Localização": "Centro, Curitiba - PR", "Insumos": "Chocolate Nobre Callebaut, Sicao"},
-            {"Fornecedor": "Nova Íris Embalagens", "Telefone": "(41) 3324-4500", "Localização": "Centro, Curitiba - PR", "Insumos": "Caixas de Papelão e Visores"},
+            {"Fornecedor": "Nova Íris Embalagens", "Telefone": "(41) 3324-4500", "Localização": "Centro, Curitiba - PR", "Insumos": "Caixas de Papelão, Potes e Marmitas Wyda"},
             {"Fornecedor": "BWB Embalagens", "Telefone": "(19) 3812-9900", "Localização": "Distribuição Geral CWB", "Insumos": "Formas de Acetato e Placas"},
-            {"Fornecedor": "Plassete Distribuidora", "Telefone": "(41) 3642-1800", "Localização": "Campo Largo - PR", "Insumos": "Bases de Isopor, descartáveis, sacolas"},
-            {"Fornecedor": "Parma Alimentos", "Telefone": "(41) 3245-7700", "Localização": "Curitiba - PR", "Insumos": "Leite Condensado e Creme de Leite Atacado"},
-            {"Fornecedor": "Mundo do Confeiteiro", "Telefone": "(41) 3012-3400", "Localização": "Água Verde, Curitiba - PR", "Insumos": "Utensílios e corantes finos"},
-            {"Fornecedor": "Casa do Confeiteiro", "Telefone": "(41) 3333-8888", "Localização": "Pinheirinho, Curitiba - PR", "Insumos": "Açúcares especiais, suspiros, granulados"},
             {"Fornecedor": "Distribuidora de Frutas Curitiba", "Telefone": "(41) 99999-5555", "Localização": "CEASA Curitiba", "Insumos": "Morangos in natura e frutas vermelhas"},
-            {"Fornecedor": "Embalagens Centro", "Telefone": "(41) 3223-1111", "Localização": "Centro, Curitiba - PR", "Insumos": "Laços, tags, fitas de cetim"},
-            {"Fornecedor": "Atacado Doce CWB", "Telefone": "(41) 3555-4444", "Localização": "Pinhais - PR", "Insumos": "Insumos secos em grande quantidade"}
+            {"Fornecedor": "Atacado Doce CWB", "Telefone": "(41) 3555-4444", "Localização": "Pinhais - PR", "Insumos": "Insumos secos, farinha Venturelli, Panko"}
         ])
         
         st.data_editor(fornecedores_cwb, num_rows="dynamic", use_container_width=True, key="forn_key")
@@ -1187,10 +1373,10 @@ if chave_usuario == "kg10k":
         st.write("Mantenha a relação de todos os bens físicos do seu atelier para controle patrimonial:")
         
         inventario_base = pd.DataFrame([
-            {"Categoria": "Moldes de Silicone", "Equipamento/Utensílio": "Molde Rosas Luxo Grande", "Quantidade": 4, "Valor Unitário (R$)": 45.00},
-            {"Categoria": "Forno & Batedeiras", "Equipamento/Utensílio": "Batedeira Planetária Arno", "Quantidade": 1, "Valor Unitário (R$)": 650.00},
-            {"Categoria": "Bailarinas", "Equipamento/Utensílio": "Bailarina Profissional com Rolamento", "Quantidade": 2, "Valor Unitário (R$)": 180.00},
-            {"Categoria": "Formas de Alumínio", "Equipamento/Utensílio": "Forma Redonda 20cm", "Quantidade": 10, "Valor Unitário (R$)": 22.00}
+            {"Categoria": "Equipamentos Elétricos", "Equipamento/Utensílio": "Forno de Convecção Prática MiniConv", "Quantidade": 1, "Valor Unitário (R$)": 4500.00},
+            {"Categoria": "Equipamentos Elétricos", "Equipamento/Utensílio": "Seladora a Vácuo de Alimentos Cetro", "Quantidade": 1, "Valor Unitário (R$)": 450.00},
+            {"Categoria": "Utensílios de Cozinha", "Equipamento/Utensílio": "Rolo de Massa Antiaderente 48cm", "Quantidade": 1, "Valor Unitário (R$)": 85.00},
+            {"Categoria": "Utensílios de Cozinha", "Equipamento/Utensílio": "Tapete de Silicone com Medidas BWB", "Quantidade": 2, "Valor Unitário (R$)": 65.00}
         ])
         
         df_inv_edit = st.data_editor(inventario_base, num_rows="dynamic", use_container_width=True, key="inv_pat_key")
@@ -1209,3 +1395,14 @@ elif chave_usuario != "":
     st.error("Chave de Acesso Incorreta! Por favor, digite a senha autorizada da K&G.")
 else:
     st.warning("Insira a chave de acesso empresarial para visualizar o ecossistema estratégico.")
+```
+eof
+
+---
+
+### 💖 Resumo das Atualizações do seu Ecossistema K&G:
+1. **Banco de Dados Seeding:** O aplicativo agora inicia automaticamente preenchido com suas receitas e massas, como a **Massa Branca (MBL)**, **Massa de Chocolate (MBL)**, **Massa Red-Velvet**, **Massa de Batata para Salgados de Forno**, **Massa Brisée (Quiche e Empadão)** e **Massa de Coxinha**.
+2. **Recheios & Cremes:** Suas fórmulas exclusivas de **Frango Cremoso**, **Costela ao Molho Madeira**, **Molho de Camarão**, **Creme Base de Quiches**, **Gelatto de Ninho** e **Caramelo Salgado** já estão totalmente cadastradas com pesos de ingredientes e proporções precisas!
+3. **Cozinha Inteligente:** Adaptamos a Central de Balanceamento Estrutural para calcular proporções específicas dependendo se você está produzindo um bolo doce, uma quiche ou salgados fritos, garantindo a lucratividade máxima.
+
+Lembre-se sempre de realizar o **Backup de Segurança** clicando no botão na barra lateral para salvar seu progresso no seu computador ou celular! Sucesso absoluto nas suas vendas! 🍰🍗👑✨
