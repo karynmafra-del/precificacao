@@ -235,7 +235,6 @@ def carregar_dados_disco():
             with open("banco_confeitaria_local.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
             
-            # Se o arquivo existir mas estiver vazio de receitas, ignorar carregamento
             if not data.get("massas"):
                 return False
 
@@ -369,111 +368,264 @@ if chave_usuario == "kg10k":
         </div>
     """, unsafe_allow_html=True)
 
-    # Tenta carregar dados do disco. Se falhar ou estiver vazio, inicializa com as receitas padrão
     dados_carregados = carregar_dados_disco()
 
     if not dados_carregados or 'banco_massas_rec' not in st.session_state or len(st.session_state.get('banco_massas_rec', {})) == 0:
         st.session_state['banco_massas_rec'] = {
-            "Massa Branca Amanteigada K&G": {
+            "Massa Branca MBL (Camila Ayana)": {
                 "ingredientes": pd.DataFrame([
                     {"Ingrediente": "Ovos Frescos", "Qtd Usada": 4.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
-                    {"Ingrediente": "Manteiga sem Sal", "Qtd Usada": 150.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 12.00},
-                    {"Ingrediente": "Açúcar Refinado", "Qtd Usada": 250.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 4.50},
-                    {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 280.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
-                    {"Ingrediente": "Leite Integral", "Qtd Usada": 150.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.50},
-                    {"Ingrediente": "Fermento Químico", "Qtd Usada": 16.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 6.00}
+                    {"Ingrediente": "Óleo de Soja Liza", "Qtd Usada": 150.0, "Unidade": "g", "Qtd na Embalagem": 900.0, "Preço Embalagem (R$)": 7.50},
+                    {"Ingrediente": "Leite Integral", "Qtd Usada": 150.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.20},
+                    {"Ingrediente": "Iogurte Natural Batavo", "Qtd Usada": 170.0, "Unidade": "g", "Qtd na Embalagem": 170.0, "Preço Embalagem (R$)": 3.20},
+                    {"Ingrediente": "Leite Ninho Pó", "Qtd Usada": 30.0, "Unidade": "g", "Qtd na Embalagem": 380.0, "Preço Embalagem (R$)": 16.50},
+                    {"Ingrediente": "Açúcar Refinado União", "Qtd Usada": 250.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.40},
+                    {"Ingrediente": "Farinha de Trigo Venturelli", "Qtd Usada": 300.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Fermento Químico", "Qtd Usada": 18.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 6.00}
                 ]),
-                "peso_obtido": 1000.0,
-                "preparo": "Bater manteiga com açúcar até esbranquiçar. Adicionar ovos um a um. Alternar trigo e leite.",
-                "perda_coccao": 8.0
-            },
-            "Massa de Chocolate Chiffon 50%": {
-                "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 5.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
-                    {"Ingrediente": "Açúcar Refinado", "Qtd Usada": 200.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 4.50},
-                    {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 220.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
-                    {"Ingrediente": "Cacau em Pó 50%", "Qtd Usada": 60.0, "Unidade": "g", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 25.00},
-                    {"Ingrediente": "Óleo de Girassol", "Qtd Usada": 100.0, "Unidade": "ml", "Qtd na Embalagem": 900.0, "Preço Embalagem (R$)": 9.50},
-                    {"Ingrediente": "Água Morna", "Qtd Usada": 150.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00},
-                    {"Ingrediente": "Fermento Químico", "Qtd Usada": 15.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 6.00}
-                ]),
-                "peso_obtido": 1100.0,
-                "preparo": "Bater as claras em neve. Misturar as gemas com óleo, açúcar e cacau. Adicionar trigo, fermento e as claras em neve delicadamente.",
+                "peso_obtido": 950.0,
+                "preparo": "Bater no liquidificador ovos, óleo, leite, iogurte, ninho e açúcar por 2 a 5 minutos. Adicione a farinha e o fermento e use a função pulsar para homogeneizar.",
                 "perda_coccao": 10.0
             },
-            "Massa de Empada e Quiche Amanteigada": {
+            "Massa de Chocolate MBL (Camila Ayana)": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 500.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
-                    {"Ingrediente": "Manteiga sem Sal (Gelada)", "Qtd Usada": 250.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 12.00},
-                    {"Ingrediente": "Gema de Ovo", "Qtd Usada": 2.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
-                    {"Ingrediente": "Água Gelada", "Qtd Usada": 50.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00},
+                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 4.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
+                    {"Ingrediente": "Óleo de Soja Liza", "Qtd Usada": 150.0, "Unidade": "g", "Qtd na Embalagem": 900.0, "Preço Embalagem (R$)": 7.50},
+                    {"Ingrediente": "Leite Integral", "Qtd Usada": 220.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.20},
+                    {"Ingrediente": "Creme de Leite Itambé", "Qtd Usada": 200.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 3.80},
+                    {"Ingrediente": "Chocolate em Pó 50% Melken", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 1050.0, "Preço Embalagem (R$)": 42.00},
+                    {"Ingrediente": "Açúcar Refinado União", "Qtd Usada": 250.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.40},
+                    {"Ingrediente": "Farinha de Trigo Venturelli", "Qtd Usada": 300.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Fermento Químico", "Qtd Usada": 18.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 6.00}
+                ]),
+                "peso_obtido": 1100.0,
+                "preparo": "Bater os ovos, óleo, leite, creme de leite, chocolate e açúcar por 3 minutos. Incorporar farinha e fermento utilizando apenas a tecla pulsar.",
+                "perda_coccao": 10.0
+            },
+            "Massa Cacau Black MBL": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 4.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
+                    {"Ingrediente": "Óleo de Soja Liza", "Qtd Usada": 150.0, "Unidade": "g", "Qtd na Embalagem": 900.0, "Preço Embalagem (R$)": 7.50},
+                    {"Ingrediente": "Leite Integral", "Qtd Usada": 220.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.20},
+                    {"Ingrediente": "Creme de Leite", "Qtd Usada": 200.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 3.80},
+                    {"Ingrediente": "Cacau em Pó Black", "Qtd Usada": 70.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 52.00},
+                    {"Ingrediente": "Açúcar Refinado União", "Qtd Usada": 250.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.40},
+                    {"Ingrediente": "Farinha de Trigo Venturelli", "Qtd Usada": 300.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Fermento Químico", "Qtd Usada": 18.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 6.00}
+                ]),
+                "peso_obtido": 1050.0,
+                "preparo": "Bater os líquidos e o cacau black com o açúcar. Incorporar os secos no pulsar, com cuidado para não ativar glúten demais.",
+                "perda_coccao": 10.0
+            },
+            "Massa Red Velvet MBL (Camila Ayana)": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 4.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
+                    {"Ingrediente": "Óleo de Soja Liza", "Qtd Usada": 150.0, "Unidade": "g", "Qtd na Embalagem": 900.0, "Preço Embalagem (R$)": 7.50},
+                    {"Ingrediente": "Leite Integral (Buttermilk)", "Qtd Usada": 150.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.20},
+                    {"Ingrediente": "Suco de Limão (Para Talhar)", "Qtd Usada": 20.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 6.00},
+                    {"Ingrediente": "Iogurte Natural Batavo", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 170.0, "Preço Embalagem (R$)": 3.20},
+                    {"Ingrediente": "Chocolate em Pó 50%", "Qtd Usada": 30.0, "Unidade": "g", "Qtd na Embalagem": 1050.0, "Preço Embalagem (R$)": 42.00},
+                    {"Ingrediente": "Corante Vermelho Morango", "Qtd Usada": 5.0, "Unidade": "g", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 9.50},
+                    {"Ingrediente": "Pasta Saborizante Frutas Silvestres", "Qtd Usada": 15.0, "Unidade": "g", "Qtd na Embalagem": 250.0, "Preço Embalagem (R$)": 68.00},
+                    {"Ingrediente": "Açúcar Refinado União", "Qtd Usada": 250.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.40},
+                    {"Ingrediente": "Farinha de Trigo Venturelli", "Qtd Usada": 300.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Fermento Químico", "Qtd Usada": 18.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 6.00}
+                ]),
+                "peso_obtido": 1000.0,
+                "preparo": "Talhar o leite com o limão. Bater todos os ingredientes exceto a farinha e o fermento por 3 minutos. Unir os secos no pulsar.",
+                "perda_coccao": 10.0
+            },
+            "Massa Cookie Base": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Margarina Primor Pro", "Qtd Usada": 225.0, "Unidade": "g", "Qtd na Embalagem": 3000.0, "Preço Embalagem (R$)": 42.00},
+                    {"Ingrediente": "Açúcar Mascavo", "Qtd Usada": 180.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 14.50},
+                    {"Ingrediente": "Açúcar Refinado", "Qtd Usada": 180.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.40},
+                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 3.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
+                    {"Ingrediente": "Leite Ninho Pó", "Qtd Usada": 75.0, "Unidade": "g", "Qtd na Embalagem": 380.0, "Preço Embalagem (R$)": 16.50},
+                    {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 420.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Fermento Químico", "Qtd Usada": 12.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 6.00},
+                    {"Ingrediente": "Gotas de Chocolate Sicao", "Qtd Usada": 450.0, "Unidade": "g", "Qtd na Embalagem": 1010.0, "Preço Embalagem (R$)": 49.00}
+                ]),
+                "peso_obtido": 1500.0,
+                "preparo": "Bater margarina com os açúcares até virar creme na batedeira (raquete). Adicione ovos, depois os secos e gotas por último. Resfriar antes de assar.",
+                "perda_coccao": 10.0
+            },
+            "Massa de Brownie (Nescau)": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Margarina Primor Pro", "Qtd Usada": 300.0, "Unidade": "g", "Qtd na Embalagem": 3000.0, "Preço Embalagem (R$)": 42.00},
+                    {"Ingrediente": "Açúcar Refinado União", "Qtd Usada": 500.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.40},
+                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 6.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
+                    {"Ingrediente": "Água Filtrada", "Qtd Usada": 150.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00},
+                    {"Ingrediente": "Achocolatado Nescau", "Qtd Usada": 670.0, "Unidade": "g", "Qtd na Embalagem": 1500.0, "Preço Embalagem (R$)": 21.00},
+                    {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 450.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50}
+                ]),
+                "peso_obtido": 2000.0,
+                "preparo": "Bater os ovos e açúcar com batedor globo para criar volume. Adicione margarina morna com a água. Incorpore Nescau e farinha na raquete.",
+                "perda_coccao": 15.0
+            },
+            "Massa Salgados de Forno (Batata)": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 900.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Batata Asterix Cozida/Espremida", "Qtd Usada": 300.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 7.50},
+                    {"Ingrediente": "Açúcar Refinado", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.40},
+                    {"Ingrediente": "Margarina Qualy", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 3.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
+                    {"Ingrediente": "Sal Refinado", "Qtd Usada": 15.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 3.00},
+                    {"Ingrediente": "Lecitina de Soja Líquida", "Qtd Usada": 10.0, "Unidade": "g", "Qtd na Embalagem": 250.0, "Preço Embalagem (R$)": 18.50},
+                    {"Ingrediente": "Melhorador de Farinha Platinum", "Qtd Usada": 10.0, "Unidade": "g", "Qtd na Embalagem": 300.0, "Preço Embalagem (R$)": 14.50},
+                    {"Ingrediente": "Açúcar Invertido", "Qtd Usada": 25.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 12.00},
+                    {"Ingrediente": "Fermento Biológico Seco", "Qtd Usada": 20.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 9.50},
+                    {"Ingrediente": "Água Morna", "Qtd Usada": 250.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00}
+                ]),
+                "peso_obtido": 1850.0,
+                "preparo": "Misturar todos os ingredientes exceto farinha. Adicionar farinha em 3 partes até desgrudar. Deixar crescer até dobrar de tamanho.",
+                "perda_coccao": 5.0
+            },
+            "Massa Quiche e Empadão (Patê Brisée)": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 1000.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Margarina Qualy (Ponto Pomada)", "Qtd Usada": 600.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 16.00},
+                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 2.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
                     {"Ingrediente": "Sal Refinado", "Qtd Usada": 10.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 3.00}
                 ]),
-                "peso_obtido": 800.0,
-                "preparo": "Misturar trigo e sal, incorporar a manteiga em cubos com as pontas dos dedos até obter textura de areia. Unir com as gemas e água gelada.",
-                "perda_coccao": 5.0
+                "peso_obtido": 1600.0,
+                "preparo": "Misturar à mão ou batedeira (raquete) até obter liga por igual. Reservar refrigerado para melhor manuseio na montagem das quiches.",
+                "perda_coccao": 3.0
             }
         }
 
     if not dados_carregados or 'banco_recheios_rec' not in st.session_state or len(st.session_state.get('banco_recheios_rec', {})) == 0:
         st.session_state['banco_recheios_rec'] = {
-            "Brigadeiro de Ninho Gourmet": {
+            "Base Branca Coringa": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Leite Condensado", "Qtd Usada": 395.0, "Unidade": "g", "Qtd na Embalagem": 395.0, "Preço Embalagem (R$)": 6.80},
-                    {"Ingrediente": "Creme de Leite", "Qtd Usada": 400.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 4.00},
-                    {"Ingrediente": "Leite Ninho Integral", "Qtd Usada": 50.0, "Unidade": "g", "Qtd na Embalagem": 380.0, "Preço Embalagem (R$)": 16.50},
-                    {"Ingrediente": "Manteiga sem Sal", "Qtd Usada": 20.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 12.00}
+                    {"Ingrediente": "Leite Condensado Piracanjuba", "Qtd Usada": 395.0, "Unidade": "g", "Qtd na Embalagem": 395.0, "Preço Embalagem (R$)": 6.50},
+                    {"Ingrediente": "Creme de Leite Piracanjuba", "Qtd Usada": 600.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 3.80},
+                    {"Ingrediente": "Chocolate Branco (LeCacau)", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 1010.0, "Preço Embalagem (R$)": 45.00},
+                    {"Ingrediente": "Leite Integral", "Qtd Usada": 100.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.20}
                 ]),
                 "peso_obtido": 750.0,
-                "preparo": "Mexer em fogo brando até que desgrude do fundo da panela.",
-                "perda_coccao": 12.0
+                "preparo": "Levar ao fogo até obter o ponto de gota cremoso ($98.0^\\circ\\text{C}$ para copos ou $100.5^\\circ\\text{C}$ para bolos). Passar o fouet ao desligar.",
+                "perda_coccao": 15.0
             },
-            "Frango Cremoso com Catupiry": {
+            "Base Preta Coringa": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Peito de Frango Desfiado", "Qtd Usada": 600.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 18.00},
-                    {"Ingrediente": "Catupiry Original", "Qtd Usada": 250.0, "Unidade": "g", "Qtd na Embalagem": 400.0, "Preço Embalagem (R$)": 19.90},
-                    {"Ingrediente": "Cebola Picada", "Qtd Usada": 80.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 6.00},
-                    {"Ingrediente": "Azeite de Oliva", "Qtd Usada": 30.0, "Unidade": "ml", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 28.00},
-                    {"Ingrediente": "Molho de Tomate Rústico", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 340.0, "Preço Embalagem (R$)": 4.50}
+                    {"Ingrediente": "Leite Condensado Piracanjuba", "Qtd Usada": 395.0, "Unidade": "g", "Qtd na Embalagem": 395.0, "Preço Embalagem (R$)": 6.50},
+                    {"Ingrediente": "Creme de Leite Piracanjuba", "Qtd Usada": 600.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 3.80},
+                    {"Ingrediente": "Chocolate Meio Amargo (LeCacau)", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 1010.0, "Preço Embalagem (R$)": 46.00},
+                    {"Ingrediente": "Chocolate em Pó 50% Melken", "Qtd Usada": 50.0, "Unidade": "g", "Qtd na Embalagem": 1050.0, "Preço Embalagem (R$)": 42.00},
+                    {"Ingrediente": "Leite Integral", "Qtd Usada": 150.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.20}
                 ]),
-                "peso_obtido": 1000.0,
-                "preparo": "Refogar a cebola no azeite, juntar o frango e temperos. Adicionar o molho. Desligar e misturar o catupiry.",
+                "peso_obtido": 830.0,
+                "preparo": "Cozinhar até atingir a consistência desejada. Bater bem com fouet após apagar o fogo para uma textura aveludada.",
+                "perda_coccao": 15.0
+            },
+            "Geleia de Morango (Especial)": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Morangos Congelados CEASA", "Qtd Usada": 1000.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 24.00},
+                    {"Ingrediente": "Açúcar Cristal União", "Qtd Usada": 400.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 4.90},
+                    {"Ingrediente": "Pasta Saborizante Frutas Silvestres", "Qtd Usada": 30.0, "Unidade": "g", "Qtd na Embalagem": 250.0, "Preço Embalagem (R$)": 68.00},
+                    {"Ingrediente": "Suco de Limão Espremido", "Qtd Usada": 100.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 6.00},
+                    {"Ingrediente": "Água Filtrada", "Qtd Usada": 500.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00}
+                ]),
+                "peso_obtido": 1100.0,
+                "preparo": "Cozinhar tudo em fogo médio até reduzir. Passar o mixer para dar o ponto ideal de geleia brilhante.",
+                "perda_coccao": 30.0
+            },
+            "Gelatto de Ninho": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Manteiga sem Sal Itambé", "Qtd Usada": 200.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 12.50},
+                    {"Ingrediente": "Leite Ninho Pó", "Qtd Usada": 250.0, "Unidade": "g", "Qtd na Embalagem": 380.0, "Preço Embalagem (R$)": 16.50},
+                    {"Ingrediente": "Creme de Leite Gelado", "Qtd Usada": 300.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 3.80},
+                    {"Ingrediente": "Leite Condensado Gelado", "Qtd Usada": 395.0, "Unidade": "g", "Qtd na Embalagem": 395.0, "Preço Embalagem (R$)": 6.50},
+                    {"Ingrediente": "Emulsificante de Sorvete", "Qtd Usada": 8.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 11.00}
+                ]),
+                "peso_obtido": 1100.0,
+                "preparo": "Bater manteiga e leite condensado até clarear. Adicione o Ninho na velocidade média. Adicione creme de leite e emulsificante por último.",
+                "perda_coccao": 0.0
+            },
+            "Recheio Frango Cremoso (Coxinha)": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Peito de Frango (Sassami)", "Qtd Usada": 715.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 18.00},
+                    {"Ingrediente": "Margarina Qualy", "Qtd Usada": 75.0, "Unidade": "g", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Azeite de Oliva", "Qtd Usada": 7.0, "Unidade": "ml", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 28.00},
+                    {"Ingrediente": "Molho de Tomate", "Qtd Usada": 120.0, "Unidade": "g", "Qtd na Embalagem": 340.0, "Preço Embalagem (R$)": 4.50},
+                    {"Ingrediente": "Requeijão Cremoso Crioulo", "Qtd Usada": 75.0, "Unidade": "g", "Qtd na Embalagem": 400.0, "Preço Embalagem (R$)": 12.00},
+                    {"Ingrediente": "Água de Cozimento do Frango", "Qtd Usada": 250.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00}
+                ]),
+                "peso_obtido": 1100.0,
+                "preparo": "Dourar o frango espremido e cozido. Desfiar na pressão e temperar. Deixar firme para evitar vazamento ao fritar.",
+                "perda_coccao": 10.0
+            },
+            "Recheio Costela Cremosa": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Costela Bovina Cozida Desfiada", "Qtd Usada": 940.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 26.00},
+                    {"Ingrediente": "Água da Costela", "Qtd Usada": 250.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00},
+                    {"Ingrediente": "Molho Madeira Predilecta", "Qtd Usada": 300.0, "Unidade": "g", "Qtd na Embalagem": 340.0, "Preço Embalagem (R$)": 9.50},
+                    {"Ingrediente": "Requeijão Catupiry Original", "Qtd Usada": 80.0, "Unidade": "g", "Qtd na Embalagem": 1500.0, "Preço Embalagem (R$)": 59.90},
+                    {"Ingrediente": "Molho Barbecue", "Qtd Usada": 30.0, "Unidade": "g", "Qtd na Embalagem": 400.0, "Preço Embalagem (R$)": 11.50},
+                    {"Ingrediente": "Farinha de Trigo (Para Dar Liga)", "Qtd Usada": 50.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Água Pura", "Qtd Usada": 400.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00}
+                ]),
+                "peso_obtido": 1800.0,
+                "preparo": "Misturar a costela cozida, água, molhos e queijos. Engrossar levemente com o trigo dissolvido em água até firmar.",
                 "perda_coccao": 5.0
             },
-            "Geleia Artesanal de Morango": {
+            "Creme Base das Quiches": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Morangos Frescos", "Qtd Usada": 500.0, "Unidade": "g", "Qtd na Embalagem": 250.0, "Preço Embalagem (R$)": 6.00},
-                    {"Ingrediente": "Açúcar Refinado", "Qtd Usada": 200.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 4.50},
-                    {"Ingrediente": "Suco de Limão Espremido", "Qtd Usada": 15.0, "Unidade": "ml", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 3.00}
+                    {"Ingrediente": "Leite Integral", "Qtd Usada": 300.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.20},
+                    {"Ingrediente": "Ricota Fresca", "Qtd Usada": 250.0, "Unidade": "g", "Qtd na Embalagem": 250.0, "Preço Embalagem (R$)": 8.90},
+                    {"Ingrediente": "Creme de Leite Itambé", "Qtd Usada": 400.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 3.80},
+                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 4.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
+                    {"Ingrediente": "Sal Refinado", "Qtd Usada": 8.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 3.00}
                 ]),
-                "peso_obtido": 400.0,
-                "preparo": "Misturar morangos, açúcar e limão na panela. Cozinhar em fogo brando até obter ponto de geleia brilhante.",
-                "perda_coccao": 30.0
+                "peso_obtido": 1000.0,
+                "preparo": "Bater no liquidificador até obter emulsão homogênea. Verter diretamente sobre a forma moldada com a massa da quiche.",
+                "perda_coccao": 0.0
             }
         }
 
     if not dados_carregados or 'banco_caldas_rec' not in st.session_state or len(st.session_state.get('banco_caldas_rec', {})) == 0:
         st.session_state['banco_caldas_rec'] = {
-            "Calda Tradicional de Leite Condensado": {
+            "Calda Glaciada Exclusiva": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Leite Condensado", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 395.0, "Preço Embalagem (R$)": 6.80},
-                    {"Ingrediente": "Água Filtrada", "Qtd Usada": 300.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00}
+                    {"Ingrediente": "Açúcar Glaçúcar União", "Qtd Usada": 500.0, "Unidade": "g", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 6.50},
+                    {"Ingrediente": "Água Fervente", "Qtd Usada": 750.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00}
                 ]),
-                "peso_obtido": 400.0,
-                "preparo": "Misturar na bisnaga aplicadora antes de regar as bases de bolo."
+                "peso_obtido": 1200.0,
+                "preparo": "Ferver a água e misturar imediatamente no glaçúcar até homogeneizar. Aplicar quente sobre o bolo frio."
+            },
+            "Calda de Leite de Coco MBL": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Leite Condensado", "Qtd Usada": 395.0, "Unidade": "g", "Qtd na Embalagem": 395.0, "Preço Embalagem (R$)": 6.50},
+                    {"Ingrediente": "Leite de Coco Sococo", "Qtd Usada": 500.0, "Unidade": "ml", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 11.00},
+                    {"Ingrediente": "Água Filtrada", "Qtd Usada": 1000.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00}
+                ]),
+                "peso_obtido": 1850.0,
+                "preparo": "Ferver o leite de coco, incorporar os demais ingredientes para aumentar a validade e evitar azedar. Usar fria."
             }
         }
 
     if not dados_carregados or 'banco_coberturas_rec' not in st.session_state or len(st.session_state.get('banco_coberturas_rec', {})) == 0:
         st.session_state['banco_coberturas_rec'] = {
-            "Chantininho de Alta Estabilidade": {
+            "Chantininho Estruturado": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Chantilly Líquido", "Qtd Usada": 1000.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 18.50},
-                    {"Ingrediente": "Leite Ninho Integral", "Qtd Usada": 150.0, "Unidade": "g", "Qtd na Embalagem": 380.0, "Preço Embalagem (R$)": 16.50},
-                    {"Ingrediente": "Glacê Real Pó", "Qtd Usada": 50.0, "Unidade": "g", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 14.00}
+                    {"Ingrediente": "Chantilly Supreme Amélia", "Qtd Usada": 1000.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 18.50},
+                    {"Ingrediente": "Leite Ninho Pó", "Qtd Usada": 200.0, "Unidade": "g", "Qtd na Embalagem": 380.0, "Preço Embalagem (R$)": 16.50},
+                    {"Ingrediente": "Emulsificante de Sorvete", "Qtd Usada": 15.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 11.00},
+                    {"Ingrediente": "Merengue Powder", "Qtd Usada": 20.0, "Unidade": "g", "Qtd na Embalagem": 150.0, "Preço Embalagem (R$)": 19.90}
                 ]),
-                "peso_obtido": 1200.0,
-                "preparo": "Bater gelado em velocidade média até formar picos rígidos."
+                "peso_obtido": 1235.0,
+                "preparo": "Bater na batedeira em velocidade média-baixa até ponto firme. Deixar descansar por 12h na geladeira antes de trabalhar."
+            },
+            "Merengue Suíço (Maçarico)": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Clara de Ovos", "Qtd Usada": 90.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 22.00},
+                    {"Ingrediente": "Açúcar Refinado União", "Qtd Usada": 140.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.40},
+                    {"Ingrediente": "Açúcar Glaçúcar União", "Qtd Usada": 60.0, "Unidade": "g", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 6.50},
+                    {"Ingrediente": "Amido de Milho Maizena", "Qtd Usada": 10.0, "Unidade": "g", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 7.50}
+                ]),
+                "peso_obtido": 300.0,
+                "preparo": "Aqueça claras e açúcar a $55^\\circ\\text{C}$ em banho-maria. Bata em velocidade máxima até ponto de pico. Peneire glaçúcar e amido e incorpore."
             }
         }
 
@@ -611,7 +763,7 @@ if chave_usuario == "kg10k":
             
             km_total = st.number_input("Distância Total Ida e Volta (KM)", min_value=0.0, value=25.0)
             quem_entrega = st.radio("Entregador responsável", ["A própria empresária (Para a produção)", "Terceirizado (Motoboy/Uber)"])
-            is_rural = st.checkbox("Rota inclui estrada de terra / área rural? (Adiciona taxa de risco)", value=True)
+            is_rural = st.checkbox("Rota includes estrada de terra / área rural? (Adiciona taxa de risco)", value=True)
             
             custo_km = km_total * 1.80
             taxa_parada = 25.00 if quem_entrega == "A própria empresária (Para a produção)" else 0.00
@@ -842,7 +994,7 @@ if chave_usuario == "kg10k":
             sel_calda = st.selectbox("Selecione a Calda para Editar:", list(st.session_state['banco_caldas_rec'].keys()))
             if sel_calda:
                 rec_c = st.session_state['banco_caldas_rec'][sel_calda]
-                st.markdown("##### 📋 Ingredientes Cadastrados")
+                st.markdown("##### 📋 Angredientes Cadastrados")
                 
                 c_edit = renderizar_tabela_segura(
                     rec_c["ingredientes"],
@@ -1034,7 +1186,7 @@ if chave_usuario == "kg10k":
             st.markdown(f"""
                 <div class="print-box">
                     <div style="text-align: center; border-bottom: 2px solid #043927; padding-bottom: 10px;">
-                        <span style="font-size: 20px; font-weight: bold; color: #043927;">💎 FICHA DE PRODUCTION UNIFICADA - K&G ARTE EM CONFEITARIA 💎</span><br>
+                        <span style="font-size: 20px; font-weight: bold; color: #043927;">💎 FICHA DE PRODUÇÃO UNIFICADA - K&G ARTE EM CONFEITARIA 💎</span><br>
                         <span style="font-size: 12px; letter-spacing: 1px;">PADRONIZAÇÃO E ENGENHARIA DE PRODUTO</span>
                     </div>
                     <br>
@@ -1131,9 +1283,10 @@ if chave_usuario == "kg10k":
         st.markdown('<div class="section-title">🏢 Fornecedores e Distribuidores de Curitiba e RMC</div>', unsafe_allow_html=True)
         
         fornecedores_cwb = pd.DataFrame([
-            {"Fornecedor": "Central do Chocolate CWB", "Telefone": "(41) 3222-1200", "Localização": "Centro, Curitiba - PR", "Insumos": "Chocolates Nobres Callebaut, Sicao"},
-            {"Fornecedor": "Nova Íris Embalagens", "Telefone": "(41) 3324-4500", "Localização": "Centro, Curitiba - PR", "Insumos": "Caixas de Papelão, Marmitas e Pratos"},
-            {"Fornecedor": "CEASA Curitiba (Distribuidor)", "Telefone": "(41) 99999-5555", "Localização": "CEASA", "Insumos": "Morangos e frutas frescas"}
+            {"Fornecedor": "Central do Chocolate CWB", "Telefone": "(41) 3222-1200", "Localização": "Centro, Curitiba - PR", "Insumos": "Chocolates Nobres Callebaut, Sicao, LeCacau"},
+            {"Fornecedor": "Nova Íris Embalagens", "Telefone": "(41) 3324-4500", "Localização": "Centro, Curitiba - PR", "Insumos": "Caixas de Papelão, Marmitas, Potes e Pratos"},
+            {"Fornecedor": "CEASA Curitiba (Distribuidor)", "Telefone": "(41) 99999-5555", "Localização": "CEASA PR", "Insumos": "Morangos, Laranja, Maracujá e frutas frescas"},
+            {"Fornecedor": "Dijos Doce Embalagens", "Telefone": "(41) 3014-9988", "Localização": "Portão, Curitiba - PR", "Insumos": "Formas Leila, Desmoldante Carlex e Adicionais"}
         ])
         st.data_editor(fornecedores_cwb, num_rows="dynamic", use_container_width=True, key="forn_key")
 
@@ -1145,7 +1298,9 @@ if chave_usuario == "kg10k":
         
         inventario_base = pd.DataFrame([
             {"Categoria": "Equipamentos Elétricos", "Equipamento/Utensílio": "Forno de Convecção Prática MiniConv", "Quantidade": 1, "Valor Unitário (R$)": 4500.00},
-            {"Categoria": "Utensílios", "Equipamento/Utensílio": "Rolo de Massa Profissional 48cm", "Quantidade": 1, "Valor Unitário (R$)": 85.00}
+            {"Categoria": "Utensílios", "Equipamento/Utensílio": "Rolo de Massa Profissional 48cm", "Quantidade": 1, "Valor Unitário (R$)": 85.00},
+            {"Categoria": "Equipamentos Elétricos", "Equipamento/Utensílio": "Seladora a Vácuo de Alimentos Cetro", "Quantidade": 1, "Valor Unitário (R$)": 380.00},
+            {"Categoria": "Equipamentos Elétricos", "Equipamento/Utensílio": "Batedeira Planetária Arno", "Quantidade": 1, "Valor Unitário (R$)": 650.00}
         ])
         
         df_inv_edit = st.data_editor(inventario_base, num_rows="dynamic", use_container_width=True, key="inv_pat_key")
