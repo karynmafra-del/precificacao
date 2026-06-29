@@ -71,25 +71,31 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# --- FUNÇÃO DE SEGURANÇA ABSOLUTA CONTRA ERROS DE DIGITAÇÃO OU CAMPOS EM BRANCO ---
+# --- FUNÇÃO EXECUTIVA DE LIMPEZA E TRATAMENTO DE VÍRGULAS EM NÚMEROS ---
+def limpar_e_converter_coluna(df, coluna, padrao=0.0):
+    if df is None or df.empty or coluna not in df.columns:
+        return pd.Series([padrao] * (len(df) if df is not None else 1))
+    try:
+        # Força a conversão para texto, substitui vírgula por ponto e remove espaços
+        serie_str = df[coluna].astype(str).str.replace(',', '.', regex=False).str.strip()
+        # Retorna convertido em float numérico seguro
+        return pd.to_numeric(serie_str, errors='coerce').fillna(padrao)
+    except Exception:
+        return pd.Series([padrao] * len(df))
+
+# --- CALCULO MATEMÁTICO INTEGRADO DE FICHAS TÉCNICAS ---
 def calcular_custo_tabela_seguro(df, col_preco, col_embalagem, col_usado):
     if df is None or df.empty:
         return 0.0
     try:
-        df_temp = df.copy()
-        for col in [col_preco, col_embalagem, col_usado]:
-            if col not in df_temp.columns:
-                df_temp[col] = 0.0
+        precos = limpar_e_converter_coluna(df, col_preco, 0.0)
+        embalagens = limpar_e_converter_coluna(df, col_embalagem, 1.0)
+        usados = limpar_e_converter_coluna(df, col_usado, 0.0)
         
-        # Converte para numérico de forma segura e substitui erros/vazios por valores padrão estáveis
-        df_temp[col_preco] = pd.to_numeric(df_temp[col_preco], errors='coerce').fillna(0.0)
-        df_temp[col_embalagem] = pd.to_numeric(df_temp[col_embalagem], errors='coerce').fillna(1.0)
-        df_temp[col_usado] = pd.to_numeric(df_temp[col_usado], errors='coerce').fillna(0.0)
+        # Evita qualquer divisão por zero
+        embalagens = embalagens.replace(0, 1.0)
         
-        # Impede a divisão matemática por zero
-        df_temp[col_embalagem] = df_temp[col_embalagem].replace(0, 1.0)
-        
-        custos = (df_temp[col_preco] / df_temp[col_embalagem]) * df_temp[col_usado]
+        custos = (precos / embalagens) * usados
         return float(custos.sum())
     except Exception:
         return 0.0
@@ -107,6 +113,32 @@ def get_recipe_cost_kg(banco, name):
         return (custo_total / peso_obtido) * 1000.0
     except Exception:
         return 0.0
+
+# --- FUNÇÃO AUXILIAR PARA ADICIONAR INGREDIENTE SEM COMPLICAÇÃO ---
+def adicionar_ingrediente_banco(banco_key, receita_nome, ingrediente, unidade, preco, qtd_emb, qtd_usada):
+    try:
+        preco_val = float(str(preco).replace(',', '.').strip()) if preco else 0.0
+    except:
+        preco_val = 0.0
+    try:
+        qtd_emb_val = float(str(qtd_emb).replace(',', '.').strip()) if qtd_emb else 1.0
+    except:
+        qtd_emb_val = 1.0
+    try:
+        qtd_usada_val = float(str(qtd_usada).replace(',', '.').strip()) if qtd_usada else 0.0
+    except:
+        qtd_usada_val = 0.0
+        
+    new_row = {
+        "Ingrediente": ingrediente,
+        "Unidade": unidade,
+        "Preço Embalagem (R$)": preco_val,
+        "Qtd na Embalagem": qtd_emb_val,
+        "Qtd Usada": qtd_usada_val
+    }
+    
+    df = st.session_state[banco_key][receita_nome]["ingredientes"]
+    st.session_state[banco_key][receita_nome]["ingredientes"] = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
 
 # 🔒 CHAVE DE ACESSO GLOBAL DO SISTEMA
 chave_usuario = st.text_input("Insira a sua Chave de Acesso para liberar o sistema:", type="password")
@@ -243,13 +275,13 @@ if chave_usuario == "kg10k":
                 st.markdown("##### Custos Fixos")
                 df_fixos_ed = st.data_editor(st.session_state['df_fixos'], num_rows="dynamic", use_container_width=True, key="c_fixos_key")
                 st.session_state['df_fixos'] = df_fixos_ed
-                total_fixos = pd.to_numeric(df_fixos_ed["Valor Mensal (R$)"], errors='coerce').fillna(0.0).sum()
+                total_fixos = limpar_e_converter_coluna(df_fixos_ed, "Valor Mensal (R$)", 0.0).sum()
                 st.metric("Total de Custos Fixos", f"R$ {total_fixos:.2f}")
             with col_dr2:
                 st.markdown("##### Custos Variáveis")
                 df_var_ed = st.data_editor(st.session_state['df_var'], num_rows="dynamic", use_container_width=True, key="c_var_key")
                 st.session_state['df_var'] = df_var_ed
-                total_var = pd.to_numeric(df_var_ed["Valor Estimado (R$)"], errors='coerce').fillna(0.0).sum()
+                total_var = limpar_e_converter_coluna(df_var_ed, "Valor Estimado (R$)", 0.0).sum()
                 st.metric("Total de Custos Variáveis", f"R$ {total_var:.2f}")
         with sub_dp_aba:
             st.metric("Pró-Labore da Karyn", "R$ 4.000,00")
@@ -315,7 +347,7 @@ if chave_usuario == "kg10k":
 
         msg_whatsapp = f"Olá {c_nome}! Segue o espelho do seu orçamento para o dia {c_data_festa.strftime('%d/%m/%Y')} às {c_horario.strftime('%H:%M')}.\n\n* Itens: {c_doce} - R$ {c_valor_produtos:.2f}\n* Entrega ({c_endereco}): R$ {valor_frete_final:.2f}\n\n*Total:* R$ {valor_total_pedido:.2f}\n\n*Restrições de Cozinha:* {c_obs_criticas}"
         
-        if st.button("🖨| Emitir Espelho do Orçamento Completo"):
+        if st.button("🖨️ Emitir Espelho do Orçamento Completo"):
             st.markdown(f"""
                 <div class="print-box">
                     <b>💎 PROPOSTA COMERCIAL EXCLUSIVA - K&G ARTE EM CONFEITARIA 💎</b><br>
@@ -347,7 +379,7 @@ if chave_usuario == "kg10k":
         st.session_state['banco_crm'] = df_crm_ed
 
     # ==========================================
-    # ABA 3: FÁBRICA DE BASES (SISTEMA DE SEGURANÇA MÁXIMA PARA CADASTRO)
+    # ABA 3: FÁBRICA DE BASES (SISTEMA ULTRA SEGURO DE DIGITAÇÃO COM "SALVAR" EXCLUSIVO)
     # ==========================================
     with tabs[3]:
         st.markdown('<div class="section-title">🥣 Fábrica de Bases: Gestão Ilimitada de Receitas e Custos</div>', unsafe_allow_html=True)
@@ -362,23 +394,43 @@ if chave_usuario == "kg10k":
                 if submit_m and novo_m_nome:
                     if novo_m_nome not in st.session_state['banco_massas_rec']:
                         st.session_state['banco_massas_rec'][novo_m_nome] = {
-                            "ingredientes": pd.DataFrame([
-                                {"Ingrediente": "Ingrediente Exemplo", "Unidade": "g", "Preço Embalagem (R$)": 10.00, "Qtd na Embalagem": 1000.0, "Qtd Usada": 100.0}
-                            ]),
+                            "ingredientes": pd.DataFrame(columns=["Ingrediente", "Unidade", "Preço Embalagem (R$)", "Qtd na Embalagem", "Qtd Usada"]),
                             "peso_obtido": 1000.0,
                             "preparo": "Descreva aqui o modo de preparo passo a passo.",
                             "decoracao": "Padrão estético aceito para a produção."
                         }
-                        st.success(f"Massa '{novo_m_nome}' cadastrada! Selecione-a abaixo para editar os ingredientes.")
+                        st.success(f"Massa '{novo_m_nome}' cadastrada! Selecione-a abaixo para alimentar os ingredientes.")
                     else:
                         st.warning("Massa já cadastrada!")
 
             st.write("---")
-            sel_massa = st.selectbox("Selecione a Massa para Visualizar/Editar os Ingredientes:", list(st.session_state['banco_massas_rec'].keys()))
+            sel_massa = st.selectbox("Selecione a Massa para Visualizar/Alimentar:", list(st.session_state['banco_massas_rec'].keys()))
             
             if sel_massa:
                 rec_m = st.session_state['banco_massas_rec'][sel_massa]
-                # DATA EDITOR SEGURO E ROBUSTO
+                
+                # 📥 NOVO FORMULÁRIO DE ENTRADA RÁPIDA DE INGREDIENTES (O botão Salvar que você pediu!)
+                st.markdown(f"##### 📥 Adicionar Novo Ingrediente à receita: *{sel_massa}*")
+                with st.form(key=f"form_add_ing_massa_{sel_massa}", clear_on_submit=True):
+                    col_ing1, col_ing2, col_ing3, col_ing4, col_ing5 = st.columns(5)
+                    with col_ing1:
+                        f_ing = st.text_input("Ingrediente", placeholder="Ex: Chocolate 50%", key=f"f_m_ing_{sel_massa}")
+                    with col_ing2:
+                        f_uni = st.selectbox("Unidade", ["g", "ml", "un"], key=f"f_m_uni_{sel_massa}")
+                    with col_ing3:
+                        f_prec = st.text_input("Preço Embalagem (R$)", value="0.00", key=f"f_m_prec_{sel_massa}")
+                    with col_ing4:
+                        f_emb = st.text_input("Qtd na Embalagem", value="1000", key=f"f_m_emb_{sel_massa}")
+                    with col_ing5:
+                        f_usd = st.text_input("Qtd Usada na Receita", value="0", key=f"f_m_usd_{sel_massa}")
+                    
+                    submit_ing_m = st.form_submit_button("💾 Salvar Ingrediente na Receita", type="primary")
+                    if submit_ing_m and f_ing:
+                        adicionar_ingrediente_banco('banco_massas_rec', sel_massa, f_ing, f_uni, f_prec, f_emb, f_usd)
+                        st.success(f"✔️ {f_ing} adicionado e salvo com sucesso!")
+                        st.rerun()
+
+                st.markdown("##### 📋 Ingredientes Cadastrados (Abaixo você pode ver, ajustar ou deletar linhas se precisar)")
                 m_edit = st.data_editor(
                     rec_m["ingredientes"],
                     num_rows="dynamic",
@@ -410,22 +462,43 @@ if chave_usuario == "kg10k":
                 if submit_r and novo_r_nome:
                     if novo_r_nome not in st.session_state['banco_recheios_rec']:
                         st.session_state['banco_recheios_rec'][novo_r_nome] = {
-                            "ingredientes": pd.DataFrame([
-                                {"Ingrediente": "Ingrediente Exemplo", "Unidade": "g", "Preço Embalagem (R$)": 10.00, "Qtd na Embalagem": 1000.0, "Qtd Usada": 100.0}
-                            ]),
+                            "ingredientes": pd.DataFrame(columns=["Ingrediente", "Unidade", "Preço Embalagem (R$)", "Qtd na Embalagem", "Qtd Usada"]),
                             "peso_obtido": 1000.0,
                             "preparo": "Descreva aqui o modo de preparo passo a passo.",
                             "decoracao": "Padrão estético aceito para a produção."
                         }
-                        st.success(f"Recheio '{novo_r_nome}' cadastrado! Selecione-o abaixo para editar.")
+                        st.success(f"Recheio '{novo_r_nome}' cadastrado! Selecione-o abaixo para alimentar.")
                     else:
                         st.warning("Recheio já cadastrado!")
 
             st.write("---")
-            sel_recheio = st.selectbox("Selecione o Recheio para Visualizar/Editar os Ingredientes:", list(st.session_state['banco_recheios_rec'].keys()))
+            sel_recheio = st.selectbox("Selecione o Recheio para Visualizar/Alimentar:", list(st.session_state['banco_recheios_rec'].keys()))
             
             if sel_recheio:
                 rec_r = st.session_state['banco_recheios_rec'][sel_recheio]
+                
+                # 📥 FORMULÁRIO DE ENTRADA RÁPIDA DE INGREDIENTES
+                st.markdown(f"##### 📥 Adicionar Novo Ingrediente ao Recheio: *{sel_recheio}*")
+                with st.form(key=f"form_add_ing_recheio_{sel_recheio}", clear_on_submit=True):
+                    col_ing1, col_ing2, col_ing3, col_ing4, col_ing5 = st.columns(5)
+                    with col_ing1:
+                        f_ing = st.text_input("Ingrediente", placeholder="Ex: Leite Moça", key=f"f_r_ing_{sel_recheio}")
+                    with col_ing2:
+                        f_uni = st.selectbox("Unidade", ["g", "ml", "un"], key=f"f_r_uni_{sel_recheio}")
+                    with col_ing3:
+                        f_prec = st.text_input("Preço Embalagem (R$)", value="0.00", key=f"f_r_prec_{sel_recheio}")
+                    with col_ing4:
+                        f_emb = st.text_input("Qtd na Embalagem", value="395", key=f"f_r_emb_{sel_recheio}")
+                    with col_ing5:
+                        f_usd = st.text_input("Qtd Usada na Receita", value="0", key=f"f_r_usd_{sel_recheio}")
+                    
+                    submit_ing_r = st.form_submit_button("💾 Salvar Ingrediente na Receita", type="primary")
+                    if submit_ing_r and f_ing:
+                        adicionar_ingrediente_banco('banco_recheios_rec', sel_recheio, f_ing, f_uni, f_prec, f_emb, f_usd)
+                        st.success(f"✔️ {f_ing} adicionado e salvo com sucesso!")
+                        st.rerun()
+
+                st.markdown("##### 📋 Ingredientes Cadastrados")
                 r_edit = st.data_editor(
                     rec_r["ingredientes"],
                     num_rows="dynamic",
@@ -457,14 +530,12 @@ if chave_usuario == "kg10k":
                 if submit_c and novo_c_nome:
                     if novo_c_nome not in st.session_state['banco_caldas_rec']:
                         st.session_state['banco_caldas_rec'][novo_c_nome] = {
-                            "ingredientes": pd.DataFrame([
-                                {"Ingrediente": "Açúcar", "Unidade": "g", "Preço Embalagem (R$)": 4.50, "Qtd na Embalagem": 1000.0, "Qtd Usada": 100.0}
-                            ]),
+                            "ingredientes": pd.DataFrame(columns=["Ingrediente", "Unidade", "Preço Embalagem (R$)", "Qtd na Embalagem", "Qtd Usada"]),
                             "peso_obtido": 1000.0,
                             "preparo": "Misturar e ferver.",
                             "decoracao": "Calda fluida."
                         }
-                        st.success(f"Calda '{novo_c_nome}' cadastrada!")
+                        st.success(f"Calda '{novo_c_nome}' cadastrada! Selecione-a abaixo para alimentar.")
                     else:
                         st.warning("Calda já cadastrada!")
 
@@ -472,6 +543,29 @@ if chave_usuario == "kg10k":
             sel_calda = st.selectbox("Selecione a Calda para Editar:", list(st.session_state['banco_caldas_rec'].keys()))
             if sel_calda:
                 rec_c = st.session_state['banco_caldas_rec'][sel_calda]
+                
+                # 📥 FORMULÁRIO DE ENTRADA RÁPIDA DE INGREDIENTES
+                st.markdown(f"##### 📥 Adicionar Novo Ingrediente à Calda: *{sel_calda}*")
+                with st.form(key=f"form_add_ing_calda_{sel_calda}", clear_on_submit=True):
+                    col_ing1, col_ing2, col_ing3, col_ing4, col_ing5 = st.columns(5)
+                    with col_ing1:
+                        f_ing = st.text_input("Ingrediente", placeholder="Ex: Açúcar Cristal", key=f"f_c_ing_{sel_calda}")
+                    with col_ing2:
+                        f_uni = st.selectbox("Unidade", ["g", "ml", "un"], key=f"f_c_uni_{sel_calda}")
+                    with col_ing3:
+                        f_prec = st.text_input("Preço Embalagem (R$)", value="0.00", key=f"f_c_prec_{sel_calda}")
+                    with col_ing4:
+                        f_emb = st.text_input("Qtd na Embalagem", value="1000", key=f"f_c_emb_{sel_calda}")
+                    with col_ing5:
+                        f_usd = st.text_input("Qtd Usada na Receita", value="0", key=f"f_c_usd_{sel_calda}")
+                    
+                    submit_ing_c = st.form_submit_button("💾 Salvar Ingrediente na Receita", type="primary")
+                    if submit_ing_c and f_ing:
+                        adicionar_ingrediente_banco('banco_caldas_rec', sel_calda, f_ing, f_uni, f_prec, f_emb, f_usd)
+                        st.success(f"✔️ {f_ing} adicionado e salvo com sucesso!")
+                        st.rerun()
+
+                st.markdown("##### 📋 Ingredientes Cadastrados")
                 c_edit = st.data_editor(
                     rec_c["ingredientes"],
                     num_rows="dynamic",
@@ -503,14 +597,12 @@ if chave_usuario == "kg10k":
                 if submit_cob and novo_cob_nome:
                     if novo_cob_nome not in st.session_state['banco_coberturas_rec']:
                         st.session_state['banco_coberturas_rec'][novo_cob_nome] = {
-                            "ingredientes": pd.DataFrame([
-                                {"Ingrediente": "Chocolate", "Unidade": "g", "Preço Embalagem (R$)": 55.00, "Qtd na Embalagem": 1000.0, "Qtd Usada": 200.0}
-                            ]),
+                            "ingredientes": pd.DataFrame(columns=["Ingrediente", "Unidade", "Preço Embalagem (R$)", "Qtd na Embalagem", "Qtd Usada"]),
                             "peso_obtido": 1000.0,
                             "preparo": "Modo de preparo.",
                             "decoracao": "Instruções."
                         }
-                        st.success(f"Cobertura '{novo_cob_nome}' cadastrada!")
+                        st.success(f"Cobertura '{novo_cob_nome}' cadastrada! Selecione-a abaixo para alimentar.")
                     else:
                         st.warning("Cobertura já cadastrada!")
 
@@ -518,6 +610,29 @@ if chave_usuario == "kg10k":
             sel_cob = st.selectbox("Selecione a Cobertura para Editar:", list(st.session_state['banco_coberturas_rec'].keys()))
             if sel_cob:
                 rec_cob = st.session_state['banco_coberturas_rec'][sel_cob]
+                
+                # 📥 FORMULÁRIO DE ENTRADA RÁPIDA DE INGREDIENTES
+                st.markdown(f"##### 📥 Adicionar Novo Ingrediente ao Banho/Blindagem: *{sel_cob}*")
+                with st.form(key=f"form_add_ing_cob_{sel_cob}", clear_on_submit=True):
+                    col_ing1, col_ing2, col_ing3, col_ing4, col_ing5 = st.columns(5)
+                    with col_ing1:
+                        f_ing = st.text_input("Ingrediente", placeholder="Ex: Chocolate Sicao Melken", key=f"f_cob_ing_{sel_cob}")
+                    with col_ing2:
+                        f_uni = st.selectbox("Unidade", ["g", "ml", "un"], key=f"f_cob_uni_{sel_cob}")
+                    with col_ing3:
+                        f_prec = st.text_input("Preço Embalagem (R$)", value="0.00", key=f"f_cob_prec_{sel_cob}")
+                    with col_ing4:
+                        f_emb = st.text_input("Qtd na Embalagem", value="1000", key=f"f_cob_emb_{sel_cob}")
+                    with col_ing5:
+                        f_usd = st.text_input("Qtd Usada na Receita", value="0", key=f"f_cob_usd_{sel_cob}")
+                    
+                    submit_ing_cob = st.form_submit_button("💾 Salvar Ingrediente na Receita", type="primary")
+                    if submit_ing_cob and f_ing:
+                        adicionar_ingrediente_banco('banco_coberturas_rec', sel_cob, f_ing, f_uni, f_prec, f_emb, f_usd)
+                        st.success(f"✔️ {f_ing} adicionado e salvo com sucesso!")
+                        st.rerun()
+
+                st.markdown("##### 📋 Ingredientes Cadastrados")
                 cob_edit = st.data_editor(
                     rec_cob["ingredientes"],
                     num_rows="dynamic",
@@ -683,8 +798,8 @@ if chave_usuario == "kg10k":
         st.markdown("##### 🚨 Alerta Vermelho de Compras:")
         for idx, row in df_est_edit.iterrows():
             try:
-                atual = float(row["Quantidade em Estoque (Un)"])
-                minimo = float(row["Estoque Mínimo de Segurança (Un)"])
+                atual = float(limpar_e_converter_coluna(pd.DataFrame([row]), "Quantidade em Estoque (Un)", 0.0)[0])
+                minimo = float(limpar_e_converter_coluna(pd.DataFrame([row]), "Estoque Mínimo de Segurança (Un)", 0.0)[0])
                 if atual < minimo:
                     st.error(f"⚠️ {row['Item de Estoque']} está abaixo do estoque de segurança! Adquirir mais {int(minimo - atual)} unidades.")
             except Exception:
@@ -727,8 +842,8 @@ if chave_usuario == "kg10k":
         
         df_inv_edit = st.data_editor(inventario_base, num_rows="dynamic", use_container_width=True, key="inv_pat_key")
         
-        custo_unit = pd.to_numeric(df_inv_edit["Valor Unitário (R$)"], errors='coerce').fillna(0.0)
-        quantidades = pd.to_numeric(df_inv_edit["Quantidade"], errors='coerce').fillna(0.0)
+        custo_unit = limpar_e_converter_coluna(df_inv_edit, "Valor Unitário (R$)", 0.0)
+        quantidades = limpar_e_converter_coluna(df_inv_edit, "Quantidade", 0.0)
         patrimonio_total = (custo_unit * quantidades).sum()
         
         st.metric("Patrimônio Físico Total Acumulado no Atelier", f"R$ {patrimonio_total:.2f}")
