@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import math
 import random
+import json
+import os
 from datetime import datetime, timedelta
 
 # Configuração da página de luxo K&G
@@ -10,14 +12,6 @@ st.set_page_config(
     page_icon="✨",
     layout="wide"
 )
-
-# Inicialização de variáveis globais compartilhadas (Evita qualquer erro de variável indefinida)
-custo_massa_kg = 0.0
-custo_recheio_kg = 0.0
-custo_calda_kg = 0.0
-custo_cob_kg = 0.0
-peso_alvo = 5.0
-nome_bolo_final = "Bolo de Morango Especial"
 
 # Estilização de Elite K&G (Verde Esmeralda, Ouro e Customização das Abas em Rosé Nude)
 st.markdown("""
@@ -86,7 +80,6 @@ def corrigir_colunas_df(df):
     if df is None:
         return pd.DataFrame(columns=["Ingrediente", "Qtd Usada", "Unidade", "Qtd na Embalagem", "Preço Embalagem (R$)"])
     
-    # Mapeamento inteligente de nomes antigos para os novos unificados
     mapeamento = {
         "Gramos Usados na Receita": "Qtd Usada",
         "Gramos Embalagem (g)": "Qtd na Embalagem",
@@ -97,7 +90,6 @@ def corrigir_colunas_df(df):
     }
     df_corrigido = df.rename(columns=mapeamento)
     
-    # Garante que todas as colunas obrigatórias existam
     colunas_obrigatorias = ["Ingrediente", "Qtd Usada", "Unidade", "Qtd na Embalagem", "Preço Embalagem (R$)"]
     for col in colunas_obrigatorias:
         if col not in df_corrigido.columns:
@@ -110,7 +102,57 @@ def corrigir_colunas_df(df):
             else:
                 df_corrigido[col] = 0.0
                 
+    # Trata valores nulos para evitar NaN visual nas tabelas
+    df_corrigido["Ingrediente"] = df_corrigido["Ingrediente"].fillna("Novo Insumo")
+    df_corrigido["Qtd Usada"] = pd.to_numeric(df_corrigido["Qtd Usada"], errors='coerce').fillna(0.0)
+    df_corrigido["Unidade"] = df_corrigido["Unidade"].fillna("g")
+    df_corrigido["Qtd na Embalagem"] = pd.to_numeric(df_corrigido["Qtd na Embalagem"], errors='coerce').fillna(1000.0)
+    df_corrigido["Preço Embalagem (R$)"] = pd.to_numeric(df_corrigido["Preço Embalagem (R$)"], errors='coerce').fillna(0.0)
+                
     return df_corrigido[colunas_obrigatorias]
+
+# --- CONFIGURAÇÃO SUPREMA DE DESIGN DAS COLUNAS (PLANILHA DE FLUXO RÁPIDO) ---
+config_colunas_ingredientes = {
+    "Ingrediente": st.column_config.TextColumn(
+        "🧁 Ingrediente / Insumo",
+        placeholder="Clique para digitar... Ex: Leite Moça",
+        required=True,
+        width="medium"
+    ),
+    "Qtd Usada": st.column_config.NumberColumn(
+        "⚖️ Qtd Usada na Receita",
+        placeholder="0.0",
+        min_value=0.0,
+        step=0.1,
+        required=True,
+        format="%.1f",
+        help="Quantidade líquida colocada na receita"
+    ),
+    "Unidade": st.column_config.SelectboxColumn(
+        "📏 Unidade",
+        options=["g", "ml", "un"],
+        required=True,
+        default="g"
+    ),
+    "Qtd na Embalagem": st.column_config.NumberColumn(
+        "📦 Qtd na Embalagem",
+        placeholder="1000",
+        min_value=0.1,
+        step=1.0,
+        required=True,
+        format="%.1f",
+        help="Peso/Volume total da embalagem fechada do mercado"
+    ),
+    "Preço Embalagem (R$)": st.column_config.NumberColumn(
+        "💰 Preço Embalagem",
+        placeholder="0.00",
+        min_value=0.0,
+        step=0.01,
+        required=True,
+        format="R$ %.2f",
+        help="Preço total pago na embalagem fechada"
+    )
+}
 
 # --- CONVERSÃO INTELIGENTE DE UNIDADES PARA CÁLCULO DE PESO BRUTO REAL ---
 def calcular_peso_bruto_ingredientes(df):
@@ -193,32 +235,126 @@ def get_recipe_cost_kg(banco, name):
     except Exception:
         return 0.0
 
-# --- ADICIONAR INGREDIENTE AO BANCO DE DADOS ---
-def adicionar_ingrediente_banco(banco_key, receita_nome, ingrediente, unidade, preco, qtd_emb, qtd_usada):
+# --- SISTEMA DE PERSISTÊNCIA E BACKUP EM DISCO ---
+def salvar_dados_disco():
     try:
-        preco_val = float(str(preco).replace(',', '.').strip()) if preco else 0.0
-    except:
-        preco_val = 0.0
+        if 'banco_massas_rec' in st.session_state:
+            backup_dict = {
+                "massas": {k: {"ingredientes": v["ingredientes"].to_dict(orient="records"), "peso_obtido": v["peso_obtido"], "preparo": v["preparo"], "perda_coccao": v.get("perda_coccao", 10.0)} for k, v in st.session_state['banco_massas_rec'].items()},
+                "recheios": {k: {"ingredientes": v["ingredientes"].to_dict(orient="records"), "peso_obtido": v["peso_obtido"], "preparo": v["preparo"], "perda_coccao": v.get("perda_coccao", 15.0)} for k, v in st.session_state['banco_recheios_rec'].items()},
+                "caldas": {k: {"ingredientes": v["ingredientes"].to_dict(orient="records"), "peso_obtido": v["peso_obtido"], "preparo": v["preparo"]} for k, v in st.session_state['banco_caldas_rec'].items()},
+                "coberturas": {k: {"ingredientes": v["ingredientes"].to_dict(orient="records"), "peso_obtido": v["peso_obtido"], "preparo": v["preparo"]} for k, v in st.session_state['banco_coberturas_rec'].items()},
+                "crm": st.session_state['banco_crm'].to_dict(orient="records") if 'banco_crm' in st.session_state else [],
+                "fixos": st.session_state['df_fixos'].to_dict(orient="records") if 'df_fixos' in st.session_state else [],
+                "var": st.session_state['df_var'].to_dict(orient="records") if 'df_var' in st.session_state else [],
+                "decoracao": st.session_state.get('decoracao_bolo_completo', '')
+            }
+            with open("banco_confeitaria_local.json", "w", encoding="utf-8") as f:
+                json.dump(backup_dict, f, ensure_ascii=False, indent=4)
+    except Exception:
+        pass
+
+def carregar_dados_disco():
+    if os.path.exists("banco_confeitaria_local.json"):
+        try:
+            with open("banco_confeitaria_local.json", "r", encoding="utf-8") as f:
+                data = json.load(f)
+            st.session_state['banco_massas_rec'] = {
+                k: {
+                    "ingredientes": pd.DataFrame(v["ingredientes"]),
+                    "peso_obtido": v["peso_obtido"],
+                    "preparo": v["preparo"],
+                    "perda_coccao": v.get("perda_coccao", 10.0)
+                } for k, v in data["massas"].items()
+            }
+            st.session_state['banco_recheios_rec'] = {
+                k: {
+                    "ingredientes": pd.DataFrame(v["ingredientes"]),
+                    "peso_obtido": v["peso_obtido"],
+                    "preparo": v["preparo"],
+                    "perda_coccao": v.get("perda_coccao", 15.0)
+                } for k, v in data["recheios"].items()
+            }
+            st.session_state['banco_caldas_rec'] = {
+                k: {
+                    "ingredientes": pd.DataFrame(v["ingredientes"]),
+                    "peso_obtido": v["peso_obtido"],
+                    "preparo": v["preparo"]
+                } for k, v in data["caldas"].items()
+            }
+            st.session_state['banco_coberturas_rec'] = {
+                k: {
+                    "ingredientes": pd.DataFrame(v["ingredientes"]),
+                    "peso_obtido": v["peso_obtido"],
+                    "preparo": v["preparo"]
+                } for k, v in data["coberturas"].items()
+            }
+            st.session_state['banco_crm'] = pd.DataFrame(data["crm"])
+            st.session_state['df_fixos'] = pd.DataFrame(data["fixos"])
+            st.session_state['df_var'] = pd.DataFrame(data["var"])
+            st.session_state['decoracao_bolo_completo'] = data["decoracao"]
+            return True
+        except Exception:
+            pass
+    return False
+
+def exportar_backup_json():
     try:
-        qtd_emb_val = float(str(qtd_emb).replace(',', '.').strip()) if qtd_emb else 1.0
-    except:
-        qtd_emb_val = 1.0
+        backup_dict = {
+            "massas": {k: {"ingredientes": v["ingredientes"].to_dict(orient="records"), "peso_obtido": v["peso_obtido"], "preparo": v["preparo"], "perda_coccao": v.get("perda_coccao", 10.0)} for k, v in st.session_state['banco_massas_rec'].items()},
+            "recheios": {k: {"ingredientes": v["ingredientes"].to_dict(orient="records"), "peso_obtido": v["peso_obtido"], "preparo": v["preparo"], "perda_coccao": v.get("perda_coccao", 15.0)} for k, v in st.session_state['banco_recheios_rec'].items()},
+            "caldas": {k: {"ingredientes": v["ingredientes"].to_dict(orient="records"), "peso_obtido": v["peso_obtido"], "preparo": v["preparo"]} for k, v in st.session_state['banco_caldas_rec'].items()},
+            "coberturas": {k: {"ingredientes": v["ingredientes"].to_dict(orient="records"), "peso_obtido": v["peso_obtido"], "preparo": v["preparo"]} for k, v in st.session_state['banco_coberturas_rec'].items()},
+            "crm": st.session_state['banco_crm'].to_dict(orient="records") if 'banco_crm' in st.session_state else [],
+            "fixos": st.session_state['df_fixos'].to_dict(orient="records") if 'df_fixos' in st.session_state else [],
+            "var": st.session_state['df_var'].to_dict(orient="records") if 'df_var' in st.session_state else [],
+            "decoracao": st.session_state.get('decoracao_bolo_completo', '')
+        }
+        return json.dumps(backup_dict, ensure_ascii=False, indent=4)
+    except Exception:
+        return ""
+
+def importar_backup_json(json_str):
     try:
-        qtd_usada_val = float(str(qtd_usada).replace(',', '.').strip()) if qtd_usada else 0.0
-    except:
-        qtd_usada_val = 0.0
-        
-    new_row = {
-        "Ingrediente": ingrediente,
-        "Qtd Usada": qtd_usada_val,
-        "Unidade": unidade,
-        "Qtd na Embalagem": qtd_emb_val,
-        "Preço Embalagem (R$)": preco_val
-    }
-    
-    df = st.session_state[banco_key][receita_nome]["ingredientes"]
-    df = corrigir_colunas_df(df)
-    st.session_state[banco_key][receita_nome]["ingredientes"] = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+        data = json.loads(json_str)
+        st.session_state['banco_massas_rec'] = {
+            k: {
+                "ingredientes": pd.DataFrame(v["ingredientes"]),
+                "peso_obtido": v["peso_obtido"],
+                "preparo": v["preparo"],
+                "perda_coccao": v.get("perda_coccao", 10.0)
+            } for k, v in data["massas"].items()
+        }
+        st.session_state['banco_recheios_rec'] = {
+            k: {
+                "ingredientes": pd.DataFrame(v["ingredientes"]),
+                "peso_obtido": v["peso_obtido"],
+                "preparo": v["preparo"],
+                "perda_coccao": v.get("perda_coccao", 15.0)
+            } for k, v in data["recheios"].items()
+        }
+        st.session_state['banco_caldas_rec'] = {
+            k: {
+                "ingredientes": pd.DataFrame(v["ingredientes"]),
+                "peso_obtido": v["peso_obtido"],
+                "preparo": v["preparo"]
+            } for k, v in data["caldas"].items()
+        }
+        st.session_state['banco_coberturas_rec'] = {
+            k: {
+                "ingredientes": pd.DataFrame(v["ingredientes"]),
+                "peso_obtido": v["peso_obtido"],
+                "preparo": v["preparo"]
+            } for k, v in data["coberturas"].items()
+        }
+        st.session_state['banco_crm'] = pd.DataFrame(data["crm"])
+        st.session_state['df_fixos'] = pd.DataFrame(data["fixos"])
+        st.session_state['df_var'] = pd.DataFrame(data["var"])
+        st.session_state['decoracao_bolo_completo'] = data["decoracao"]
+        salvar_dados_disco()
+        return True
+    except Exception:
+        return False
 
 # 🔒 CHAVE DE ACESSO GLOBAL DO SISTEMA
 chave_usuario = st.text_input("Insira a sua Chave de Acesso para liberar o sistema:", type="password")
@@ -226,8 +362,13 @@ chave_usuario = st.text_input("Insira a sua Chave de Acesso para liberar o siste
 if chave_usuario == "kg10k":
     st.success("Acesso Autorizado! Seja bem-vinda ao seu sistema, Karyn.")
 
-    # Inicialização dos Bancos de Dados na memória
+    # Tenta carregar os dados salvos em disco automaticamente antes de inicializar o padrão
+    dados_carregados = False
     if 'banco_massas_rec' not in st.session_state:
+        dados_carregados = carregar_dados_disco()
+
+    # Se não tiver arquivo salvo em disco, cria a base padrão
+    if not dados_carregados and 'banco_massas_rec' not in st.session_state:
         st.session_state['banco_massas_rec'] = {
             "Massa Choc Premium": {
                 "ingredientes": pd.DataFrame([
@@ -275,6 +416,15 @@ if chave_usuario == "kg10k":
                 ], columns=["Ingrediente", "Qtd Usada", "Unidade", "Qtd na Embalagem", "Preço Embalagem (R$)"]),
                 "peso_obtido": 650.0,
                 "preparo": "Ferver água e açúcar até reduzir ligeiramente e homogeneizar. Deixar esfriar."
+            },
+            "Calda de Leite de Coco": {
+                "ingredientes": pd.DataFrame([
+                    {"Ingrediente": "Leite de Coco", "Qtd Usada": 200.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 6.50},
+                    {"Ingrediente": "Leite Condensado Itambé", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 395.0, "Preço Embalagem (R$)": 6.80},
+                    {"Ingrediente": "Água Filtrada", "Qtd Usada": 100.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.0}
+                ], columns=["Ingrediente", "Qtd Usada", "Unidade", "Qtd na Embalagem", "Preço Embalagem (R$)"]),
+                "peso_obtido": 400.0,
+                "preparo": "Misturar todos os ingredientes a frio na bisnaga aplicadora."
             }
         }
 
@@ -290,7 +440,6 @@ if chave_usuario == "kg10k":
             }
         }
 
-    # VACINA ATIVA: Garante que TODAS as receitas existentes na memória do seu navegador sejam convertidas para colunas novas
     for r_nome in st.session_state['banco_massas_rec']:
         st.session_state['banco_massas_rec'][r_nome]["ingredientes"] = corrigir_colunas_df(st.session_state['banco_massas_rec'][r_nome]["ingredientes"])
     for r_nome in st.session_state['banco_recheios_rec']:
@@ -300,7 +449,6 @@ if chave_usuario == "kg10k":
     for r_nome in st.session_state['banco_coberturas_rec']:
         st.session_state['banco_coberturas_rec'][r_nome]["ingredientes"] = corrigir_colunas_df(st.session_state['banco_coberturas_rec'][r_nome]["ingredientes"])
 
-    # Inicialização do CRM, DRE e outros dados do ERP
     if 'banco_crm' not in st.session_state:
         st.session_state['banco_crm'] = pd.DataFrame([
             {"Cliente VIP": "Juliana Mendes Rossi", "WhatsApp": "(41) 99123-4567", "E-mail": "juliana@rossi.com", "Aniv. Cliente": "12/06", "Aniv. Marido": "18/10", "Aniv. Filhos": "Gabriel (04/02)", "Data Casamento": "22/11", "Restrições": "NÃO PODE CONTER AMENDOIM!", "Últimos Pedidos": "KG-2026-1042"},
@@ -322,9 +470,32 @@ if chave_usuario == "kg10k":
             {"Descrição do Custo Variável": "Taxas de Entrega / Apps", "Valor Estimado (R$)": 220.00}
         ])
 
-    # Inicialização da Decoração do Bolo Completo (Persistência de dados)
-    if 'decoracao_bolo_completo' not in st.session_state:
-        st.session_state['decoracao_bolo_completo'] = "Chantininho rosé nude espatulado rústico, quinas imperfeitas com pó de ouro egípcio e morangos frescos higienizados no topo com brilho de confeiteiro."
+    # --- BARRA LATERAL EXCLUSIVA DE SEGURANÇA E BACKUP ---
+    with st.sidebar:
+        st.markdown("### 🔒 CENTRAL DE SEGURANÇA K&G")
+        st.write("Baixe uma cópia das suas receitas para o celular/computador e fique 100% segura contra perdas!")
+        
+        backup_json = exportar_backup_json()
+        
+        st.download_button(
+            label="💾 Baixar Backup de Segurança",
+            data=backup_json,
+            file_name=f"backup_confeitaria_kg_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+            mime="application/json",
+            use_container_width=True
+        )
+        
+        st.markdown("---")
+        st.write("🔄 **Restaurar Receitas Perdidas:**")
+        arquivo_upload_backup = st.file_uploader("Envie seu arquivo de backup (.json) para restaurar:", type=["json"])
+        if arquivo_upload_backup is not None:
+            conteudo = arquivo_upload_backup.read().decode("utf-8")
+            if st.button("🚀 Confirmar e Restaurar Tudo Agora", use_container_width=True):
+                if importar_backup_json(conteudo):
+                    st.success("✔️ Todos os dados e receitas foram restaurados com sucesso!")
+                    st.rerun()
+                else:
+                    st.error("Erro ao ler o arquivo de backup. Verifique se é um arquivo de backup K&G válido.")
 
     # Criação das Abas Principais
     tabs = st.tabs([
@@ -434,6 +605,7 @@ if chave_usuario == "kg10k":
                 st.session_state['banco_crm'] = pd.concat([st.session_state['banco_crm'], pd.DataFrame([novo_vip])], ignore_index=True)
                 st.success(f"Pedido {st.session_state['id_pedido_atual']} enviado para a ficha de {c_nome} no CRM!")
                 st.session_state['id_pedido_atual'] = f"KG-2026-{random.randint(1000, 9999)}"
+                salvar_dados_disco()
         with col_b2:
             st.write("")
 
@@ -491,6 +663,7 @@ if chave_usuario == "kg10k":
                             "perda_coccao": 10.0
                         }
                         st.success(f"Massa '{novo_m_nome}' cadastrada!")
+                        salvar_dados_disco()
                         st.rerun()
                     else:
                         st.warning("Massa já cadastrada!")
@@ -501,34 +674,18 @@ if chave_usuario == "kg10k":
             if sel_massa:
                 rec_m = st.session_state['banco_massas_rec'][sel_massa]
                 
-                st.markdown(f"##### 📥 Adicionar Novo Insumo à massa: *{sel_massa}*")
-                with st.form(key=f"form_add_ing_massa_{sel_massa}", clear_on_submit=True):
-                    col_ing1, col_ing2, col_ing3, col_ing4, col_ing5 = st.columns(5)
-                    with col_ing1:
-                        f_ing = st.text_input("Ingrediente", placeholder="Ex: Chocolate 50%", key=f"f_m_ing_{sel_massa}")
-                    with col_ing2:
-                        f_usd = st.text_input("Quantidade Usada na Receita", value="0", key=f"f_m_usd_{sel_massa}")
-                    with col_ing3:
-                        f_uni = st.selectbox("Unidade", ["g", "ml", "un"], key=f"f_m_uni_{sel_massa}")
-                    with col_ing4:
-                        f_emb = st.text_input("Quantidade na Embalagem", value="1000", key=f"f_m_emb_{sel_massa}")
-                    with col_ing5:
-                        f_prec = st.text_input("Preço Embalagem (R$)", value="0.00", key=f"f_m_prec_{sel_massa}")
-                    
-                    submit_ing_m = st.form_submit_button("💾 Salvar Ingrediente na Receita", type="primary")
-                    if submit_ing_m and f_ing:
-                        adicionar_ingrediente_banco('banco_massas_rec', sel_massa, f_ing, f_uni, f_prec, f_emb, f_usd)
-                        st.success(f"✔️ {f_ing} adicionado e salvo com sucesso!")
-                        st.rerun()
-
                 st.markdown("##### 📋 Ingredientes Cadastrados")
+                st.caption("💡 **Dica de Ouro da K&G:** Clique no botão `+` (no canto inferior da tabela) para adicionar novas linhas de ingredientes com preenchimento de colunas automático!")
+                
                 m_edit = st.data_editor(
                     corrigir_colunas_df(rec_m["ingredientes"]),
                     num_rows="dynamic",
                     use_container_width=True,
+                    column_config=config_colunas_ingredientes,
                     key=f"m_edit_{sel_massa}"
                 )
                 st.session_state['banco_massas_rec'][sel_massa]["ingredientes"] = m_edit
+                salvar_dados_disco()
                 
                 peso_bruto_m = calcular_peso_bruto_ingredientes(m_edit)
                 
@@ -557,6 +714,7 @@ if chave_usuario == "kg10k":
                     if st.button("🗑️ Excluir Permanentemente", key=f"btn_del_m_{sel_massa}", type="primary", disabled=not conf_del_m):
                         del st.session_state['banco_massas_rec'][sel_massa]
                         st.success("Receita excluída com sucesso!")
+                        salvar_dados_disco()
                         st.rerun()
 
         # --- SUB-ABA 2: RECHEIOS ---
@@ -574,6 +732,7 @@ if chave_usuario == "kg10k":
                             "perda_coccao": 15.0
                         }
                         st.success(f"Recheio '{novo_r_nome}' cadastrado!")
+                        salvar_dados_disco()
                         st.rerun()
                     else:
                         st.warning("Recheio já cadastrado!")
@@ -584,34 +743,18 @@ if chave_usuario == "kg10k":
             if sel_recheio:
                 rec_r = st.session_state['banco_recheios_rec'][sel_recheio]
                 
-                st.markdown(f"##### 📥 Adicionar Novo Ingrediente ao Recheio: *{sel_recheio}*")
-                with st.form(key=f"form_add_ing_recheio_{sel_recheio}", clear_on_submit=True):
-                    col_ing1, col_ing2, col_ing3, col_ing4, col_ing5 = st.columns(5)
-                    with col_ing1:
-                        f_ing = st.text_input("Ingrediente", placeholder="Ex: Leite Moça", key=f"f_r_ing_{sel_recheio}")
-                    with col_ing2:
-                        f_usd = st.text_input("Quantidade Usada na Receita", value="0", key=f"f_r_usd_{sel_recheio}")
-                    with col_ing3:
-                        f_uni = st.selectbox("Unidade", ["g", "ml", "un"], key=f"f_r_uni_{sel_recheio}")
-                    with col_ing4:
-                        f_emb = st.text_input("Quantidade na Embalagem", value="395", key=f"f_r_emb_{sel_recheio}")
-                    with col_ing5:
-                        f_prec = st.text_input("Preço Embalagem (R$)", value="0.00", key=f"f_r_prec_{sel_recheio}")
-                    
-                    submit_ing_r = st.form_submit_button("💾 Salvar Ingrediente na Receita", type="primary")
-                    if submit_ing_r and f_ing:
-                        adicionar_ingrediente_banco('banco_recheios_rec', sel_recheio, f_ing, f_uni, f_prec, f_emb, f_usd)
-                        st.success(f"✔️ {f_ing} adicionado e salvo com sucesso!")
-                        st.rerun()
-
                 st.markdown("##### 📋 Ingredientes Cadastrados")
+                st.caption("💡 **Dica de Ouro da K&G:** Clique no botão `+` (no canto inferior da tabela) para adicionar novas linhas de ingredientes com preenchimento de colunas automático!")
+                
                 r_edit = st.data_editor(
                     corrigir_colunas_df(rec_r["ingredientes"]),
                     num_rows="dynamic",
                     use_container_width=True,
+                    column_config=config_colunas_ingredientes,
                     key=f"r_edit_{sel_recheio}"
                 )
                 st.session_state['banco_recheios_rec'][sel_recheio]["ingredientes"] = r_edit
+                salvar_dados_disco()
                 
                 peso_bruto_r = calcular_peso_bruto_ingredientes(r_edit)
                 
@@ -640,6 +783,7 @@ if chave_usuario == "kg10k":
                     if st.button("🗑️ Excluir Permanentemente", key=f"btn_del_r_{sel_recheio}", type="primary", disabled=not conf_del_r):
                         del st.session_state['banco_recheios_rec'][sel_recheio]
                         st.success("Receita excluída com sucesso!")
+                        salvar_dados_disco()
                         st.rerun()
 
         # --- SUB-ABA 3: CALDAS ---
@@ -656,6 +800,7 @@ if chave_usuario == "kg10k":
                             "preparo": "Misturar e ferver."
                         }
                         st.success(f"Calda '{novo_c_nome}' cadastrada!")
+                        salvar_dados_disco()
                         st.rerun()
                     else:
                         st.warning("Calda já cadastrada!")
@@ -665,34 +810,18 @@ if chave_usuario == "kg10k":
             if sel_calda:
                 rec_c = st.session_state['banco_caldas_rec'][sel_calda]
                 
-                st.markdown(f"##### 📥 Adicionar Novo Ingrediente à Calda: *{sel_calda}*")
-                with st.form(key=f"form_add_ing_calda_{sel_calda}", clear_on_submit=True):
-                    col_ing1, col_ing2, col_ing3, col_ing4, col_ing5 = st.columns(5)
-                    with col_ing1:
-                        f_ing = st.text_input("Ingrediente", placeholder="Ex: Açúcar Cristal", key=f"f_c_ing_{sel_calda}")
-                    with col_ing2:
-                        f_usd = st.text_input("Quantidade Usada na Receita", value="0", key=f"f_c_usd_{sel_calda}")
-                    with col_ing3:
-                        f_uni = st.selectbox("Unidade", ["g", "ml", "un"], key=f"f_c_uni_{sel_calda}")
-                    with col_ing4:
-                        f_emb = st.text_input("Quantidade na Embalagem", value="1000", key=f"f_c_emb_{sel_calda}")
-                    with col_ing5:
-                        f_prec = st.text_input("Preço Embalagem (R$)", value="0.00", key=f"f_c_prec_{sel_calda}")
-                    
-                    submit_ing_c = st.form_submit_button("💾 Salvar Ingrediente na Receita", type="primary")
-                    if submit_ing_c and f_ing:
-                        adicionar_ingrediente_banco('banco_caldas_rec', sel_calda, f_ing, f_uni, f_prec, f_emb, f_usd)
-                        st.success(f"✔️ {f_ing} adicionado e salvo com sucesso!")
-                        st.rerun()
-
                 st.markdown("##### 📋 Ingredientes Cadastrados")
+                st.caption("💡 **Dica de Ouro da K&G:** Clique no botão `+` (no canto inferior da tabela) para adicionar novas linhas de ingredientes com preenchimento de colunas automático!")
+                
                 c_edit = st.data_editor(
                     corrigir_colunas_df(rec_c["ingredientes"]),
                     num_rows="dynamic",
                     use_container_width=True,
+                    column_config=config_colunas_ingredientes,
                     key=f"c_edit_{sel_calda}"
                 )
                 st.session_state['banco_caldas_rec'][sel_calda]["ingredientes"] = c_edit
+                salvar_dados_disco()
                 
                 peso_obt_c = calcular_peso_bruto_ingredientes(c_edit)
                 st.session_state['banco_caldas_rec'][sel_calda]["peso_obtido"] = peso_obt_c
@@ -715,6 +844,7 @@ if chave_usuario == "kg10k":
                     if st.button("🗑️ Excluir Permanentemente", key=f"btn_del_c_{sel_calda}", type="primary", disabled=not conf_del_c):
                         del st.session_state['banco_caldas_rec'][sel_calda]
                         st.success("Receita excluída com sucesso!")
+                        salvar_dados_disco()
                         st.rerun()
 
         # --- SUB-ABA 4: COBERTURAS ---
@@ -731,6 +861,7 @@ if chave_usuario == "kg10k":
                             "preparo": "Modo de preparo."
                         }
                         st.success(f"Cobertura '{novo_cob_nome}' cadastrada!")
+                        salvar_dados_disco()
                         st.rerun()
                     else:
                         st.warning("Cobertura já cadastrada!")
@@ -740,34 +871,18 @@ if chave_usuario == "kg10k":
             if sel_cob:
                 rec_cob = st.session_state['banco_coberturas_rec'][sel_cob]
                 
-                st.markdown(f"##### 📥 Adicionar Novo Ingrediente ao Banho/Blindagem: *{sel_cob}*")
-                with st.form(key=f"form_add_ing_cob_{sel_cob}", clear_on_submit=True):
-                    col_ing1, col_ing2, col_ing3, col_ing4, col_ing5 = st.columns(5)
-                    with col_ing1:
-                        f_ing = st.text_input("Ingrediente", placeholder="Ex: Chocolate Sicao", key=f"f_cob_ing_{sel_cob}")
-                    with col_ing2:
-                        f_usd = st.text_input("Quantidade Usada na Receita", value="0", key=f"f_cob_usd_{sel_cob}")
-                    with col_ing3:
-                        f_uni = st.selectbox("Unidade", ["g", "ml", "un"], key=f"f_cob_uni_{sel_cob}")
-                    with col_ing4:
-                        f_emb = st.text_input("Quantidade na Embalagem", value="1000", key=f"f_cob_emb_{sel_cob}")
-                    with col_ing5:
-                        f_prec = st.text_input("Preço Embalagem (R$)", value="0.00", key=f"f_cob_prec_{sel_cob}")
-                    
-                    submit_ing_cob = st.form_submit_button("💾 Salvar Ingrediente na Receita", type="primary")
-                    if submit_ing_cob and f_ing:
-                        adicionar_ingrediente_banco('banco_coberturas_rec', sel_cob, f_ing, f_uni, f_prec, f_emb, f_usd)
-                        st.success(f"✔️ {f_ing} adicionado e salvo com sucesso!")
-                        st.rerun()
-
                 st.markdown("##### 📋 Ingredientes Cadastrados")
+                st.caption("💡 **Dica de Ouro da K&G:** Clique no botão `+` (no canto inferior da tabela) para adicionar novas linhas de ingredientes com preenchimento de colunas automático!")
+                
                 cob_edit = st.data_editor(
                     corrigir_colunas_df(rec_cob["ingredientes"]),
                     num_rows="dynamic",
                     use_container_width=True,
+                    column_config=config_colunas_ingredientes,
                     key=f"cob_edit_{sel_cob}"
                 )
                 st.session_state['banco_coberturas_rec'][sel_cob]["ingredientes"] = cob_edit
+                salvar_dados_disco()
                 
                 peso_obt_cob = calcular_peso_bruto_ingredientes(cob_edit)
                 st.session_state['banco_coberturas_rec'][sel_cob]["peso_obtido"] = peso_obt_cob
@@ -790,6 +905,7 @@ if chave_usuario == "kg10k":
                     if st.button("🗑️ Excluir Permanentemente", key=f"btn_del_cob_{sel_cob}", type="primary", disabled=not conf_del_cob):
                         del st.session_state['banco_coberturas_rec'][sel_cob]
                         st.success("Receita excluída com sucesso!")
+                        salvar_dados_disco()
                         st.rerun()
 
     # ==========================================
@@ -843,7 +959,7 @@ if chave_usuario == "kg10k":
             st.markdown("##### 🎨 Decoração & Padronização Estética do Produto Completo")
             decor_final_input = st.text_area(
                 "Descreva o acabamento visual de alto padrão para a finalização deste bolo:",
-                value=st.session_state['decoracao_bolo_completo'],
+                value=st.session_state.get('decoracao_bolo_completo', "Chantininho rosé nude espatulado rústico, quinas imperfeitas com pó de ouro egípcio e morangos frescos higienizados no topo com brilho de confeiteiro."),
                 height=110,
                 key="decoracao_final_area"
             )
@@ -885,7 +1001,7 @@ if chave_usuario == "kg10k":
         with cv4: st.markdown(f"<div class='preco-box' style='background:#901414;'><b>🛵 CARDÁPIO IFOOD</b><br><span style='font-size:20px; font-weight:bold;'>R$ {v_ifood:.2f}</span><br>Taxas de Delivery Cobertas</div>", unsafe_allow_html=True)
 
         st.write("---")
-        if st.button("🖨️ Emitir Ficha Técnica de Produção Completa (Para a Cozinha)"):
+        if st.button("🖨️ Emitir Ficha Técnico de Produção Completa (Para a Cozinha)"):
             st.markdown(f"""
                 <div class="print-box">
                     <div style="text-align: center; border-bottom: 2px solid #043927; padding-bottom: 10px;">
@@ -1023,6 +1139,9 @@ if chave_usuario == "kg10k":
         
         st.metric("Patrimônio Físico Total Acumulado no Atelier", f"R$ {patrimonio_total:.2f}")
         st.file_uploader("📸 Registrar foto de patrimônio (moldes, cortadores, stencils)", type=["png","jpg"])
+
+    # Grava no disco local do servidor em cada execução para auto-recuperação
+    salvar_dados_disco()
 
 elif chave_usuario != "":
     st.error("Chave de Acesso Incorreta! Por favor, digite a senha autorizada da K&G.")
