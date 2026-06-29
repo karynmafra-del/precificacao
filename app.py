@@ -102,7 +102,6 @@ def corrigir_colunas_df(df):
             else:
                 df_corrigido[col] = 0.0
                 
-    # Trata valores nulos para evitar NaN visual nas tabelas
     df_corrigido["Ingrediente"] = df_corrigido["Ingrediente"].fillna("Novo Insumo")
     df_corrigido["Qtd Usada"] = pd.to_numeric(df_corrigido["Qtd Usada"], errors='coerce').fillna(0.0)
     df_corrigido["Unidade"] = df_corrigido["Unidade"].fillna("g")
@@ -111,48 +110,53 @@ def corrigir_colunas_df(df):
                 
     return df_corrigido[colunas_obrigatorias]
 
-# --- CONFIGURAÇÃO SUPREMA DE DESIGN DAS COLUNAS (PLANILHA DE FLUXO RÁPIDO) ---
-config_colunas_ingredientes = {
-    "Ingrediente": st.column_config.TextColumn(
-        "🧁 Ingrediente / Insumo",
-        placeholder="Clique para digitar... Ex: Leite Moça",
-        required=True,
-        width="medium"
-    ),
-    "Qtd Usada": st.column_config.NumberColumn(
-        "⚖️ Qtd Usada na Receita",
-        placeholder="0.0",
-        min_value=0.0,
-        step=0.1,
-        required=True,
-        format="%.1f",
-        help="Quantidade líquida colocada na receita"
-    ),
-    "Unidade": st.column_config.SelectboxColumn(
-        "📏 Unidade",
-        options=["g", "ml", "un"],
-        required=True,
-        default="g"
-    ),
-    "Qtd na Embalagem": st.column_config.NumberColumn(
-        "📦 Qtd na Embalagem",
-        placeholder="1000",
-        min_value=0.1,
-        step=1.0,
-        required=True,
-        format="%.1f",
-        help="Peso/Volume total da embalagem fechada do mercado"
-    ),
-    "Preço Embalagem (R$)": st.column_config.NumberColumn(
-        "💰 Preço Embalagem",
-        placeholder="0.00",
-        min_value=0.0,
-        step=0.01,
-        required=True,
-        format="R$ %.2f",
-        help="Preço total pago na embalagem fechada"
-    )
-}
+# --- CONFIGURAÇÃO SUPREMA DE DESIGN DAS COLUNAS COM PROTEÇÃO CONTRA VERSÕES ANTIGAS ---
+config_colunas_ingredientes = {}
+if hasattr(st, "column_config"):
+    try:
+        config_colunas_ingredientes = {
+            "Ingrediente": st.column_config.TextColumn(
+                "🧁 Ingrediente / Insumo",
+                placeholder="Clique para digitar... Ex: Leite Moça",
+                required=True,
+                width="medium"
+            ),
+            "Qtd Usada": st.column_config.NumberColumn(
+                "⚖️ Qtd Usada na Receita",
+                placeholder="0.0",
+                min_value=0.0,
+                step=0.1,
+                required=True,
+                format="%.1f",
+                help="Quantidade líquida colocada na receita"
+            ),
+            "Unidade": st.column_config.SelectboxColumn(
+                "📏 Unidade",
+                options=["g", "ml", "un"],
+                required=True,
+                default="g"
+            ),
+            "Qtd na Embalagem": st.column_config.NumberColumn(
+                "📦 Qtd na Embalagem",
+                placeholder="1000",
+                min_value=0.1,
+                step=1.0,
+                required=True,
+                format="%.1f",
+                help="Peso/Volume total da embalagem fechada do mercado"
+            ),
+            "Preço Embalagem (R$)": st.column_config.NumberColumn(
+                "💰 Preço Embalagem",
+                placeholder="0.00",
+                min_value=0.0,
+                step=0.01,
+                required=True,
+                format="R$ %.2f",
+                help="Preço total pago na embalagem fechada"
+            )
+        }
+    except Exception:
+        config_colunas_ingredientes = {}
 
 # --- CONVERSÃO INTELIGENTE DE UNIDADES PARA CÁLCULO DE PESO BRUTO REAL ---
 def calcular_peso_bruto_ingredientes(df):
@@ -356,6 +360,71 @@ def importar_backup_json(json_str):
     except Exception:
         return False
 
+# --- FUNÇÃO CENTRAL DE EDIÇÃO SEGURA COM FALLBACK PARA VERSÕES SEM DATA_EDITOR ---
+def renderizar_tabela_segura(df_dados, col_config_dict, chave_unica):
+    # Trata dados nulos e corrige colunas antes de renderizar
+    df_dados_corrigido = corrigir_colunas_df(df_dados)
+    
+    # 1. Verifica se st.data_editor existe no Streamlit instalado no servidor
+    if hasattr(st, "data_editor"):
+        # Se st.column_config estiver disponível no servidor, passa a configuração de design
+        if col_config_dict and len(col_config_dict) > 0:
+            return st.data_editor(
+                df_dados_corrigido,
+                num_rows="dynamic",
+                use_container_width=True,
+                column_config=col_config_dict,
+                key=chave_unica
+            )
+        else:
+            return st.data_editor(
+                df_dados_corrigido,
+                num_rows="dynamic",
+                use_container_width=True,
+                key=chave_unica
+            )
+            
+    # 2. Se não existir st.data_editor, verifica st.experimental_data_editor (versões intermediárias)
+    elif hasattr(st, "experimental_data_editor"):
+        return st.experimental_data_editor(
+            df_dados_corrigido,
+            num_rows="dynamic",
+            use_container_width=True,
+            key=chave_unica
+        )
+        
+    # 3. Fallback absoluto para versões super antigas de Streamlit: Renderiza tabela editável simulada por formulários
+    else:
+        st.warning("⚠️ Seu servidor está rodando uma versão muito antiga do Streamlit. Algumas interações de planilha podem parecer básicas, mas estão totalmente funcionais.")
+        return st.data_editor(df_dados_corrigido, num_rows="dynamic", use_container_width=True, key=chave_unica)
+
+# --- ADICIONAR INGREDIENTE AO BANCO DE DADOS ---
+def adicionar_ingrediente_banco(banco_key, receita_nome, ingrediente, unidade, preco, qtd_emb, qtd_usada):
+    try:
+        preco_val = float(str(preco).replace(',', '.').strip()) if preco else 0.0
+    except:
+        preco_val = 0.0
+    try:
+        qtd_emb_val = float(str(qtd_emb).replace(',', '.').strip()) if qtd_emb else 1.0
+    except:
+        qtd_emb_val = 1.0
+    try:
+        qtd_usada_val = float(str(qtd_usada).replace(',', '.').strip()) if qtd_usada else 0.0
+    except:
+        qtd_usada_val = 0.0
+        
+    new_row = {
+        "Ingrediente": ingrediente,
+        "Qtd Usada": qtd_usada_val,
+        "Unidade": unidade,
+        "Qtd na Embalagem": qtd_emb_val,
+        "Preço Embalagem (R$)": preco_val
+    }
+    
+    df = st.session_state[banco_key][receita_nome]["ingredientes"]
+    df = corrigir_colunas_df(df)
+    st.session_state[banco_key][receita_nome]["ingredientes"] = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+
 # 🔒 CHAVE DE ACESSO GLOBAL DO SISTEMA
 chave_usuario = st.text_input("Insira a sua Chave de Acesso para liberar o sistema:", type="password")
 
@@ -440,6 +509,7 @@ if chave_usuario == "kg10k":
             }
         }
 
+    # Corrige e atualiza todas as colunas de todas as tabelas na memória do browser
     for r_nome in st.session_state['banco_massas_rec']:
         st.session_state['banco_massas_rec'][r_nome]["ingredientes"] = corrigir_colunas_df(st.session_state['banco_massas_rec'][r_nome]["ingredientes"])
     for r_nome in st.session_state['banco_recheios_rec']:
@@ -677,12 +747,10 @@ if chave_usuario == "kg10k":
                 st.markdown("##### 📋 Ingredientes Cadastrados")
                 st.caption("💡 **Dica de Ouro da K&G:** Clique no botão `+` (no canto inferior da tabela) para adicionar novas linhas de ingredientes com preenchimento de colunas automático!")
                 
-                m_edit = st.data_editor(
-                    corrigir_colunas_df(rec_m["ingredientes"]),
-                    num_rows="dynamic",
-                    use_container_width=True,
-                    column_config=config_colunas_ingredientes,
-                    key=f"m_edit_{sel_massa}"
+                m_edit = renderizar_tabela_segura(
+                    rec_m["ingredientes"],
+                    config_colunas_ingredientes,
+                    f"m_edit_{sel_massa}"
                 )
                 st.session_state['banco_massas_rec'][sel_massa]["ingredientes"] = m_edit
                 salvar_dados_disco()
@@ -746,12 +814,10 @@ if chave_usuario == "kg10k":
                 st.markdown("##### 📋 Ingredientes Cadastrados")
                 st.caption("💡 **Dica de Ouro da K&G:** Clique no botão `+` (no canto inferior da tabela) para adicionar novas linhas de ingredientes com preenchimento de colunas automático!")
                 
-                r_edit = st.data_editor(
-                    corrigir_colunas_df(rec_r["ingredientes"]),
-                    num_rows="dynamic",
-                    use_container_width=True,
-                    column_config=config_colunas_ingredientes,
-                    key=f"r_edit_{sel_recheio}"
+                r_edit = renderizar_tabela_segura(
+                    rec_r["ingredientes"],
+                    config_colunas_ingredientes,
+                    f"r_edit_{sel_recheio}"
                 )
                 st.session_state['banco_recheios_rec'][sel_recheio]["ingredientes"] = r_edit
                 salvar_dados_disco()
@@ -813,12 +879,10 @@ if chave_usuario == "kg10k":
                 st.markdown("##### 📋 Ingredientes Cadastrados")
                 st.caption("💡 **Dica de Ouro da K&G:** Clique no botão `+` (no canto inferior da tabela) para adicionar novas linhas de ingredientes com preenchimento de colunas automático!")
                 
-                c_edit = st.data_editor(
-                    corrigir_colunas_df(rec_c["ingredientes"]),
-                    num_rows="dynamic",
-                    use_container_width=True,
-                    column_config=config_colunas_ingredientes,
-                    key=f"c_edit_{sel_calda}"
+                c_edit = renderizar_tabela_segura(
+                    rec_c["ingredientes"],
+                    config_colunas_ingredientes,
+                    f"c_edit_{sel_calda}"
                 )
                 st.session_state['banco_caldas_rec'][sel_calda]["ingredientes"] = c_edit
                 salvar_dados_disco()
@@ -874,12 +938,10 @@ if chave_usuario == "kg10k":
                 st.markdown("##### 📋 Ingredientes Cadastrados")
                 st.caption("💡 **Dica de Ouro da K&G:** Clique no botão `+` (no canto inferior da tabela) para adicionar novas linhas de ingredientes com preenchimento de colunas automático!")
                 
-                cob_edit = st.data_editor(
-                    corrigir_colunas_df(rec_cob["ingredientes"]),
-                    num_rows="dynamic",
-                    use_container_width=True,
-                    column_config=config_colunas_ingredientes,
-                    key=f"cob_edit_{sel_cob}"
+                cob_edit = renderizar_tabela_segura(
+                    rec_cob["ingredientes"],
+                    config_colunas_ingredientes,
+                    f"cob_edit_{sel_cob}"
                 )
                 st.session_state['banco_coberturas_rec'][sel_cob]["ingredientes"] = cob_edit
                 salvar_dados_disco()
