@@ -384,7 +384,7 @@ if chave_usuario == "kg10k":
                     {"Ingrediente": "Fermento Químico", "Qtd Usada": 18.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 6.00}
                 ]),
                 "peso_obtido": 950.0,
-                "preparo": "Bater no liquidificador ovos, óleo, leite, iogurte, ninho e açúcar por 2 a 5 minutos. Adicione a farinha e o fermento e use a função pulsar para homogeneizar.",
+                "preparo": "No liquidificador, adicione os ovos, o óleo de soja, o leite integral, o iogurte natural, o leite Ninho em pó e o açúcar refinado. Bata em velocidade média-alta por um período de 2 a 5 minutos até obter uma emulsão perfeitamente lisa, esbranquiçada e sem grânulos de açúcar. Transfira a mistura líquida para um bowl de inox. Peneire a farinha de trigo Venturelli diretamente sobre os líquidos em três etapas, misturando delicadamente com o fouet de dentro para fora para evitar o desenvolvimento excessivo de glúten. Adicione o fermento químico por último, incorporando-o de forma homogênea com movimentos suaves. Distribua em formas untadas ou com papel manteiga no fundo e asse em forno turbo pré-aquecido a 180°C por aproximadamente 35 a 40 minutos.",
                 "perda_coccao": 10.0
             },
             "Massa de Chocolate MBL (Camila Ayana)": {
@@ -393,13 +393,13 @@ if chave_usuario == "kg10k":
                     {"Ingrediente": "Óleo de Soja Liza", "Qtd Usada": 150.0, "Unidade": "g", "Qtd na Embalagem": 900.0, "Preço Embalagem (R$)": 7.50},
                     {"Ingrediente": "Leite Integral", "Qtd Usada": 220.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.20},
                     {"Ingrediente": "Creme de Leite Itambé", "Qtd Usada": 200.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 3.80},
-                    {"Ingrediente": "Chocolate em Pó 50% Melken", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 1050.0, "Preço Embalagem (R$)": 42.00},
+                    {"Ingrediente": "Chocolate 50% Melken", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 1050.0, "Preço Embalagem (R$)": 42.00},
                     {"Ingrediente": "Açúcar Refinado União", "Qtd Usada": 250.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.40},
                     {"Ingrediente": "Farinha de Trigo Venturelli", "Qtd Usada": 300.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
                     {"Ingrediente": "Fermento Químico", "Qtd Usada": 18.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 6.00}
                 ]),
                 "peso_obtido": 1100.0,
-                "preparo": "Bater os ovos, óleo, leite, creme de leite, chocolate e açúcar por 3 minutos. Incorporar farinha e fermento utilizando apenas a tecla pulsar.",
+                "preparo": "Adicione os ovos, o óleo, o leite integral, o creme de leite Itambé, o chocolate em pó 50% Melken e o açúcar no liquidificador. Processe por 3 minutos na velocidade máxima até dissolver completamente o chocolate em pó e homogeneizar as gorduras. Verta o creme em um bowl grande. Peneire a farinha Venturelli sobre a mistura, mexendo com o fouet apenas até homogeneizar. Adicione o fermento e incorpore-o com cuidado. Asse a 180°C em forno convencional ou 160°C em forno de convecção por 38 minutos.",
                 "perda_coccao": 10.0
             },
             "Massa Cacau Black MBL": {
@@ -414,25 +414,25 @@ if chave_usuario == "kg10k":
                     {"Ingrediente": "Fermento Químico", "Qtd Usada": 18.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 6.00}
                 ]),
                 "peso_obtido": 1050.0,
-                "preparo": "Bater os líquidos e o cacau black com o açúcar. Incorporar os secos no pulsar, com cuidado para não ativar glúten demais.",
+                "preparo": "Misture no liquidificador todos os líquidos, o cacau em pó black e o açúcar. Processe por 3 minutos. Incorpore a farinha de trigo peneirada no bowl delicadamente usando o fouet para evitar que a massa fique pesada e perca o ponto aerado. Finalize com o fermento químico em pó. Transfira para formas de fundo falso e asse a 170°C para preservar a umidade natural do cacau alcalino black.",
                 "perda_coccao": 10.0
             },
             "Massa Red Velvet MBL (Camila Ayana)": {
                 "ingredientes": pd.DataFrame([
                     {"Ingrediente": "Ovos Frescos", "Qtd Usada": 4.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
                     {"Ingrediente": "Óleo de Soja Liza", "Qtd Usada": 150.0, "Unidade": "g", "Qtd na Embalagem": 900.0, "Preço Embalagem (R$)": 7.50},
-                    {"Ingrediente": "Leite Integral (Buttermilk)", "Qtd Usada": 150.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.20},
-                    {"Ingrediente": "Suco de Limão (Para Talhar)", "Qtd Usada": 20.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 6.00},
+                    {"Ingrediente": "Leite Integral (buttermilk)", "Qtd Usada": 150.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.20},
+                    {"Ingrediente": "Suco de Limão", "Qtd Usada": 20.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 6.00},
                     {"Ingrediente": "Iogurte Natural Batavo", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 170.0, "Preço Embalagem (R$)": 3.20},
                     {"Ingrediente": "Chocolate em Pó 50%", "Qtd Usada": 30.0, "Unidade": "g", "Qtd na Embalagem": 1050.0, "Preço Embalagem (R$)": 42.00},
                     {"Ingrediente": "Corante Vermelho Morango", "Qtd Usada": 5.0, "Unidade": "g", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 9.50},
-                    {"Ingrediente": "Pasta Saborizante Frutas Silvestres", "Qtd Usada": 15.0, "Unidade": "g", "Qtd na Embalagem": 250.0, "Preço Embalagem (R$)": 68.00},
+                    {"Ingrediente": "Pasta Saborizante Frutas", "Qtd Usada": 15.0, "Unidade": "g", "Qtd na Embalagem": 250.0, "Preço Embalagem (R$)": 68.00},
                     {"Ingrediente": "Açúcar Refinado União", "Qtd Usada": 250.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.40},
                     {"Ingrediente": "Farinha de Trigo Venturelli", "Qtd Usada": 300.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
                     {"Ingrediente": "Fermento Químico", "Qtd Usada": 18.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 6.00}
                 ]),
                 "peso_obtido": 1000.0,
-                "preparo": "Talhar o leite com o limão. Bater todos os ingredientes exceto a farinha e o fermento por 3 minutos. Unir os secos no pulsar.",
+                "preparo": "Preparo do Buttermilk: Adicione os 20 g de suco de limão ao leite integral morno. Deixe descansar por 10 minutos até talhar completamente. No liquidificador, bata os ovos, o óleo de soja, o buttermilk preparado, o iogurte natural, o chocolate em pó, o corante gel vermelho morango, a pasta de frutas silvestres e o açúcar por 4 minutos até obter uma cor homogênea e brilhante. Transfira a emulsão para um bowl e incorpore a farinha peneirada, misturando de baixo para cima com cuidado. Adicione o fermento químico. Asse a 170°C em assadeiras baixas para obter discos planos perfeitos.",
                 "perda_coccao": 10.0
             },
             "Massa Cookie Base": {
@@ -447,7 +447,7 @@ if chave_usuario == "kg10k":
                     {"Ingrediente": "Gotas de Chocolate Sicao", "Qtd Usada": 450.0, "Unidade": "g", "Qtd na Embalagem": 1010.0, "Preço Embalagem (R$)": 49.00}
                 ]),
                 "peso_obtido": 1500.0,
-                "preparo": "Bater margarina com os açúcares até virar creme na batedeira (raquete). Adicione ovos, depois os secos e gotas por último. Resfriar antes de assar.",
+                "preparo": "Na batedeira equipada com a espátula tipo leque/raquete, bata a margarina Primor Pro (em ponto de pomada, por volta de 20°C) com o açúcar mascavo e o açúcar refinado até formar um creme fofo e claro. Adicione os ovos um a um, batendo bem após cada adição para emulsionar a massa. Desligue a batedeira e peneire a farinha de trigo, o leite Ninho e o fermento por cima do creme amanteigado. Misture em velocidade mínima por apenas 30 segundos ou até a farinha sumir (não bata para não desenvolver glúten). Despeje as gotas de chocolate Sicao e misture com uma espátula de silicone dura. Leve a massa à geladeira por pelo menos 2 horas antes de porcionar e assar. Asse a 180°C por 12 a 15 minutos (o centro deve continuar macio).",
                 "perda_coccao": 10.0
             },
             "Massa de Brownie (Nescau)": {
@@ -460,25 +460,25 @@ if chave_usuario == "kg10k":
                     {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 450.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50}
                 ]),
                 "peso_obtido": 2000.0,
-                "preparo": "Bater os ovos e açúcar com batedor globo para criar volume. Adicione margarina morna com a água. Incorpore Nescau e farinha na raquete.",
+                "preparo": "Na batedeira equipada com o batedor globo, bata os ovos inteiros e o açúcar refinado em velocidade máxima por cerca de 5 minutos até dobrar de volume e formar uma espuma firme e clara. Derreta a margarina Primor Pro junto com os 150 ml de água e adicione-os morno-frios na batedeira sob velocidade mínima. Desligue a batedeira e troque para o batedor de raquete. Adicione o achocolatado Nescau e a farinha de trigo peneirada. Bata apenas até incorporar. Espalhe a massa pesada em assadeira forrada com papel manteiga. Asse a 180°C por 25 minutos. O topo deve estar com uma casquinha craquelada brilhante e o centro ligeiramente úmido.",
                 "perda_coccao": 15.0
             },
             "Massa Salgados de Forno (Batata)": {
                 "ingredientes": pd.DataFrame([
                     {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 900.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
-                    {"Ingrediente": "Batata Asterix Cozida/Espremida", "Qtd Usada": 300.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 7.50},
+                    {"Ingrediente": "Batata Asterix Cozida", "Qtd Usada": 300.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 7.50},
                     {"Ingrediente": "Açúcar Refinado", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.40},
                     {"Ingrediente": "Margarina Qualy", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 8.50},
                     {"Ingrediente": "Ovos Frescos", "Qtd Usada": 3.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
                     {"Ingrediente": "Sal Refinado", "Qtd Usada": 15.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 3.00},
                     {"Ingrediente": "Lecitina de Soja Líquida", "Qtd Usada": 10.0, "Unidade": "g", "Qtd na Embalagem": 250.0, "Preço Embalagem (R$)": 18.50},
-                    {"Ingrediente": "Melhorador de Farinha Platinum", "Qtd Usada": 10.0, "Unidade": "g", "Qtd na Embalagem": 300.0, "Preço Embalagem (R$)": 14.50},
+                    {"Ingrediente": "Melhorador Platinum", "Qtd Usada": 10.0, "Unidade": "g", "Qtd na Embalagem": 300.0, "Preço Embalagem (R$)": 14.50},
                     {"Ingrediente": "Açúcar Invertido", "Qtd Usada": 25.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 12.00},
                     {"Ingrediente": "Fermento Biológico Seco", "Qtd Usada": 20.0, "Unidade": "g", "Qtd na Embalagem": 100.0, "Preço Embalagem (R$)": 9.50},
                     {"Ingrediente": "Água Morna", "Qtd Usada": 250.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00}
                 ]),
                 "peso_obtido": 1850.0,
-                "preparo": "Misturar todos os ingredientes exceto farinha. Adicionar farinha em 3 partes até desgrudar. Deixar crescer até dobrar de tamanho.",
+                "preparo": "Descasque e cozinhe as batatas Asterix até estarem muito macias. Esprema-as ainda quentes e espere esfriar completamente. Em um bowl, dilua o fermento biológico seco e o açúcar refinado na água morna (temperatura controlada a máximo 35°C). Deixe descansar por 5 minutos para ativar. Adicione a batata espremida, a margarina Qualy, os ovos, o açúcar invertido, a lecitina de soja líquida e o melhorador de farinha Platinum. Misture tudo. Adicione a farinha de trigo Premium peneirada em três partes. No meio do processo, adicione o sal refinado (nunca adicione o sal diretamente sobre o fermento ativo). Sove a massa vigorosamente em bancada de mármore por cerca de 12 minutos até desenvolver a rede de glúten (ponto de véu fino). Boleie a massa, cubra com filme plástico e deixe fermentar até dobrar de volume (aproximadamente 45 minutos em temperatura ambiente).",
                 "perda_coccao": 5.0
             },
             "Massa Quiche e Empadão (Patê Brisée)": {
@@ -489,7 +489,7 @@ if chave_usuario == "kg10k":
                     {"Ingrediente": "Sal Refinado", "Qtd Usada": 10.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 3.00}
                 ]),
                 "peso_obtido": 1600.0,
-                "preparo": "Misturar à mão ou batedeira (raquete) até obter liga por igual. Reservar refrigerado para melhor manuseio na montagem das quiches.",
+                "preparo": "Em um bowl higienizado, coloque a farinha de trigo peneirada, o sal refinado e a margarina Qualy em consistência de pomada. Com as pontas dos dedos, faça um processo de 'sablage' (esfregar a margarina na farinha) até obter uma textura que se assemelha a uma areia grossa e úmida. Não sove! Adicione os ovos ligeiramente batidos e misture a massa apertando-a contra as paredes do bowl apenas até que ela se aglutine e forme uma bola homogênea. Envolva em filme plástico e refrigere por no mínimo 1 hora antes de abrir nas formas.",
                 "perda_coccao": 3.0
             }
         }
@@ -503,8 +503,8 @@ if chave_usuario == "kg10k":
                     {"Ingrediente": "Chocolate Branco (LeCacau)", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 1010.0, "Preço Embalagem (R$)": 45.00},
                     {"Ingrediente": "Leite Integral", "Qtd Usada": 100.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.20}
                 ]),
-                "peso_obtido": 750.0,
-                "preparo": "Levar ao fogo até obter o ponto de gota cremoso ($98.0^\\circ\\text{C}$ para copos ou $100.5^\\circ\\text{C}$ para bolos). Passar o fouet ao desligar.",
+                "peso_obtido": 1015.0,
+                "preparo": "Em uma panela de fundo triplo de aço inox, adicione o leite condensado Piracanjuba e o chocolate branco picado. Misture bem até diluir um pouco o chocolate. Adicione o creme de leite e o leite integral. Mexa tudo a frio até homogeneizar. Leve ao fogo médio-baixo, mexendo constantemente em movimentos de '8' com um batedor de silicone. Cozinhe até o ponto desejado: Ponto de Copo/Fatia Macia (temperatura interna de 98°C) ou Ponto de Recheio Firme (100,5°C a 101°C). Desligue o fogo e bata vigorosamente o recheio com o fouet de inox por 1 minuto para emulsificar a gordura e garantir brilho. Cubra com filme plástico em contato direto.",
                 "perda_coccao": 15.0
             },
             "Base Preta Coringa": {
@@ -512,23 +512,23 @@ if chave_usuario == "kg10k":
                     {"Ingrediente": "Leite Condensado Piracanjuba", "Qtd Usada": 395.0, "Unidade": "g", "Qtd na Embalagem": 395.0, "Preço Embalagem (R$)": 6.50},
                     {"Ingrediente": "Creme de Leite Piracanjuba", "Qtd Usada": 600.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 3.80},
                     {"Ingrediente": "Chocolate Meio Amargo (LeCacau)", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 1010.0, "Preço Embalagem (R$)": 46.00},
-                    {"Ingrediente": "Chocolate em Pó 50% Melken", "Qtd Usada": 50.0, "Unidade": "g", "Qtd na Embalagem": 1050.0, "Preço Embalagem (R$)": 42.00},
+                    {"Ingrediente": "Chocolate 50% Melken", "Qtd Usada": 50.0, "Unidade": "g", "Qtd na Embalagem": 1050.0, "Preço Embalagem (R$)": 42.00},
                     {"Ingrediente": "Leite Integral", "Qtd Usada": 150.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.20}
                 ]),
-                "peso_obtido": 830.0,
-                "preparo": "Cozinhar até atingir a consistência desejada. Bater bem com fouet após apagar o fogo para uma textura aveludada.",
+                "peso_obtido": 1058.0,
+                "preparo": "Misture o leite condensado com o chocolate em pó 50% Melken até dissolver os grânulos secos na panela fria. Adicione o creme de leite, o chocolate meio amargo LeCacau picado e o leite integral. Cozinhe em fogo médio-alto no início, reduzindo para fogo médio quando começar a ferver. Retire ao atingir o ponto de blocos firmes (100,5°C). Bata com fouet após apagar o fogo. Cubra com filme plástico em contato e reserve.",
                 "perda_coccao": 15.0
             },
             "Geleia de Morango (Especial)": {
                 "ingredientes": pd.DataFrame([
                     {"Ingrediente": "Morangos Congelados CEASA", "Qtd Usada": 1000.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 24.00},
                     {"Ingrediente": "Açúcar Cristal União", "Qtd Usada": 400.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 4.90},
-                    {"Ingrediente": "Pasta Saborizante Frutas Silvestres", "Qtd Usada": 30.0, "Unidade": "g", "Qtd na Embalagem": 250.0, "Preço Embalagem (R$)": 68.00},
+                    {"Ingrediente": "Pasta Saborizante Frutas", "Qtd Usada": 30.0, "Unidade": "g", "Qtd na Embalagem": 250.0, "Preço Embalagem (R$)": 68.00},
                     {"Ingrediente": "Suco de Limão Espremido", "Qtd Usada": 100.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 6.00},
                     {"Ingrediente": "Água Filtrada", "Qtd Usada": 500.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00}
                 ]),
-                "peso_obtido": 1100.0,
-                "preparo": "Cozinhar tudo em fogo médio até reduzir. Passar o mixer para dar o ponto ideal de geleia brilhante.",
+                "peso_obtido": 1421.0,
+                "preparo": "Em uma panela de aço inox média, coloque os morangos congelados inteiros, o açúcar cristal e a água filtrada. Leve ao fogo médio e deixe os morangos cozinharem. Quando começar a reduzir, adicione o suco de limão filtrado para ativar a pectina natural. Deixe cozinhar em fogo baixo por cerca de 30 minutos ou até que o líquido atinja consistência de xarope espesso. Adicione a pasta saborizante de frutas silvestres e misture bem. Passe o mixer de mão rapidamente para quebrar os pedaços grandes, mantendo uma textura pedaçuda de geleia rústica. Esfrie e refrigere.",
                 "perda_coccao": 30.0
             },
             "Gelatto de Ninho": {
@@ -540,7 +540,7 @@ if chave_usuario == "kg10k":
                     {"Ingrediente": "Emulsificante de Sorvete", "Qtd Usada": 8.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 11.00}
                 ]),
                 "peso_obtido": 1100.0,
-                "preparo": "Bater manteiga e leite condensado até clarear. Adicione o Ninho na velocidade média. Adicione creme de leite e emulsificante por último.",
+                "preparo": "O creme de leite e o leite condensado devem estar sob refrigeração a 4°C por no mínimo 12 horas. A manteiga deve estar em temperatura ambiente macia (22°C). Na batedeira equipada com o batedor globo, adicione a manteiga sem sal e o leite condensado gelado. Bata em velocidade média-alta por 5 minutos até virar um creme esbranquiçado. Adicione o leite Ninho em pó peneirado em duas etapas, batendo em velocidade baixa apenas para incorporar. Adicione o creme de leite gelado e o emulsificante para sorvete. Aumente para a velocidade máxima e bata por exatos 4 minutos. O creme vai expandir e virar um mousse brilhante, leve e ultra aveludado.",
                 "perda_coccao": 0.0
             },
             "Recheio Frango Cremoso (Coxinha)": {
@@ -549,28 +549,28 @@ if chave_usuario == "kg10k":
                     {"Ingrediente": "Margarina Qualy", "Qtd Usada": 75.0, "Unidade": "g", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 8.50},
                     {"Ingrediente": "Azeite de Oliva", "Qtd Usada": 7.0, "Unidade": "ml", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 28.00},
                     {"Ingrediente": "Molho de Tomate", "Qtd Usada": 120.0, "Unidade": "g", "Qtd na Embalagem": 340.0, "Preço Embalagem (R$)": 4.50},
-                    {"Ingrediente": "Requeijão Cremoso Crioulo", "Qtd Usada": 75.0, "Unidade": "g", "Qtd na Embalagem": 400.0, "Preço Embalagem (R$)": 12.00},
-                    {"Ingrediente": "Água de Cozimento do Frango", "Qtd Usada": 250.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00}
+                    {"Ingrediente": "Requeijão Crioulo", "Qtd Usada": 75.0, "Unidade": "g", "Qtd na Embalagem": 400.0, "Preço Embalagem (R$)": 12.00},
+                    {"Ingrediente": "Água de Cozimento", "Qtd Usada": 250.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00}
                 ]),
-                "peso_obtido": 1100.0,
-                "preparo": "Dourar o frango espremido e cozido. Desfiar na pressão e temperar. Deixar firme para evitar vazamento ao fritar.",
+                "peso_obtido": 1068.0,
+                "preparo": "Na panela de pressão, cozinhe o peito de frango Sassami com água e sal por 15 minutos. Escorra a água, reservando 250 ml para temperar, e balance a panela fechada com força para desfiar. Em uma panela de fundo triplo, derreta a margarina Qualy com o azeite de oliva. Refogue cebola e alho picados muito finos. Adicione o frango desfiado e frite até dourar. Junte o molho de tomate e os 250 ml de água de cozimento. Deixe reduzir até secar. Desligue o fogo e misture o requeijão Crioulo para dar cremosidade (deve ficar úmido, porém firme). Esfrie completamente antes de usar.",
                 "perda_coccao": 10.0
             },
             "Recheio Costela Cremosa": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Costela Bovina Cozida Desfiada", "Qtd Usada": 940.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 26.00},
+                    {"Ingrediente": "Costela Desfiada", "Qtd Usada": 940.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 26.00},
                     {"Ingrediente": "Água da Costela", "Qtd Usada": 250.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00},
                     {"Ingrediente": "Molho Madeira Predilecta", "Qtd Usada": 300.0, "Unidade": "g", "Qtd na Embalagem": 340.0, "Preço Embalagem (R$)": 9.50},
                     {"Ingrediente": "Requeijão Catupiry Original", "Qtd Usada": 80.0, "Unidade": "g", "Qtd na Embalagem": 1500.0, "Preço Embalagem (R$)": 59.90},
                     {"Ingrediente": "Molho Barbecue", "Qtd Usada": 30.0, "Unidade": "g", "Qtd na Embalagem": 400.0, "Preço Embalagem (R$)": 11.50},
-                    {"Ingrediente": "Farinha de Trigo (Para Dar Liga)", "Qtd Usada": 50.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Farinha de Trigo", "Qtd Usada": 50.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
                     {"Ingrediente": "Água Pura", "Qtd Usada": 400.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00}
                 ]),
-                "peso_obtido": 1800.0,
-                "preparo": "Misturar a costela cozida, água, molhos e queijos. Engrossar levemente com o trigo dissolvido em água até firmar.",
+                "peso_obtido": 1900.0,
+                "preparo": "O peito de costela bovina deve ser previamente cozido na pressão por 45 minutos e desfiado completamente, limpando toda e qualquer gordura excessiva. Em uma panela, coloque a costela bovina desfiada, os 250 ml de água de cozimento, o molho madeira e o barbecue. Dissolva os 50 g de farinha de trigo nos 400 ml de água fria pura. Adicione à panela sob fogo médio-baixo, mexendo constantemente até cozinhar o amido e virar um creme encorpado. Adicione o Catupiry original por último e misture. Deixe ferver por mais 3 minutos.",
                 "perda_coccao": 5.0
             },
-            "Creme Base das Quiches": {
+            "Creme Base das Quiches (Royal)": {
                 "ingredientes": pd.DataFrame([
                     {"Ingrediente": "Leite Integral", "Qtd Usada": 300.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 5.20},
                     {"Ingrediente": "Ricota Fresca", "Qtd Usada": 250.0, "Unidade": "g", "Qtd na Embalagem": 250.0, "Preço Embalagem (R$)": 8.90},
@@ -578,8 +578,8 @@ if chave_usuario == "kg10k":
                     {"Ingrediente": "Ovos Frescos", "Qtd Usada": 4.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 22.00},
                     {"Ingrediente": "Sal Refinado", "Qtd Usada": 8.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 3.00}
                 ]),
-                "peso_obtido": 1000.0,
-                "preparo": "Bater no liquidificador até obter emulsão homogênea. Verter diretamente sobre a forma moldada com a massa da quiche.",
+                "peso_obtido": 1158.0,
+                "preparo": "No liquidificador, quebre os ovos um a um. Adicione a ricota fresca esfarelada, o creme de leite Itambé, o leite integral e o sal refinado. Processe em velocidade máxima por exatos 2 minutos até dissolver completamente todos os pedacinhos da ricota e emulsificar os ovos nos laticínios. Verta diretamente sobre a base de quiche já montada com a massa Brisée e o recheio de sua preferência. Asse a 180°C até coagular.",
                 "perda_coccao": 0.0
             }
         }
@@ -588,11 +588,11 @@ if chave_usuario == "kg10k":
         st.session_state['banco_caldas_rec'] = {
             "Calda Glaciada Exclusiva": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Açúcar Glaçúcar União", "Qtd Usada": 500.0, "Unidade": "g", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 6.50},
+                    {"Ingrediente": "Glaçúcar União", "Qtd Usada": 500.0, "Unidade": "g", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 6.50},
                     {"Ingrediente": "Água Fervente", "Qtd Usada": 750.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00}
                 ]),
                 "peso_obtido": 1200.0,
-                "preparo": "Ferver a água e misturar imediatamente no glaçúcar até homogeneizar. Aplicar quente sobre o bolo frio."
+                "preparo": "Em um recipiente de plástico com bico dosador ou jarra graduada resistente ao calor, coloque os 500 g de açúcar de confeiteiro Glaçúcar União peneirado. Ferva os 750 ml de água filtrada a 100°C. Verta a água fervente imediatamente sobre o Glaçúcar e mexa vigorosamente com o fouet até que todos os cristais estejam completamente diluídos. Espere esfriar e utilize."
             },
             "Calda de Leite de Coco MBL": {
                 "ingredientes": pd.DataFrame([
@@ -600,8 +600,8 @@ if chave_usuario == "kg10k":
                     {"Ingrediente": "Leite de Coco Sococo", "Qtd Usada": 500.0, "Unidade": "ml", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 11.00},
                     {"Ingrediente": "Água Filtrada", "Qtd Usada": 1000.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.00}
                 ]),
-                "peso_obtido": 1850.0,
-                "preparo": "Ferver o leite de coco, incorporar os demais ingredientes para aumentar a validade e evitar azedar. Usar fria."
+                "peso_obtido": 1857.0,
+                "preparo": "Em uma panela pequena, coloque o leite de coco Sococo e a água filtrada. Leve ao fogo médio e espere ferver por exatos 3 minutos (esse processo de fervura do leite de coco prolonga consideravelmente a validade do bolo montado). Retire do fogo e misture imediatamente o leite condensado, misturando bem até homogeneizar por completo. Mantenha sob refrigeração."
             }
         }
 
@@ -615,7 +615,7 @@ if chave_usuario == "kg10k":
                     {"Ingrediente": "Merengue Powder", "Qtd Usada": 20.0, "Unidade": "g", "Qtd na Embalagem": 150.0, "Preço Embalagem (R$)": 19.90}
                 ]),
                 "peso_obtido": 1235.0,
-                "preparo": "Bater na batedeira em velocidade média-baixa até ponto firme. Deixar descansar por 12h na geladeira antes de trabalhar."
+                "preparo": "O Chantilly Supreme Amélia deve estar extremamente gelado (4°C por 24 horas e no freezer por 15 minutos antes). Na batedeira equipada com o batedor globo, adicione o chantilly gelado, o leite Ninho em pó peneirado e o Merengue Powder. Misture levemente a seco com a batedeira desligada. Adicione o emulsificante de sorvete. Inicie o batimento em velocidade baixa por 1 minuto e aumente gradualmente para a velocidade média-alta. Bata até que o creme forme um buraco no meio da batedeira (ponto duro). Transfira para um bowl de plástico selado e deixe estabilizar na geladeira por 12 horas antes de hidratar e decorar."
             },
             "Merengue Suíço (Maçarico)": {
                 "ingredientes": pd.DataFrame([
@@ -625,7 +625,7 @@ if chave_usuario == "kg10k":
                     {"Ingrediente": "Amido de Milho Maizena", "Qtd Usada": 10.0, "Unidade": "g", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 7.50}
                 ]),
                 "peso_obtido": 300.0,
-                "preparo": "Aqueça claras e açúcar a $55^\\circ\\text{C}$ em banho-maria. Bata em velocidade máxima até ponto de pico. Peneire glaçúcar e amido e incorpore."
+                "preparo": "Em um recipiente metálico ou de vidro limpo e isento de gorduras, misture as claras e o açúcar refinado União. Leve em banho-maria em fogo baixo, mexendo sem parar. A mistura deve atingir exatos 55°C a 60°C para pasteurizar as claras sem coagular a albumina. Se ao esfregar com os dedos não sentir grãos de açúcar, retire imediatamente. Coloque na batedeira com o batedor globo e bata em velocidade máxima por 10 minutos até o bowl esfriar e formar picos firmes. Peneire o Glaçúcar e o amido de milho Maizena diretamente sobre o merengue batido. Incorpore delicadamente com uma espátula de silicone em movimentos envolventes de baixo para cima."
             }
         }
 
