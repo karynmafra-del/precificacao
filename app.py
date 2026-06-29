@@ -11,10 +11,18 @@ st.set_page_config(
     layout="wide"
 )
 
+# Inicialização de variáveis globais compartilhadas (Evita qualquer erro de variável indefinida)
+custo_massa_kg = 0.0
+custo_recheio_kg = 0.0
+custo_calda_kg = 0.0
+custo_cob_kg = 0.0
+peso_alvo = 5.0
+nome_bolo_final = "Bolo de Morango Especial"
+
 # Estilização de Elite K&G (Verde Esmeralda, Ouro e Customização das Abas em Rosé Nude)
 st.markdown("""
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght=300;400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght=400;700&family=Poppins:wght=300;400;600&display=swap');
         * { font-family: 'Poppins', sans-serif; }
         .main { background-color: #FAF6F0; }
         
@@ -30,13 +38,13 @@ st.markdown("""
         /* Títulos de Seção */
         .section-title { font-family: 'Playfair Display', serif; color: #043927; font-size: 22px; border-left: 4px solid #D4AF37; padding-left: 12px; margin-top: 20px; margin-bottom: 15px; }
         
-        /* Caixas de Exibição e Alertas */
+        /* Caixas de Texto e Exibição */
         .print-box { background: white; border: 1px solid #ced4da; padding: 20px; border-radius: 10px; font-family: monospace; color: black; line-height: 1.4; }
         .lupa-box { border: 3px solid black; background: white; color: black; padding: 10px; font-weight: bold; text-align: center; font-size: 14px; margin-bottom: 10px; font-family: Arial, sans-serif; }
         .preco-box { background: #043927; color: #FAF6F0; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #D4AF37; }
         .alerta-aniv { background: #FAF0F2; border-left: 5px solid #D4AF37; padding: 12px; border-radius: 4px; margin-bottom: 15px; }
         
-        /* Estilização das Abas em Rosé Nude */
+        /* Customização das Abas em Rosé Nude */
         button[data-baseweb="tab"] {
             color: #555555 !important;
             font-weight: 400 !important;
@@ -59,22 +67,27 @@ st.markdown("""
 st.markdown("""
     <div class="brand-header">
         <div class="brand-title">K&G Arte em Confeitaria</div>
-        <div class="brand-subtitle">💎 Sistema de Gestão Industrial ERP & CRM de Elite 💎</div>
+        <div class="brand-subtitle">💎 Sistema ERP & CRM Integrado de Alta Confeitaria 💎</div>
     </div>
 """, unsafe_allow_html=True)
 
-# --- FUNÇÃO DE SEGURANÇA CONTRA ERROS DE DIGITAÇÃO NAS TABELAS ---
+# --- FUNÇÃO DE SEGURANÇA ABSOLUTA CONTRA ERROS DE DIGITAÇÃO OU CAMPOS EM BRANCO ---
 def calcular_custo_tabela_seguro(df, col_preco, col_embalagem, col_usado):
     if df is None or df.empty:
         return 0.0
     try:
         df_temp = df.copy()
-        # Converte para numérico e substitui erros/vazios por valores seguros
+        # Garante a existência das colunas antes de realizar a conversão
+        for col in [col_preco, col_embalagem, col_usado]:
+            if col not in df_temp.columns:
+                df_temp[col] = 0.0
+        
+        # Converte para numérico de forma segura e substitui erros por valores padrão
         df_temp[col_preco] = pd.to_numeric(df_temp[col_preco], errors='coerce').fillna(0.0)
         df_temp[col_embalagem] = pd.to_numeric(df_temp[col_embalagem], errors='coerce').fillna(1.0)
         df_temp[col_usado] = pd.to_numeric(df_temp[col_usado], errors='coerce').fillna(0.0)
         
-        # Impede divisão por zero
+        # Impede a divisão matemática por zero
         df_temp[col_embalagem] = df_temp[col_embalagem].replace(0, 1.0)
         
         custos = (df_temp[col_preco] / df_temp[col_embalagem]) * df_temp[col_usado]
@@ -82,38 +95,44 @@ def calcular_custo_tabela_seguro(df, col_preco, col_embalagem, col_usado):
     except Exception:
         return 0.0
 
-# 🔒 CHAVE DE ACESSO GLOBAL
+# 🔒 CHAVE DE ACESSO GLOBAL DO SISTEMA
 chave_usuario = st.text_input("Insira a sua Chave de Acesso para liberar o sistema:", type="password")
 
 if chave_usuario == "kg10k":
-    st.success("Acesso Homologado! Seja bem-vinda ao seu centro administrativo, Karyn.")
+    st.success("Acesso Autorizado! Seja bem-vinda ao seu sistema, Karyn.")
 
-    # Inicialização dos Bancos de Dados de Receita na memória
+    # Inicialização dos Bancos de Dados na memória
+    if 'banco_massas' not in st.session_state:
+        st.session_state['banco_massas'] = {"Massa Choc Premium": 18.50, "Pão de Ló de Baunilha": 14.20, "Red Velvet Elite": 25.00}
+    if 'banco_recheios' not in st.session_state:
+        st.session_state['banco_recheios'] = {"Brigadeiro de Ninho": 22.00, "Geleia de Morango Caseira": 18.00, "Brigadeiro ao Leite 32%": 20.00}
+    if 'banco_caldas' not in st.session_state:
+        st.session_state['banco_caldas'] = {"Calda de Chocolate Fina": 5.00, "Calda de Especiarias": 6.50, "Calda Básica de Açúcar": 3.00}
+    if 'banco_coberturas' not in st.session_state:
+        st.session_state['banco_coberturas'] = {"Chantiganache ao Leite": 35.00, "Glacê de Leite em Pó": 28.00}
+
+    # Inicialização dos ingredientes das receitas base (Fichas Técnicas da Fábrica)
     if 'massa_ing' not in st.session_state:
         st.session_state['massa_ing'] = pd.DataFrame([
             {"Ingrediente": "Farinha de Trigo Premium", "Preço Embalagem (R$)": 8.50, "Gramos Embalagem (g)": 1000.0, "Gramos Usados na Receita": 300.0},
             {"Ingrediente": "Chocolate em Pó 50%", "Preço Embalagem (R$)": 22.00, "Gramos Embalagem (g)": 500.0, "Gramos Usados na Receita": 100.0},
-            {"Ingrediente": "Ovos Frescos", "Preço Embalagem (R$)": 12.00, "Gramos Embalagem (g)": 600.0, "Gramos Usados na Receita": 240.0},
-            {"Ingrediente": "Manteiga Extra", "Preço Embalagem (R$)": 14.00, "Gramos Embalagem (g)": 200.0, "Gramos Usados na Receita": 150.0}
+            {"Ingrediente": "Ovos Frescos", "Preço Embalagem (R$)": 12.00, "Gramos Embalagem (g)": 600.0, "Gramos Usados na Receita": 240.0}
         ])
     if 'recheio_ing' not in st.session_state:
         st.session_state['recheio_ing'] = pd.DataFrame([
             {"Ingrediente": "Leite Condensado Itambé", "Preço Embalagem (R$)": 6.80, "Gramos Embalagem (g)": 395.0, "Gramos Usados na Receita": 395.0},
-            {"Ingrediente": "Creme de Leite", "Preço Embalagem (R$)": 4.20, "Gramos Embalagem (g)": 200.0, "Gramos Usados na Receita": 200.0},
-            {"Ingrediente": "Leite em Pó Ninho", "Preço Embalagem (R$)": 18.50, "Gramos Embalagem (g)": 400.0, "Gramos Usados na Receita": 100.0}
+            {"Ingrediente": "Creme de Leite", "Preço Embalagem (R$)": 4.20, "Gramos Embalagem (g)": 200.0, "Gramos Usados na Receita": 200.0}
         ])
     if 'calda_ing' not in st.session_state:
         st.session_state['calda_ing'] = pd.DataFrame([
-            {"Ingrediente": "Açúcar Refinado", "Preço Embalagem (R$)": 4.50, "Gramos Embalagem (g)": 1000.0, "Gramos Usados na Receita": 200.0},
-            {"Ingrediente": "Água Filtrada", "Preço Embalagem (R$)": 0.00, "Gramos Embalagem (g)": 1000.0, "Gramos Usados na Receita": 500.0}
+            {"Ingrediente": "Açúcar Refinado", "Preço Embalagem (R$)": 4.50, "Gramos Embalagem (g)": 1000.0, "Gramos Usados na Receita": 200.0}
         ])
     if 'cobertura_ing' not in st.session_state:
         st.session_state['cobertura_ing'] = pd.DataFrame([
-            {"Ingrediente": "Chocolate Nobre ao Leite", "Preço Embalagem (R$)": 55.00, "Gramos Embalagem (g)": 1000.0, "Gramos Usados na Receita": 500.0},
-            {"Ingrediente": "Creme de Leite (Ganache)", "Preço Embalagem (R$)": 4.20, "Gramos Embalagem (g)": 200.0, "Gramos Usados na Receita": 150.0}
+            {"Ingrediente": "Chocolate Nobre ao Leite", "Preço Embalagem (R$)": 55.00, "Gramos Embalagem (g)": 1000.0, "Gramos Usados na Receita": 500.0}
         ])
 
-    # Abas Principais Unificadas
+    # Criação das Abas Principais Unificadas
     tabs = st.tabs([
         "💰 CENTRAL FINANCEIRA",
         "📝 1. ORÇAMENTOS & FRETE",
@@ -134,17 +153,17 @@ if chave_usuario == "kg10k":
     with tabs[0]:
         st.markdown('<div class="section-title">📊 Saúde Financeira e Demonstrativo de Resultados (DRE)</div>', unsafe_allow_html=True)
         sub_fin1, sub_fin2, sub_fin3, sub_dp_aba = st.tabs(["📈 Dashboard de Resultados", "💸 Lançamentos Diários", "📉 Estrutura DRE", "👥 Departamento Pessoal (DP)"])
+        
         with sub_fin1:
             st.metric("Meta Faturamento Mês", "R$ 10.000,00")
             st.progress(6420 / 10000, text="64.2% da Meta de R$ 10k Atingida")
             
-            # Gráfico de Lucro Realizado
             chart_data = pd.DataFrame({
-                "Dias": ["Semana 1", "Semana 2", "Semana 3", "Semana 4"],
+                "Período": ["Semana 1", "Semana 2", "Semana 3", "Semana 4"],
                 "Receitas": [2100, 1800, 2520, 0],
                 "Despesas": [1200, 950, 1100, 0]
             })
-            st.bar_chart(chart_data, x="Dias", y=["Receitas", "Despesas"])
+            st.bar_chart(chart_data, x="Período", y=["Receitas", "Despesas"])
 
         with sub_fin2:
             st.data_editor(pd.DataFrame([{"Data": "28/06/2026", "Tipo": "Receita", "Descrição": "Encomenda Casamento", "Valor (R$)": 1450.00}]), num_rows="dynamic", use_container_width=True, key="fluxo_caixa_key")
@@ -195,7 +214,6 @@ if chave_usuario == "kg10k":
         valor_total_pedido = c_valor_produtos + valor_frete_final
         st.markdown(f"### Valor Final da Proposta: **R$ {valor_total_pedido:.2f}**")
 
-        # Geração de Mensagem para WhatsApp
         msg_whatsapp = f"Olá {c_nome}! Segue o espelho do seu orçamento para o dia {c_data_festa.strftime('%d/%m/%Y')} às {c_horario.strftime('%H:%M')}.\n\n* Itens: {c_doce} - R$ {c_valor_produtos:.2f}\n* Entrega ({c_endereco}): R$ {valor_frete_final:.2f}\n\n*Total:* R$ {valor_total_pedido:.2f}\n\n*Restrições de Cozinha:* {c_obs_criticas}"
         
         if st.button("🖨️ Gerar Espelho de Pedido e Orçamento"):
@@ -228,7 +246,6 @@ if chave_usuario == "kg10k":
             {"Cliente": "Carlos Henrique Rocha", "WhatsApp": "(41) 98877-6655", "Aniv. Cliente": "29/08", "Whats Marido": "-", "Aniv. Marido": "-", "Aniv. Filhos": "Sofia (15/05)", "Data Casamento": "-", "Restrições": "Não gosta de suspiro de jeito nenhum.", "Último Pedido": "KG-2026-8841"}
         ])
         
-        # Filtro de Busca Ativa
         busca = st.text_input("🔍 Busca Ativa por Nome, Telefone ou Restrições Críticas:")
         if busca:
             df_filtrado = df_crm[df_crm.apply(lambda r: r.astype(str).str.contains(busca, case=False).any(), axis=1)]
@@ -249,8 +266,7 @@ if chave_usuario == "kg10k":
             massa_edit = st.data_editor(st.session_state['massa_ing'], num_rows="dynamic", use_container_width=True, key="m_ing_key")
             st.session_state['massa_ing'] = massa_edit
             
-            # Cálculo seguro
-            custo_massa_total = calcular_custo_tabela_seguro(massa_edit, "Preço Embalagem (R$)", "Gromos Embalagem (g)", "Gramos Usados na Receita")
+            custo_massa_total = calcular_custo_tabela_seguro(massa_edit, "Preço Embalagem (R$)", "Gramos Embalagem (g)", "Gramos Usados na Receita")
             if peso_obtido_massa > 0:
                 custo_massa_kg = (custo_massa_total / peso_obtido_massa) * 1000
             else:
@@ -326,27 +342,25 @@ if chave_usuario == "kg10k":
             tipo_forma_final = st.selectbox("Geometria da Forma", ["Redonda", "Retangular"])
             margem_comercial = st.slider("Selecione a Margem Comercial de Segurança (%)", min_value=40, max_value=50, value=45)
             
-        with col_prop2:
-            # Lógica de pesos proporcionais da confeitaria estruturada
+        with col_pd2: # Corrigido NameError (Substituído col_prop2 para col_pd2)
             peso_alvo_g = peso_alvo * 1000
             calc_massa_final = peso_alvo_g * 0.35
             calc_recheio_final = peso_alvo_g * 0.40
             calc_calda_final = peso_alvo_g * 0.10
             calc_cobertura_final = peso_alvo_g * 0.15
             
-            # Cálculo de Forma sugerida
             if tipo_forma_final == "Redonda":
                 diametro_sugerido = math.ceil(2 * math.sqrt(peso_alvo_g / (3.14 * 10 * 0.6)))
                 st.metric("Forma Redonda Recomendada", f"{diametro_sugerido} cm de diâmetro (Altura de 10cm)")
             else:
                 st.metric("Forma Retangular Recomendada", "35x25 cm")
 
-        # CUSTO REAL DINÂMICO INTERLIGADO COM A ABA 3
+        # CUSTO DINÂMICO AUTOMÁTICO DERIVADO DAS RECEITAS DA ABA 3
         custo_massa_composto = (custo_massa_kg / 1000) * calc_massa_final
         custo_recheio_composto = (custo_recheio_kg / 1000) * calc_recheio_final
         custo_calda_composto = (custo_calda_kg / 1000) * calc_calda_final
         custo_cob_composto = (custo_cob_kg / 1000) * calc_cobertura_final
-        custo_insumos_total = custo_massa_composto + custo_recheio_composto + custo_calda_composto + custo_cob_composto + 12.00 # Caixa/Embalagem inclusa
+        custo_insumos_total = custo_massa_composto + custo_recheio_composto + custo_calda_composto + custo_cob_composto + 12.00
         
         st.markdown("##### 📝 Balanço e Distribuição para Produção de Cozinha:")
         c_p1, c_p2, c_p3, c_p4 = st.columns(4)
@@ -355,21 +369,20 @@ if chave_usuario == "kg10k":
         with c_p3: st.metric("Calda de Regar", f"{int(calc_calda_final)} g", f"Custo: R$ {custo_calda_composto:.2f}")
         with c_p4: st.metric("Blindagem / Cobertura", f"{int(calc_cobertura_final)} g", f"Custo: R$ {custo_cob_composto:.2f}")
 
-        # PRECIFICAÇÃO DETALHADA COM TAXAS DE CARTÃO E IFOOD
+        # PRECIFICAÇÃO E TAXAS FINANCEIRAS
         st.markdown("### 💰 Estrutura de Preço de Venda Comercial")
         divisor_margem = (100 - margem_comercial) / 100
         preco_venda_base = custo_insumos_total / divisor_margem
         
-        # Taxas de cartões
-        v_debito = preco_venda_base / (1 - 0.0199) # Taxa simulação de débito 1.99%
-        v_credito = preco_venda_base / (1 - 0.0499) # Taxa simulação de crédito 4.99%
-        v_ifood = preco_venda_base / 0.73 # iFood taxa média de 27% para reter margem cheia
+        v_debito = preco_venda_base / (1 - 0.0199)
+        v_credito = preco_venda_base / (1 - 0.0499)
+        v_ifood = preco_venda_base / 0.73
 
         cv1, cv2, cv3, cv4 = st.columns(4)
         with cv1: st.markdown(f"<div class='preco-box'><b>🛍️ DINHEIRO/PIX</b><br><span style='font-size:20px; font-weight:bold;'>R$ {preco_venda_base:.2f}</span><br>Lucro Protegido</div>", unsafe_allow_html=True)
-        with cv2: st.markdown(f"<div class='preco-box' style='background:#0B533A;'><b>💳 DÉBITO MAQ.</b><br><span style='font-size:20px; font-weight:bold;'>R$ {v_debito:.2f}</span><br>Taxa 1.99% Reassumida</div>", unsafe_allow_html=True)
-        with cv3: st.markdown(f"<div class='preco-box' style='background:#0B533A;'><b>💳 CRÉDITO MAQ.</b><br><span style='font-size:20px; font-weight:bold;'>R$ {v_credito:.2f}</span><br>Taxa 4.99% Reassumida</div>", unsafe_allow_html=True)
-        with cv4: st.markdown(f"<div class='preco-box' style='background:#901414;'><b>🛵 CARDÁPIO IFOOD</b><br><span style='font-size:20px; font-weight:bold;'>R$ {v_ifood:.2f}</span><br>Taxa da Plataforma Coberta</div>", unsafe_allow_html=True)
+        with cv2: st.markdown(f"<div class='preco-box' style='background:#0B533A;'><b>💳 DÉBITO MAQ.</b><br><span style='font-size:20px; font-weight:bold;'>R$ {v_debito:.2f}</span><br>Taxa 1.99% inclusa</div>", unsafe_allow_html=True)
+        with cv3: st.markdown(f"<div class='preco-box' style='background:#0B533A;'><b>💳 CRÉDITO MAQ.</b><br><span style='font-size:20px; font-weight:bold;'>R$ {v_credito:.2f}</span><br>Taxa 4.99% inclusa</div>", unsafe_allow_html=True)
+        with cv4: st.markdown(f"<div class='preco-box' style='background:#901414;'><b>🛵 CARDÁPIO IFOOD</b><br><span style='font-size:20px; font-weight:bold;'>R$ {v_ifood:.2f}</span><br>Margem Assegurada</div>", unsafe_allow_html=True)
 
         foto_bolo = st.file_uploader("📸 Enviar Foto do Produto Finalizado", type=["jpg", "png", "jpeg"])
 
@@ -430,7 +443,6 @@ if chave_usuario == "kg10k":
         
         df_est_edit = st.data_editor(estoque_base, num_rows="dynamic", use_container_width=True, key="estoque_crit_key")
         
-        # Lógica de Alertas de Falta
         st.markdown("##### 🚨 Alerta Vermelho de Compras:")
         for idx, row in df_est_edit.iterrows():
             try:
@@ -478,7 +490,6 @@ if chave_usuario == "kg10k":
         
         df_inv_edit = st.data_editor(inventario_base, num_rows="dynamic", use_container_width=True, key="inv_pat_key")
         
-        # Cálculo de patrimônio
         custo_unit = pd.to_numeric(df_inv_edit["Valor Unitário (R$)"], errors='coerce').fillna(0.0)
         quantidades = pd.to_numeric(df_inv_edit["Quantidade"], errors='coerce').fillna(0.0)
         patrimonio_total = (custo_unit * quantidades).sum()
