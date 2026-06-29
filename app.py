@@ -6,6 +6,7 @@ import json
 import os
 from datetime import datetime, timedelta
 
+# Configuração da página - Streamlit puro
 st.set_page_config(
     page_title="K&G Arte em Confeitaria",
     page_icon="✨",
@@ -30,13 +31,12 @@ st.markdown("""
         /* Estilo dos Títulos de Seções */
         .section-title { font-family: 'Playfair Display', serif; color: #043927; font-size: 22px; border-left: 4px solid #D4AF37; padding-left: 12px; margin-top: 20px; margin-bottom: 15px; }
         
-        /* Caixas de Texto, Preços e Lupa ANVISA */
+        /* Caixas de Estilo Visual */
         .print-box { background: white; border: 1px solid #ced4da; padding: 20px; border-radius: 10px; font-family: monospace; color: black; line-height: 1.4; }
         .lupa-box { border: 3px solid black; background: white; color: black; padding: 10px; font-weight: bold; text-align: center; font-size: 14px; margin-bottom: 10px; font-family: Arial, sans-serif; }
         .preco-box { background: #043927; color: #FAF6F0; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #D4AF37; }
         .alerta-aniv { background: #FAF0F2; border-left: 5px solid #D4AF37; padding: 12px; border-radius: 4px; margin-bottom: 15px; }
         
-        /* Caixa de Alerta de Segurança de Backup */
         .safety-alert-box {
             background-color: #FFF5F5;
             border-left: 6px solid #E53E3E;
@@ -44,16 +44,6 @@ st.markdown("""
             border-radius: 8px;
             margin-bottom: 20px;
             color: #C53030;
-        }
-        
-        /* Tabs personalizadas Rosé Nude */
-        button[data-baseweb="tab"] {
-            color: #555555 !important;
-            font-weight: 400 !important;
-        }
-        button[data-baseweb="tab"][aria-selected="true"] {
-            color: #043927 !important;
-            font-weight: 600 !important;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -1115,18 +1105,10 @@ if chave_usuario == "kg10k":
         
         st.metric("Patrimônio Físico Atelier", f"R$ {patrimonio_total:.2f}")
 
-    # Grava no disco local para garantir persistência automática em cada atualização
+    # Salva automaticamente em cada atualização
     salvar_dados_disco()
 
 elif chave_usuario != "":
     st.error("Chave de Acesso Incorreta! Por favor, digite a senha autorizada da K&G.")
 else:
     st.warning("Insira a chave de acesso empresarial para visualizar o ecossistema estratégico.")
-```
-eof
-
-### O que fazer agora:
-1. Copie o código inteiro no arquivo `app.py`.
-2. Salve no seu editor.
-3. Observe o Streamlit carregar novamente em verde e sem erros no seu link.
-4. Assim que der certo, volte aqui no chat, me confirme, e **abrimos uma nova conversa limpa**. Na conversa nova, você pode anexar seus PDFs aos poucos e nós vamos inserindo todas as receitas de fatias gourmet, cremes, caldas e salgados uma por uma, com segurança máxima!
