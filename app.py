@@ -6,6 +6,7 @@ import json
 import os
 from datetime import datetime, timedelta
 
+# Configuração da página do Streamlit
 st.set_page_config(
     page_title="K&G Arte em Confeitaria",
     page_icon="✨",
@@ -233,6 +234,11 @@ def carregar_dados_disco():
         try:
             with open("banco_confeitaria_local.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
+            
+            # Se o arquivo existir mas estiver vazio de receitas, ignorar carregamento
+            if not data.get("massas"):
+                return False
+
             st.session_state['banco_massas_rec'] = {
                 k: {
                     "ingredientes": pd.DataFrame(v["ingredientes"]),
@@ -363,11 +369,10 @@ if chave_usuario == "kg10k":
         </div>
     """, unsafe_allow_html=True)
 
-    dados_carregados = False
-    if 'banco_massas_rec' not in st.session_state:
-        dados_carregados = carregar_dados_disco()
+    # Tenta carregar dados do disco. Se falhar ou estiver vazio, inicializa com as receitas padrão
+    dados_carregados = carregar_dados_disco()
 
-    if not dados_carregados and 'banco_massas_rec' not in st.session_state:
+    if not dados_carregados or 'banco_massas_rec' not in st.session_state or len(st.session_state.get('banco_massas_rec', {})) == 0:
         st.session_state['banco_massas_rec'] = {
             "Massa Branca Amanteigada K&G": {
                 "ingredientes": pd.DataFrame([
@@ -410,7 +415,7 @@ if chave_usuario == "kg10k":
             }
         }
 
-    if 'banco_recheios_rec' not in st.session_state:
+    if not dados_carregados or 'banco_recheios_rec' not in st.session_state or len(st.session_state.get('banco_recheios_rec', {})) == 0:
         st.session_state['banco_recheios_rec'] = {
             "Brigadeiro de Ninho Gourmet": {
                 "ingredientes": pd.DataFrame([
@@ -447,7 +452,7 @@ if chave_usuario == "kg10k":
             }
         }
 
-    if 'banco_caldas_rec' not in st.session_state:
+    if not dados_carregados or 'banco_caldas_rec' not in st.session_state or len(st.session_state.get('banco_caldas_rec', {})) == 0:
         st.session_state['banco_caldas_rec'] = {
             "Calda Tradicional de Leite Condensado": {
                 "ingredientes": pd.DataFrame([
@@ -459,7 +464,7 @@ if chave_usuario == "kg10k":
             }
         }
 
-    if 'banco_coberturas_rec' not in st.session_state:
+    if not dados_carregados or 'banco_coberturas_rec' not in st.session_state or len(st.session_state.get('banco_coberturas_rec', {})) == 0:
         st.session_state['banco_coberturas_rec'] = {
             "Chantininho de Alta Estabilidade": {
                 "ingredientes": pd.DataFrame([
@@ -481,13 +486,13 @@ if chave_usuario == "kg10k":
     for r_nome in st.session_state['banco_coberturas_rec']:
         st.session_state['banco_coberturas_rec'][r_nome]["ingredientes"] = corrigir_colunas_df(st.session_state['banco_coberturas_rec'][r_nome]["ingredientes"])
 
-    if 'banco_crm' not in st.session_state:
+    if 'banco_crm' not in st.session_state or st.session_state['banco_crm'] is None or st.session_state['banco_crm'].empty:
         st.session_state['banco_crm'] = pd.DataFrame([
             {"Cliente VIP": "Juliana Mendes Rossi", "WhatsApp": "(41) 99123-4567", "E-mail": "juliana@rossi.com", "Aniv. Cliente": "12/06", "Aniv. Marido": "18/10", "Aniv. Filhos": "Gabriel (04/02)", "Data Casamento": "22/11", "Restrições": "ALERGIA GRAVE A AMENDOIM!", "Últimos Pedidos": "KG-2026-1042"},
             {"Cliente VIP": "Carlos Henrique Rocha", "WhatsApp": "(41) 98877-6655", "E-mail": "carlos@rocha.com", "Aniv. Cliente": "29/08", "Aniv. Marido": "-", "Aniv. Filhos": "Sofia (15/05)", "Data Casamento": "-", "Restrições": "Sem cebola ou alho cru", "Últimos Pedidos": "KG-2026-8841"}
         ])
 
-    if 'df_fixos' not in st.session_state:
+    if 'df_fixos' not in st.session_state or st.session_state['df_fixos'] is None or st.session_state['df_fixos'].empty:
         st.session_state['df_fixos'] = pd.DataFrame([
             {"Descrição do Custo Fixo": "Aluguel / Atelier", "Valor Mensal (R$)": 1500.00},
             {"Descrição do Custo Fixo": "Água e Energia Elétrica", "Valor Mensal (R$)": 650.00},
@@ -495,7 +500,7 @@ if chave_usuario == "kg10k":
             {"Descrição do Custo Fixo": "Internet e Plataformas", "Valor Mensal (R$)": 150.00}
         ])
 
-    if 'df_var' not in st.session_state:
+    if 'df_var' not in st.session_state or st.session_state['df_var'] is None or st.session_state['df_var'].empty:
         st.session_state['df_var'] = pd.DataFrame([
             {"Descrição do Custo Variável": "Matérias-Primas e Embalagens", "Valor Estimado (R$)": 1500.00},
             {"Descrição do Custo Variável": "Gás de Cozinha Recarga", "Valor Estimado (R$)": 135.00},
