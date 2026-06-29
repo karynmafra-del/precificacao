@@ -11,6 +11,14 @@ st.set_page_config(
     layout="wide"
 )
 
+# Inicialização de variáveis globais compartilhadas (Evita qualquer erro de variável indefinida)
+custo_massa_kg = 0.0
+custo_recheio_kg = 0.0
+custo_calda_kg = 0.0
+custo_cob_kg = 0.0
+peso_alvo = 5.0
+nome_bolo_final = "Bolo de Morango Especial"
+
 # Estilização de Elite K&G (Verde Esmeralda, Ouro e Customização das Abas em Rosé Nude)
 st.markdown("""
     <style>
@@ -63,7 +71,7 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# --- FUNÇÃO DE SEGURANÇA CONTRA CAMPOS EM BRANCO NAS RECEITAS ---
+# --- FUNÇÃO DE SEGURANÇA ABSOLUTA CONTRA ERROS DE DIGITAÇÃO OU CAMPOS EM BRANCO ---
 def calcular_custo_tabela_seguro(df, col_preco, col_embalagem, col_usado):
     if df is None or df.empty:
         return 0.0
@@ -72,9 +80,13 @@ def calcular_custo_tabela_seguro(df, col_preco, col_embalagem, col_usado):
         for col in [col_preco, col_embalagem, col_usado]:
             if col not in df_temp.columns:
                 df_temp[col] = 0.0
+        
+        # Converte para numérico de forma segura e substitui erros por valores padrão
         df_temp[col_preco] = pd.to_numeric(df_temp[col_preco], errors='coerce').fillna(0.0)
         df_temp[col_embalagem] = pd.to_numeric(df_temp[col_embalagem], errors='coerce').fillna(1.0)
         df_temp[col_usado] = pd.to_numeric(df_temp[col_usado], errors='coerce').fillna(0.0)
+        
+        # Impede a divisão matemática por zero
         df_temp[col_embalagem] = df_temp[col_embalagem].replace(0, 1.0)
         
         custos = (df_temp[col_preco] / df_temp[col_embalagem]) * df_temp[col_usado]
@@ -91,25 +103,61 @@ def get_recipe_cost_kg(banco, name):
         peso_obtido = recipe.get("peso_obtido", 1000.0)
         if peso_obtido <= 0:
             peso_obtido = 1.0
-        custo_total = calcular_custo_tabela_seguro(df, "Preço Embalagem (R$)", "Gramos Embalagem (g)", "Gramos Usados")
+        custo_total = calcular_custo_tabela_seguro(df, "Preço Embalagem (R$)", "Qtd na Embalagem", "Qtd Usada")
         return (custo_total / peso_obtido) * 1000.0
     except Exception:
         return 0.0
 
-# 🔒 CHAVE DE ACESSO GLOBAL
+# Configuração Padrão Segura de Colunas para as Fichas Técnicas de Ingredientes
+ingredientes_column_config = {
+    "Ingrediente": st.column_config.TextColumn(
+        "Ingrediente",
+        placeholder="Ex: Farinha Premium",
+        required=True
+    ),
+    "Unidade de Medida": st.column_config.SelectboxColumn(
+        "Unidade",
+        options=["g", "ml", "un"],
+        default="g",
+        required=True
+    ),
+    "Preço Embalagem (R$)": st.column_config.NumberColumn(
+        "Preço Embalagem (R$)",
+        min_value=0.00,
+        format="R$ %.2f",
+        default=0.00,
+        required=True
+    ),
+    "Qtd na Embalagem": st.column_config.NumberColumn(
+        "Qtd na Embalagem",
+        min_value=0.001,
+        format="%.3f",
+        default=1000.0,
+        required=True
+    ),
+    "Qtd Usada": st.column_config.NumberColumn(
+        "Qtd Usada na Receita",
+        min_value=0.0,
+        format="%.3f",
+        default=0.0,
+        required=True
+    )
+}
+
+# 🔒 CHAVE DE ACESSO GLOBAL DO SISTEMA
 chave_usuario = st.text_input("Insira a sua Chave de Acesso para liberar o sistema:", type="password")
 
 if chave_usuario == "kg10k":
-    st.success("Acesso Homologado! Seja bem-vinda ao seu sistema, Karyn.")
+    st.success("Acesso Autorizado! Seja bem-vinda ao seu sistema, Karyn.")
 
-    # Inicialização Dinâmica de Bancos de Dados de Receita na Memória (Aba 3)
+    # Inicialização dos Bancos de Dados na memória com a nova coluna de Unidades de Medida padronizada
     if 'banco_massas_rec' not in st.session_state:
         st.session_state['banco_massas_rec'] = {
             "Massa Choc Premium": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Farinha de Trigo Premium", "Preço Embalagem (R$)": 8.50, "Gramos Embalagem (g)": 1000.0, "Gramos Usados": 300.0},
-                    {"Ingrediente": "Chocolate em Pó 50%", "Preço Embalagem (R$)": 22.00, "Gramos Embalagem (g)": 500.0, "Gramos Usados": 100.0},
-                    {"Ingrediente": "Ovos Frescos", "Preço Embalagem (R$)": 12.00, "Gramos Embalagem (g)": 600.0, "Gramos Usados": 240.0}
+                    {"Ingrediente": "Farinha de Trigo Premium", "Unidade de Medida": "g", "Preço Embalagem (R$)": 8.50, "Qtd na Embalagem": 1000.0, "Qtd Usada": 300.0},
+                    {"Ingrediente": "Chocolate em Pó 50%", "Unidade de Medida": "g", "Preço Embalagem (R$)": 22.00, "Qtd na Embalagem": 500.0, "Qtd Usada": 100.0},
+                    {"Ingrediente": "Ovos Frescos", "Unidade de Medida": "un", "Preço Embalagem (R$)": 12.00, "Qtd na Embalagem": 12.0, "Qtd Usada": 4.0}
                 ]),
                 "peso_obtido": 1000.0,
                 "preparo": "Bater claras em neve, juntar secos aos poucos na velocidade baixa da planetária.",
@@ -117,9 +165,9 @@ if chave_usuario == "kg10k":
             },
             "Pão de Ló de Baunilha": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Farinha de Trigo Premium", "Preço Embalagem (R$)": 8.50, "Gramos Embalagem (g)": 1000.0, "Gramos Usados": 300.0},
-                    {"Ingrediente": "Açúcar Refinado", "Preço Embalagem (R$)": 4.50, "Gramos Embalagem (g)": 1000.0, "Gramos Usados": 250.0},
-                    {"Ingrediente": "Ovos Frescos", "Preço Embalagem (R$)": 12.00, "Gramos Embalagem (g)": 600.0, "Gramos Usados": 300.0}
+                    {"Ingrediente": "Farinha de Trigo Premium", "Unidade de Medida": "g", "Preço Embalagem (R$)": 8.50, "Qtd na Embalagem": 1000.0, "Qtd Usada": 300.0},
+                    {"Ingrediente": "Açúcar Refinado", "Unidade de Medida": "g", "Preço Embalagem (R$)": 4.50, "Qtd na Embalagem": 1000.0, "Qtd Usada": 250.0},
+                    {"Ingrediente": "Ovos Frescos", "Unidade de Medida": "un", "Preço Embalagem (R$)": 12.00, "Qtd na Embalagem": 12.0, "Qtd Usada": 5.0}
                 ]),
                 "peso_obtido": 1000.0,
                 "preparo": "Emulsionar ovos e açúcar, peneirar farinha levemente e assar a 180°C.",
@@ -131,9 +179,9 @@ if chave_usuario == "kg10k":
         st.session_state['banco_recheios_rec'] = {
             "Brigadeiro de Ninho": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Leite Condensado Itambé", "Preço Embalagem (R$)": 6.80, "Gramos Embalagem (g)": 395.0, "Gramos Usados": 395.0},
-                    {"Ingrediente": "Creme de Leite", "Preço Embalagem (R$)": 4.20, "Gramos Embalagem (g)": 200.0, "Gramos Usados": 200.0},
-                    {"Ingrediente": "Leite Ninho", "Preço Embalagem (R$)": 18.50, "Gramos Embalagem (g)": 400.0, "Gramos Usados": 100.0}
+                    {"Ingrediente": "Leite Condensado Itambé", "Unidade de Medida": "un", "Preço Embalagem (R$)": 6.80, "Qtd na Embalagem": 1.0, "Qtd Usada": 1.0},
+                    {"Ingrediente": "Creme de Leite", "Unidade de Medida": "un", "Preço Embalagem (R$)": 4.20, "Qtd na Embalagem": 1.0, "Qtd Usada": 1.0},
+                    {"Ingrediente": "Leite Ninho", "Unidade de Medida": "g", "Preço Embalagem (R$)": 18.50, "Qtd na Embalagem": 400.0, "Qtd Usada": 100.0}
                 ]),
                 "peso_obtido": 695.0,
                 "preparo": "Levar ao fogo mexendo sem parar até atingir ponto de bloco firme para estruturação de bolos.",
@@ -145,8 +193,8 @@ if chave_usuario == "kg10k":
         st.session_state['banco_caldas_rec'] = {
             "Calda Básica de Açúcar": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Açúcar Refinado", "Preço Embalagem (R$)": 4.50, "Gramos Embalagem (g)": 1000.0, "Gramos Usados": 150.0},
-                    {"Ingrediente": "Água Filtrada", "Preço Embalagem (R$)": 0.0, "Gramos Embalagem (g)": 1000.0, "Gramos Usados": 500.0}
+                    {"Ingrediente": "Açúcar Refinado", "Unidade de Medida": "g", "Preço Embalagem (R$)": 4.50, "Qtd na Embalagem": 1000.0, "Qtd Usada": 150.0},
+                    {"Ingrediente": "Água Filtrada", "Unidade de Medida": "ml", "Preço Embalagem (R$)": 0.0, "Qtd na Embalagem": 1000.0, "Qtd Usada": 500.0}
                 ]),
                 "peso_obtido": 650.0,
                 "preparo": "Ferver água e açúcar até reduzir ligeiramente e homogeneizar. Deixar esfriar.",
@@ -158,8 +206,8 @@ if chave_usuario == "kg10k":
         st.session_state['banco_coberturas_rec'] = {
             "Chantiganache ao Leite": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Chocolate Nobre ao Leite", "Preço Embalagem (R$)": 55.00, "Gramos Embalagem (g)": 1000.0, "Gramos Usados": 500.0},
-                    {"Ingrediente": "Creme de Leite", "Preço Embalagem (R$)": 4.20, "Gramos Embalagem (g)": 200.0, "Gramos Usados": 200.0}
+                    {"Ingrediente": "Chocolate Nobre ao Leite", "Unidade de Medida": "g", "Preço Embalagem (R$)": 55.00, "Qtd na Embalagem": 1000.0, "Qtd Usada": 500.0},
+                    {"Ingrediente": "Creme de Leite", "Unidade de Medida": "g", "Preço Embalagem (R$)": 4.20, "Qtd na Embalagem": 200.0, "Qtd Usada": 200.0}
                 ]),
                 "peso_obtido": 700.0,
                 "preparo": "Derreter o chocolate nobre e emulsionar com creme de leite. Bater levemente para obter textura fosca.",
@@ -167,7 +215,7 @@ if chave_usuario == "kg10k":
             }
         }
 
-    # Definição das Abas do Menu Principal
+    # Criação das Abas Principais Unificadas
     tabs = st.tabs([
         "💰 CENTRAL FINANCEIRA",
         "📝 1. ORÇAMENTOS & FRETE",
@@ -289,7 +337,7 @@ if chave_usuario == "kg10k":
             st.dataframe(df_crm, use_container_width=True)
 
     # ==========================================
-    # ABA 3: FÁBRICA DE BASES (COM INSERÇÃO DE NOVAS RECEITAS)
+    # ABA 3: FÁBRICA DE BASES (SISTEMA DE SEGURANÇA MÁXIMA PARA CADASTRO)
     # ==========================================
     with tabs[3]:
         st.markdown('<div class="section-title">🥣 Fábrica de Bases: Gestão Ilimitada de Receitas e Custos</div>', unsafe_allow_html=True)
@@ -304,12 +352,12 @@ if chave_usuario == "kg10k":
                 if submit_m and novo_m_nome:
                     if novo_m_nome not in st.session_state['banco_massas_rec']:
                         st.session_state['banco_massas_rec'][novo_m_nome] = {
-                            "ingredientes": pd.DataFrame([{"Ingrediente": "Ingrediente Exemplo", "Preço Embalagem (R$)": 10.00, "Gramos Embalagem (g)": 1000.0, "Gramos Usados": 100.0}]),
+                            "ingredientes": pd.DataFrame(columns=["Ingrediente", "Unidade de Medida", "Preço Embalagem (R$)", "Qtd na Embalagem", "Qtd Usada"]),
                             "peso_obtido": 1000.0,
                             "preparo": "Descreva aqui o modo de preparo passo a passo.",
                             "decoracao": "Padrão estético aceito para a produção."
                         }
-                        st.success(f"Massa '{novo_m_nome}' cadastrada! Atualize a página para editar os ingredientes.")
+                        st.success(f"Massa '{novo_m_nome}' cadastrada! Selecione-a abaixo para editar os ingredientes.")
                     else:
                         st.warning("Massa já cadastrada!")
 
@@ -318,17 +366,24 @@ if chave_usuario == "kg10k":
             
             if sel_massa:
                 rec_m = st.session_state['banco_massas_rec'][sel_massa]
-                m_edit = st.data_editor(rec_m["ingredientes"], num_rows="dynamic", use_container_width=True, key=f"m_edit_{sel_massa}")
+                # DATA EDITOR BLINDADO COM CONFIGURAÇÕES DE COLUNA ESTÁVEIS
+                m_edit = st.data_editor(
+                    rec_m["ingredientes"],
+                    column_config=ingredientes_column_config,
+                    num_rows="dynamic",
+                    use_container_width=True,
+                    key=f"m_edit_{sel_massa}"
+                )
                 st.session_state['banco_massas_rec'][sel_massa]["ingredientes"] = m_edit
                 
                 col_m1, col_m2 = st.columns(2)
                 with col_m1:
-                    peso_obt_m = st.number_input("Peso Final Obtido na Receita (g)", value=float(rec_m.get("peso_obtido", 1000.0)), key=f"peso_m_{sel_massa}")
+                    peso_obt_m = st.number_input("Rendimento Final da Receita (g, ml ou un)", value=float(rec_m.get("peso_obtido", 1000.0)), key=f"peso_m_{sel_massa}")
                     st.session_state['banco_massas_rec'][sel_massa]["peso_obtido"] = peso_obt_m
-                    custo_massa_total = calcular_custo_tabela_seguro(m_edit, "Preço Embalagem (R$)", "Gramos Embalagem (g)", "Gramos Usados")
+                    custo_massa_total = calcular_custo_tabela_seguro(m_edit, "Preço Embalagem (R$)", "Qtd na Embalagem", "Qtd Usada")
                     custo_m_kg = (custo_massa_total / peso_obt_m * 1000) if peso_obt_m > 0 else 0.0
                     st.metric("Custo Total da Receita", f"R$ {custo_massa_total:.2f}")
-                    st.metric("Custo por kg de Massa", f"R$ {custo_m_kg:.2f}")
+                    st.metric("Custo por kg/unidade de Massa", f"R$ {custo_m_kg:.2f}")
                 with col_m2:
                     prep_m = st.text_area("Modo de Preparo", value=rec_m.get("preparo", ""), key=f"prep_m_{sel_massa}")
                     dec_m = st.text_area("Decoração & Padronização Estética", value=rec_m.get("decoracao", ""), key=f"dec_m_{sel_massa}")
@@ -344,12 +399,12 @@ if chave_usuario == "kg10k":
                 if submit_r and novo_r_nome:
                     if novo_r_nome not in st.session_state['banco_recheios_rec']:
                         st.session_state['banco_recheios_rec'][novo_r_nome] = {
-                            "ingredientes": pd.DataFrame([{"Ingrediente": "Ingrediente Exemplo", "Preço Embalagem (R$)": 10.00, "Gramos Embalagem (g)": 1000.0, "Gramos Usados": 100.0}]),
+                            "ingredientes": pd.DataFrame(columns=["Ingrediente", "Unidade de Medida", "Preço Embalagem (R$)", "Qtd na Embalagem", "Qtd Usada"]),
                             "peso_obtido": 1000.0,
                             "preparo": "Descreva aqui o modo de preparo passo a passo.",
                             "decoracao": "Padrão estético aceito para a produção."
                         }
-                        st.success(f"Recheio '{novo_r_nome}' cadastrado! Atualize para editar.")
+                        st.success(f"Recheio '{novo_r_nome}' cadastrado! Selecione-o abaixo para editar.")
                     else:
                         st.warning("Recheio já cadastrado!")
 
@@ -358,17 +413,23 @@ if chave_usuario == "kg10k":
             
             if sel_recheio:
                 rec_r = st.session_state['banco_recheios_rec'][sel_recheio]
-                r_edit = st.data_editor(rec_r["ingredientes"], num_rows="dynamic", use_container_width=True, key=f"r_edit_{sel_recheio}")
+                r_edit = st.data_editor(
+                    rec_r["ingredientes"],
+                    column_config=ingredientes_column_config,
+                    num_rows="dynamic",
+                    use_container_width=True,
+                    key=f"r_edit_{sel_recheio}"
+                )
                 st.session_state['banco_recheios_rec'][sel_recheio]["ingredientes"] = r_edit
                 
                 col_r1, col_r2 = st.columns(2)
                 with col_r1:
-                    peso_obt_r = st.number_input("Peso Final Obtido na Receita (g)", value=float(rec_r.get("peso_obtido", 1000.0)), key=f"peso_r_{sel_recheio}")
+                    peso_obt_r = st.number_input("Rendimento Final da Receita (g, ml ou un)", value=float(rec_r.get("peso_obtido", 1000.0)), key=f"peso_r_{sel_recheio}")
                     st.session_state['banco_recheios_rec'][sel_recheio]["peso_obtido"] = peso_obt_r
-                    custo_recheio_total = calcular_custo_tabela_seguro(r_edit, "Preço Embalagem (R$)", "Gramos Embalagem (g)", "Gramos Usados")
+                    custo_recheio_total = calcular_custo_tabela_seguro(r_edit, "Preço Embalagem (R$)", "Qtd na Embalagem", "Qtd Usada")
                     custo_r_kg = (custo_recheio_total / peso_obt_r * 1000) if peso_obt_r > 0 else 0.0
                     st.metric("Custo Total do Recheio", f"R$ {custo_recheio_total:.2f}")
-                    st.metric("Custo por kg de Recheio", f"R$ {custo_r_kg:.2f}")
+                    st.metric("Custo por kg/unidade de Recheio", f"R$ {custo_r_kg:.2f}")
                 with col_r2:
                     prep_r = st.text_area("Modo de Preparo", value=rec_r.get("preparo", ""), key=f"prep_r_{sel_recheio}")
                     dec_r = st.text_area("Decoração & Padronização", value=rec_r.get("decoracao", ""), key=f"dec_r_{sel_recheio}")
@@ -384,12 +445,12 @@ if chave_usuario == "kg10k":
                 if submit_c and novo_c_nome:
                     if novo_c_nome not in st.session_state['banco_caldas_rec']:
                         st.session_state['banco_caldas_rec'][novo_c_nome] = {
-                            "ingredientes": pd.DataFrame([{"Ingrediente": "Açúcar", "Preço Embalagem (R$)": 4.50, "Gramos Embalagem (g)": 1000.0, "Gramos Usados": 100.0}]),
+                            "ingredientes": pd.DataFrame(columns=["Ingrediente", "Unidade de Medida", "Preço Embalagem (R$)", "Qtd na Embalagem", "Qtd Usada"]),
                             "peso_obtido": 1000.0,
                             "preparo": "Misturar e ferver.",
-                            "decoracao": "Calda fluida."
+                            "decoracao": "Calda fluida uniforme."
                         }
-                        st.success(f"Calda '{novo_c_nome}' cadastrada!")
+                        st.success(f"Calda '{novo_c_nome}' cadastrada! Selecione-a abaixo para editar.")
                     else:
                         st.warning("Calda já cadastrada!")
 
@@ -397,17 +458,23 @@ if chave_usuario == "kg10k":
             sel_calda = st.selectbox("Selecione a Calda para Editar:", list(st.session_state['banco_caldas_rec'].keys()))
             if sel_calda:
                 rec_c = st.session_state['banco_caldas_rec'][sel_calda]
-                c_edit = st.data_editor(rec_c["ingredientes"], num_rows="dynamic", use_container_width=True, key=f"c_edit_{sel_calda}")
+                c_edit = st.data_editor(
+                    rec_c["ingredientes"],
+                    column_config=ingredientes_column_config,
+                    num_rows="dynamic",
+                    use_container_width=True,
+                    key=f"c_edit_{sel_calda}"
+                )
                 st.session_state['banco_caldas_rec'][sel_calda]["ingredientes"] = c_edit
                 
                 col_c1, col_c2 = st.columns(2)
                 with col_c1:
-                    peso_obt_c = st.number_input("Peso Final Obtido (g)", value=float(rec_c.get("peso_obtido", 1000.0)), key=f"peso_c_{sel_calda}")
+                    peso_obt_c = st.number_input("Rendimento Final (g, ml ou un)", value=float(rec_c.get("peso_obtido", 1000.0)), key=f"peso_c_{sel_calda}")
                     st.session_state['banco_caldas_rec'][sel_calda]["peso_obtido"] = peso_obt_c
-                    custo_calda_total = calcular_custo_tabela_seguro(c_edit, "Preço Embalagem (R$)", "Gramos Embalagem (g)", "Gramos Usados")
+                    custo_calda_total = calcular_custo_tabela_seguro(c_edit, "Preço Embalagem (R$)", "Qtd na Embalagem", "Qtd Usada")
                     custo_c_kg = (custo_calda_total / peso_obt_c * 1000) if peso_obt_c > 0 else 0.0
                     st.metric("Custo Total da Calda", f"R$ {custo_calda_total:.2f}")
-                    st.metric("Custo por kg", f"R$ {custo_c_kg:.2f}")
+                    st.metric("Custo por kg/unidade", f"R$ {custo_c_kg:.2f}")
                 with col_c2:
                     prep_c = st.text_area("Modo de Preparo", value=rec_c.get("preparo", ""), key=f"prep_c_{sel_calda}")
                     dec_c = st.text_area("Padronização", value=rec_c.get("decoracao", ""), key=f"dec_c_{sel_calda}")
@@ -423,12 +490,12 @@ if chave_usuario == "kg10k":
                 if submit_cob and novo_cob_nome:
                     if novo_cob_nome not in st.session_state['banco_coberturas_rec']:
                         st.session_state['banco_coberturas_rec'][novo_cob_nome] = {
-                            "ingredientes": pd.DataFrame([{"Ingrediente": "Chocolate", "Preço Embalagem (R$)": 55.00, "Gramos Embalagem (g)": 1000.0, "Gramos Usados": 200.0}]),
+                            "ingredientes": pd.DataFrame(columns=["Ingrediente", "Unidade de Medida", "Preço Embalagem (R$)", "Qtd na Embalagem", "Qtd Usada"]),
                             "peso_obtido": 1000.0,
                             "preparo": "Modo de preparo.",
                             "decoracao": "Instruções."
                         }
-                        st.success(f"Cobertura '{novo_cob_nome}' cadastrada!")
+                        st.success(f"Cobertura '{novo_cob_nome}' cadastrada! Selecione-a abaixo para editar.")
                     else:
                         st.warning("Cobertura já cadastrada!")
 
@@ -436,17 +503,23 @@ if chave_usuario == "kg10k":
             sel_cob = st.selectbox("Selecione a Cobertura para Editar:", list(st.session_state['banco_coberturas_rec'].keys()))
             if sel_cob:
                 rec_cob = st.session_state['banco_coberturas_rec'][sel_cob]
-                cob_edit = st.data_editor(rec_cob["ingredientes"], num_rows="dynamic", use_container_width=True, key=f"cob_edit_{sel_cob}")
+                cob_edit = st.data_editor(
+                    rec_cob["ingredientes"],
+                    column_config=ingredientes_column_config,
+                    num_rows="dynamic",
+                    use_container_width=True,
+                    key=f"cob_edit_{sel_cob}"
+                )
                 st.session_state['banco_coberturas_rec'][sel_cob]["ingredientes"] = cob_edit
                 
                 col_cob1, col_cob2 = st.columns(2)
                 with col_cob1:
-                    peso_obt_cob = st.number_input("Peso Final Obtido (g)", value=float(rec_cob.get("peso_obtido", 1000.0)), key=f"peso_cob_{sel_cob}")
+                    peso_obt_cob = st.number_input("Rendimento Final (g, ml ou un)", value=float(rec_cob.get("peso_obtido", 1000.0)), key=f"peso_cob_{sel_cob}")
                     st.session_state['banco_coberturas_rec'][sel_cob]["peso_obtido"] = peso_obt_cob
-                    custo_cob_total = calcular_custo_tabela_seguro(cob_edit, "Preço Embalagem (R$)", "Gramos Embalagem (g)", "Gramos Usados")
+                    custo_cob_total = calcular_custo_tabela_seguro(cob_edit, "Preço Embalagem (R$)", "Qtd na Embalagem", "Qtd Usada")
                     custo_cob_kg = (custo_cob_total / peso_obt_cob * 1000) if peso_obt_cob > 0 else 0.0
                     st.metric("Custo Total da Cobertura", f"R$ {custo_cob_total:.2f}")
-                    st.metric("Custo por kg", f"R$ {custo_cob_kg:.2f}")
+                    st.metric("Custo por kg/unidade", f"R$ {custo_cob_kg:.2f}")
                 with col_cob2:
                     prep_cob = st.text_area("Modo de Preparo", value=rec_cob.get("preparo", ""), key=f"prep_cob_{sel_cob}")
                     dec_cob = st.text_area("Padronização", value=rec_cob.get("decoracao", ""), key=f"dec_cob_{sel_cob}")
@@ -517,7 +590,7 @@ if chave_usuario == "kg10k":
         with c_p1: st.metric(f"Massa ({sel_massa_composta})", f"{int(calc_massa_final)} g", f"Custo: R$ {custo_massa_composto:.2f}")
         with c_p2: st.metric(f"Recheio ({sel_recheio_composto})", f"{int(calc_recheio_final)} g", f"Custo: R$ {custo_recheio_composto:.2f}")
         with c_p3: st.metric(f"Calda ({sel_calda_composta})", f"{int(calc_calda_final)} g", f"Custo: R$ {custo_calda_composto:.2f}")
-        with c_p4: st.metric(f"Cobertura ({sel_cobertura_composta})", f"{int(calc_cobertura_final)} g", f"Custo: R$ {custo_cob_composto:.2f}")
+        with c_p4: st.metric(f"Cobertura ({sel_cobertura_composta})", f"{int(calc_cobertura_final)} g", f"Custo: R$ {custo_cobertura_final:.2f}")
 
         # PRECIFICAÇÃO DE VENDAS COM COBERTURA DE TAXAS
         st.markdown("### 💰 Tabela de Preço de Venda Comercial")
