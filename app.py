@@ -83,14 +83,25 @@ def limpar_e_converter_coluna(df, coluna, padrao=0.0):
     except Exception:
         return pd.Series([padrao] * len(df))
 
-# --- CALCULO MATEMÁTICO INTEGRADO DE FICHAS TÉCNICAS ---
+# --- CALCULO MATEMÁTICO INTEGRADO DE FICHAS TÉCNICAS (BLINDADO CONTRA LINHAS EM BRANCO) ---
 def calcular_custo_tabela_seguro(df, col_preco, col_embalagem, col_usado):
     if df is None or df.empty:
         return 0.0
     try:
-        precos = limpar_e_converter_coluna(df, col_preco, 0.0)
-        embalagens = limpar_e_converter_coluna(df, col_embalagem, 1.0)
-        usados = limpar_e_converter_coluna(df, col_usado, 0.0)
+        df_temp = df.copy()
+        
+        # Super Filtro de Segurança: Remove qualquer linha que tenha sido criada vazia ou com None
+        if "Ingrediente" in df_temp.columns:
+            df_temp = df_temp.dropna(subset=["Ingrediente"])
+            df_temp = df_temp[df_temp["Ingrediente"].astype(str).str.strip() != "None"]
+            df_temp = df_temp[df_temp["Ingrediente"].astype(str).str.strip() != ""]
+            
+        if df_temp.empty:
+            return 0.0
+            
+        precos = limpar_e_converter_coluna(df_temp, col_preco, 0.0)
+        embalagens = limpar_e_converter_coluna(df_temp, col_embalagem, 1.0)
+        usados = limpar_e_converter_coluna(df_temp, col_usado, 0.0)
         
         # Evita qualquer divisão por zero
         embalagens = embalagens.replace(0, 1.0)
@@ -146,15 +157,15 @@ chave_usuario = st.text_input("Insira a sua Chave de Acesso para liberar o siste
 if chave_usuario == "kg10k":
     st.success("Acesso Autorizado! Seja bem-vinda ao seu sistema, Karyn.")
 
-    # Inicialização dos Bancos de Dados na memória com a nova ordenação lógica de colunas
+    # Inicialização dos Bancos de Dados na memória para persistência entre as abas (Sem "Manteiga Extra" na massa padrão!)
     if 'banco_massas_rec' not in st.session_state:
         st.session_state['banco_massas_rec'] = {
             "Massa Choc Premium": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 300.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
-                    {"Ingrediente": "Chocolate em Pó 50%", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 22.00},
-                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 4.0, "Unidade": "un", "Qtd na Embalagem": 12.0, "Preço Embalagem (R$)": 12.00},
-                    {"Ingrediente": "Manteiga Extra", "Qtd Usada": 150.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 14.00}
+                    {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 250.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 25.00},
+                    {"Ingrediente": "Chocolate em Pó 50%", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 70.00},
+                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 4.0, "Unidade": "un", "Qtd na Embalagem": 30.0, "Preço Embalagem (R$)": 25.00},
+                    {"Ingrediente": "Creme de leite", "Qtd Usada": 200.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 3.50}
                 ], columns=["Ingrediente", "Qtd Usada", "Unidade", "Qtd na Embalagem", "Preço Embalagem (R$)"]),
                 "peso_obtido": 1000.0,
                 "preparo": "Bater claras em neve, juntar secos aos poucos na velocidade baixa da planetária.",
@@ -378,7 +389,7 @@ if chave_usuario == "kg10k":
         st.session_state['banco_crm'] = df_crm_ed
 
     # ==========================================
-    # ABA 3: FÁBRICA DE BASES (REORDENADA PARA DIGITAÇÃO ULTRA-RÁPIDA)
+    # ABA 3: FÁBRICA DE BASES
     # ==========================================
     with tabs[3]:
         st.markdown('<div class="section-title">🥣 Fábrica de Bases: Gestão Ilimitada de Receitas e Custos</div>', unsafe_allow_html=True)
@@ -409,7 +420,7 @@ if chave_usuario == "kg10k":
                 rec_m = st.session_state['banco_massas_rec'][sel_massa]
                 
                 # 📥 FORMULÁRIO COM FLUXO DE DIGITAÇÃO REFORMULADO
-                st.markdown(f"##### 📥 Adicionar Novo Ingrediente à receita: *{sel_massa}*")
+                st.markdown(f"##### 📥 Adicionar Novo Insumo: *{sel_massa}*")
                 with st.form(key=f"form_add_ing_massa_{sel_massa}", clear_on_submit=True):
                     col_ing1, col_ing2, col_ing3, col_ing4, col_ing5 = st.columns(5)
                     with col_ing1:
