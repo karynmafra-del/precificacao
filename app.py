@@ -131,10 +131,10 @@ def adicionar_ingrediente_banco(banco_key, receita_nome, ingrediente, unidade, p
         
     new_row = {
         "Ingrediente": ingrediente,
+        "Qtd Usada": qtd_usada_val,
         "Unidade": unidade,
-        "Preço Embalagem (R$)": preco_val,
         "Qtd na Embalagem": qtd_emb_val,
-        "Qtd Usada": qtd_usada_val
+        "Preço Embalagem (R$)": preco_val
     }
     
     df = st.session_state[banco_key][receita_nome]["ingredientes"]
@@ -146,26 +146,26 @@ chave_usuario = st.text_input("Insira a sua Chave de Acesso para liberar o siste
 if chave_usuario == "kg10k":
     st.success("Acesso Autorizado! Seja bem-vinda ao seu sistema, Karyn.")
 
-    # Inicialização dos Bancos de Dados na memória para persistência entre as abas
+    # Inicialização dos Bancos de Dados na memória com a nova ordenação lógica de colunas
     if 'banco_massas_rec' not in st.session_state:
         st.session_state['banco_massas_rec'] = {
             "Massa Choc Premium": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Farinha de Trigo Premium", "Unidade": "g", "Preço Embalagem (R$)": 8.50, "Qtd na Embalagem": 1000.0, "Qtd Usada": 300.0},
-                    {"Ingrediente": "Chocolate em Pó 50%", "Unidade": "g", "Preço Embalagem (R$)": 22.00, "Qtd na Embalagem": 500.0, "Qtd Usada": 100.0},
-                    {"Ingrediente": "Ovos Frescos", "Unidade": "un", "Preço Embalagem (R$)": 12.00, "Qtd na Embalagem": 12.0, "Qtd Usada": 4.0},
-                    {"Ingrediente": "Manteiga Extra", "Unidade": "g", "Preço Embalagem (R$)": 14.00, "Qtd na Embalagem": 200.0, "Qtd Usada": 150.0}
-                ]),
+                    {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 300.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Chocolate em Pó 50%", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 500.0, "Preço Embalagem (R$)": 22.00},
+                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 4.0, "Unidade": "un", "Qtd na Embalagem": 12.0, "Preço Embalagem (R$)": 12.00},
+                    {"Ingrediente": "Manteiga Extra", "Qtd Usada": 150.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 14.00}
+                ], columns=["Ingrediente", "Qtd Usada", "Unidade", "Qtd na Embalagem", "Preço Embalagem (R$)"]),
                 "peso_obtido": 1000.0,
                 "preparo": "Bater claras em neve, juntar secos aos poucos na velocidade baixa da planetária.",
                 "decoracao": "Dourado uniforme com aroma intenso de cacau nobre."
             },
             "Pão de Ló de Baunilha": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Farinha de Trigo Premium", "Unidade": "g", "Preço Embalagem (R$)": 8.50, "Qtd na Embalagem": 1000.0, "Qtd Usada": 300.0},
-                    {"Ingrediente": "Açúcar Refinado", "Unidade": "g", "Preço Embalagem (R$)": 4.50, "Qtd na Embalagem": 1000.0, "Qtd Usada": 250.0},
-                    {"Ingrediente": "Ovos Frescos", "Unidade": "un", "Preço Embalagem (R$)": 12.00, "Qtd na Embalagem": 12.0, "Qtd Usada": 5.0}
-                ]),
+                    {"Ingrediente": "Farinha de Trigo Premium", "Qtd Usada": 300.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 8.50},
+                    {"Ingrediente": "Açúcar Refinado", "Qtd Usada": 250.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 4.50},
+                    {"Ingrediente": "Ovos Frescos", "Qtd Usada": 5.0, "Unidade": "un", "Qtd na Embalagem": 12.0, "Preço Embalagem (R$)": 12.00}
+                ], columns=["Ingrediente", "Qtd Usada", "Unidade", "Qtd na Embalagem", "Preço Embalagem (R$)"]),
                 "peso_obtido": 1000.0,
                 "preparo": "Emulsionar ovos e açúcar, peneirar farinha levemente e assar a 180°C.",
                 "decoracao": "Espessura simétrica, ideal para camadas com frutas frescas."
@@ -176,10 +176,10 @@ if chave_usuario == "kg10k":
         st.session_state['banco_recheios_rec'] = {
             "Brigadeiro de Ninho": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Leite Condensado Itambé", "Unidade": "un", "Preço Embalagem (R$)": 6.80, "Qtd na Embalagem": 1.0, "Qtd Usada": 1.0},
-                    {"Ingrediente": "Creme de Leite", "Unidade": "un", "Preço Embalagem (R$)": 4.20, "Qtd na Embalagem": 1.0, "Qtd Usada": 1.0},
-                    {"Ingrediente": "Leite Ninho", "Unidade": "g", "Preço Embalagem (R$)": 18.50, "Qtd na Embalagem": 400.0, "Qtd Usada": 100.0}
-                ]),
+                    {"Ingrediente": "Leite Condensado Itambé", "Qtd Usada": 1.0, "Unidade": "un", "Qtd na Embalagem": 1.0, "Preço Embalagem (R$)": 6.80},
+                    {"Ingrediente": "Creme de Leite", "Qtd Usada": 1.0, "Unidade": "un", "Qtd na Embalagem": 1.0, "Preço Embalagem (R$)": 4.20},
+                    {"Ingrediente": "Leite Ninho", "Qtd Usada": 100.0, "Unidade": "g", "Qtd na Embalagem": 400.0, "Preço Embalagem (R$)": 18.50}
+                ], columns=["Ingrediente", "Qtd Usada", "Unidade", "Qtd na Embalagem", "Preço Embalagem (R$)"]),
                 "peso_obtido": 695.0,
                 "preparo": "Levar ao fogo mexendo sem parar até atingir ponto de bloco firme para estruturação de bolos.",
                 "decoracao": "Cor marfim lisa, sem grumos e textura ultra aveludada."
@@ -190,9 +190,9 @@ if chave_usuario == "kg10k":
         st.session_state['banco_caldas_rec'] = {
             "Calda Básica de Açúcar": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Açúcar Refinado", "Unidade": "g", "Preço Embalagem (R$)": 4.50, "Qtd na Embalagem": 1000.0, "Qtd Usada": 150.0},
-                    {"Ingrediente": "Água Filtrada", "Unidade": "ml", "Preço Embalagem (R$)": 0.0, "Qtd na Embalagem": 1000.0, "Qtd Usada": 500.0}
-                ]),
+                    {"Ingrediente": "Açúcar Refinado", "Qtd Usada": 150.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 4.50},
+                    {"Ingrediente": "Água Filtrada", "Qtd Usada": 500.0, "Unidade": "ml", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 0.0}
+                ], columns=["Ingrediente", "Qtd Usada", "Unidade", "Qtd na Embalagem", "Preço Embalagem (R$)"]),
                 "peso_obtido": 650.0,
                 "preparo": "Ferver água e açúcar até reduzir ligeiramente e homogeneizar. Deixar esfriar.",
                 "decoracao": "Fluidez perfeita para absorção uniforme na massa."
@@ -203,16 +203,16 @@ if chave_usuario == "kg10k":
         st.session_state['banco_coberturas_rec'] = {
             "Chantiganache ao Leite": {
                 "ingredientes": pd.DataFrame([
-                    {"Ingrediente": "Chocolate Nobre ao Leite", "Unidade": "g", "Preço Embalagem (R$)": 55.00, "Qtd na Embalagem": 1000.0, "Qtd Usada": 500.0},
-                    {"Ingrediente": "Creme de Leite", "Unidade": "g", "Preço Embalagem (R$)": 4.20, "Qtd na Embalagem": 200.0, "Qtd Usada": 200.0}
-                ]),
+                    {"Ingrediente": "Chocolate Nobre ao Leite", "Qtd Usada": 500.0, "Unidade": "g", "Qtd na Embalagem": 1000.0, "Preço Embalagem (R$)": 55.00},
+                    {"Ingrediente": "Creme de Leite", "Qtd Usada": 200.0, "Unidade": "g", "Qtd na Embalagem": 200.0, "Preço Embalagem (R$)": 4.20}
+                ], columns=["Ingrediente", "Qtd Usada", "Unidade", "Qtd na Embalagem", "Preço Embalagem (R$)"]),
                 "peso_obtido": 700.0,
                 "preparo": "Derreter o chocolate nobre e emulsionar com creme de leite. Bater levemente para obter textura fosca.",
                 "decoracao": "Firmeza total para blindagem de quinas perfeitas."
             }
         }
 
-    # Inicialização do CRM em Session State para salvamento de verdade das vendas
+    # Inicialização do CRM, DRE e outros dados do ERP
     if 'banco_crm' not in st.session_state:
         st.session_state['banco_crm'] = pd.DataFrame([
             {"Cliente VIP": "Juliana Mendes Rossi", "WhatsApp": "(41) 99123-4567", "E-mail": "juliana@rossi.com", "Aniv. Cliente": "12/06", "Aniv. Marido": "18/10", "Aniv. Filhos": "Gabriel (04/02)", "Data Casamento": "22/11", "Restrições": "NÃO PODE CONTER AMENDOIM!", "Últimos Pedidos": "KG-2026-1042"},
@@ -234,7 +234,7 @@ if chave_usuario == "kg10k":
             {"Descrição do Custo Variável": "Taxas de Entrega / Apps", "Valor Estimado (R$)": 220.00}
         ])
 
-    # Criação das Abas Principais Unificadas
+    # Criação das Abas Principais
     tabs = st.tabs([
         "💰 CENTRAL FINANCEIRA",
         "📝 1. ORÇAMENTOS & FRETE",
@@ -288,7 +288,7 @@ if chave_usuario == "kg10k":
             st.data_editor(pd.DataFrame([{"Funcionária": "Ana Silva", "Cargo": "Auxiliar", "Salário (R$)": 1650.00, "Ocorrências": "Nenhuma"}], columns=["Funcionária", "Cargo", "Salário (R$)", "Ocorrências"]), num_rows="dynamic", use_container_width=True, key="dp_key")
 
     # ==========================================
-    # ABA 1: ORÇAMENTOS, FRETE LOGÍSTICO & INTEGRAÇÃO COM CRM
+    # ABA 1: ORÇAMENTOS, FRETE LOGÍSTICO & CRM
     # ==========================================
     with tabs[1]:
         st.markdown('<div class="section-title">📝 Emissão de Orçamentos e Logística Rígida de Entregas</div>', unsafe_allow_html=True)
@@ -372,14 +372,13 @@ if chave_usuario == "kg10k":
         mes_atual = datetime.now().strftime("%m")
         st.markdown(f"<div class='alerta-aniv'>🎉 <b>ALERTA DE MARKETING K&G:</b> Juliana Mendes faz aniversário este mês (12/{mes_atual})! Dispare uma mensagem especial e carinhosa.</div>", unsafe_allow_html=True)
         
-        # Filtro de Busca Ativa com salvamento real
         busca = st.text_input("🔍 Busca Ativa por Nome, Telefone, Códigos de Pedidos ou Alergias:")
         
         df_crm_ed = st.data_editor(st.session_state['banco_crm'], num_rows="dynamic", use_container_width=True, key="crm_base_key")
         st.session_state['banco_crm'] = df_crm_ed
 
     # ==========================================
-    # ABA 3: FÁBRICA DE BASES (SISTEMA ULTRA SEGURO DE DIGITAÇÃO COM "SALVAR" EXCLUSIVO)
+    # ABA 3: FÁBRICA DE BASES (REORDENADA PARA DIGITAÇÃO ULTRA-RÁPIDA)
     # ==========================================
     with tabs[3]:
         st.markdown('<div class="section-title">🥣 Fábrica de Bases: Gestão Ilimitada de Receitas e Custos</div>', unsafe_allow_html=True)
@@ -394,7 +393,7 @@ if chave_usuario == "kg10k":
                 if submit_m and novo_m_nome:
                     if novo_m_nome not in st.session_state['banco_massas_rec']:
                         st.session_state['banco_massas_rec'][novo_m_nome] = {
-                            "ingredientes": pd.DataFrame(columns=["Ingrediente", "Unidade", "Preço Embalagem (R$)", "Qtd na Embalagem", "Qtd Usada"]),
+                            "ingredientes": pd.DataFrame(columns=["Ingrediente", "Qtd Usada", "Unidade", "Qtd na Embalagem", "Preço Embalagem (R$)"]),
                             "peso_obtido": 1000.0,
                             "preparo": "Descreva aqui o modo de preparo passo a passo.",
                             "decoracao": "Padrão estético aceito para a produção."
@@ -409,20 +408,20 @@ if chave_usuario == "kg10k":
             if sel_massa:
                 rec_m = st.session_state['banco_massas_rec'][sel_massa]
                 
-                # 📥 NOVO FORMULÁRIO DE ENTRADA RÁPIDA DE INGREDIENTES (O botão Salvar que você pediu!)
+                # 📥 FORMULÁRIO COM FLUXO DE DIGITAÇÃO REFORMULADO
                 st.markdown(f"##### 📥 Adicionar Novo Ingrediente à receita: *{sel_massa}*")
                 with st.form(key=f"form_add_ing_massa_{sel_massa}", clear_on_submit=True):
                     col_ing1, col_ing2, col_ing3, col_ing4, col_ing5 = st.columns(5)
                     with col_ing1:
                         f_ing = st.text_input("Ingrediente", placeholder="Ex: Chocolate 50%", key=f"f_m_ing_{sel_massa}")
                     with col_ing2:
-                        f_uni = st.selectbox("Unidade", ["g", "ml", "un"], key=f"f_m_uni_{sel_massa}")
+                        f_usd = st.text_input("Quantidade Usada na Receita", value="0", key=f"f_m_usd_{sel_massa}")
                     with col_ing3:
-                        f_prec = st.text_input("Preço Embalagem (R$)", value="0.00", key=f"f_m_prec_{sel_massa}")
+                        f_uni = st.selectbox("Unidade", ["g", "ml", "un"], key=f"f_m_uni_{sel_massa}")
                     with col_ing4:
-                        f_emb = st.text_input("Qtd na Embalagem", value="1000", key=f"f_m_emb_{sel_massa}")
+                        f_emb = st.text_input("Quantidade na Embalagem", value="1000", key=f"f_m_emb_{sel_massa}")
                     with col_ing5:
-                        f_usd = st.text_input("Qtd Usada na Receita", value="0", key=f"f_m_usd_{sel_massa}")
+                        f_prec = st.text_input("Preço Embalagem (R$)", value="0.00", key=f"f_m_prec_{sel_massa}")
                     
                     submit_ing_m = st.form_submit_button("💾 Salvar Ingrediente na Receita", type="primary")
                     if submit_ing_m and f_ing:
@@ -430,7 +429,7 @@ if chave_usuario == "kg10k":
                         st.success(f"✔️ {f_ing} adicionado e salvo com sucesso!")
                         st.rerun()
 
-                st.markdown("##### 📋 Ingredientes Cadastrados (Abaixo você pode ver, ajustar ou deletar linhas se precisar)")
+                st.markdown("##### 📋 Ingredientes Cadastrados")
                 m_edit = st.data_editor(
                     rec_m["ingredientes"],
                     num_rows="dynamic",
@@ -462,7 +461,7 @@ if chave_usuario == "kg10k":
                 if submit_r and novo_r_nome:
                     if novo_r_nome not in st.session_state['banco_recheios_rec']:
                         st.session_state['banco_recheios_rec'][novo_r_nome] = {
-                            "ingredientes": pd.DataFrame(columns=["Ingrediente", "Unidade", "Preço Embalagem (R$)", "Qtd na Embalagem", "Qtd Usada"]),
+                            "ingredientes": pd.DataFrame(columns=["Ingrediente", "Qtd Usada", "Unidade", "Qtd na Embalagem", "Preço Embalagem (R$)"]),
                             "peso_obtido": 1000.0,
                             "preparo": "Descreva aqui o modo de preparo passo a passo.",
                             "decoracao": "Padrão estético aceito para a produção."
@@ -477,20 +476,20 @@ if chave_usuario == "kg10k":
             if sel_recheio:
                 rec_r = st.session_state['banco_recheios_rec'][sel_recheio]
                 
-                # 📥 FORMULÁRIO DE ENTRADA RÁPIDA DE INGREDIENTES
+                # 📥 FORMULÁRIO COM FLUXO DE DIGITAÇÃO REFORMULADO
                 st.markdown(f"##### 📥 Adicionar Novo Ingrediente ao Recheio: *{sel_recheio}*")
                 with st.form(key=f"form_add_ing_recheio_{sel_recheio}", clear_on_submit=True):
                     col_ing1, col_ing2, col_ing3, col_ing4, col_ing5 = st.columns(5)
                     with col_ing1:
                         f_ing = st.text_input("Ingrediente", placeholder="Ex: Leite Moça", key=f"f_r_ing_{sel_recheio}")
                     with col_ing2:
-                        f_uni = st.selectbox("Unidade", ["g", "ml", "un"], key=f"f_r_uni_{sel_recheio}")
+                        f_usd = st.text_input("Quantidade Usada na Receita", value="0", key=f"f_r_usd_{sel_recheio}")
                     with col_ing3:
-                        f_prec = st.text_input("Preço Embalagem (R$)", value="0.00", key=f"f_r_prec_{sel_recheio}")
+                        f_uni = st.selectbox("Unidade", ["g", "ml", "un"], key=f"f_r_uni_{sel_recheio}")
                     with col_ing4:
-                        f_emb = st.text_input("Qtd na Embalagem", value="395", key=f"f_r_emb_{sel_recheio}")
+                        f_emb = st.text_input("Quantidade na Embalagem", value="395", key=f"f_r_emb_{sel_recheio}")
                     with col_ing5:
-                        f_usd = st.text_input("Qtd Usada na Receita", value="0", key=f"f_r_usd_{sel_recheio}")
+                        f_prec = st.text_input("Preço Embalagem (R$)", value="0.00", key=f"f_r_prec_{sel_recheio}")
                     
                     submit_ing_r = st.form_submit_button("💾 Salvar Ingrediente na Receita", type="primary")
                     if submit_ing_r and f_ing:
@@ -530,7 +529,7 @@ if chave_usuario == "kg10k":
                 if submit_c and novo_c_nome:
                     if novo_c_nome not in st.session_state['banco_caldas_rec']:
                         st.session_state['banco_caldas_rec'][novo_c_nome] = {
-                            "ingredientes": pd.DataFrame(columns=["Ingrediente", "Unidade", "Preço Embalagem (R$)", "Qtd na Embalagem", "Qtd Usada"]),
+                            "ingredientes": pd.DataFrame(columns=["Ingrediente", "Qtd Usada", "Unidade", "Qtd na Embalagem", "Preço Embalagem (R$)"]),
                             "peso_obtido": 1000.0,
                             "preparo": "Misturar e ferver.",
                             "decoracao": "Calda fluida."
@@ -544,20 +543,20 @@ if chave_usuario == "kg10k":
             if sel_calda:
                 rec_c = st.session_state['banco_caldas_rec'][sel_calda]
                 
-                # 📥 FORMULÁRIO DE ENTRADA RÁPIDA DE INGREDIENTES
+                # 📥 FORMULÁRIO COM FLUXO DE DIGITAÇÃO REFORMULADO
                 st.markdown(f"##### 📥 Adicionar Novo Ingrediente à Calda: *{sel_calda}*")
                 with st.form(key=f"form_add_ing_calda_{sel_calda}", clear_on_submit=True):
                     col_ing1, col_ing2, col_ing3, col_ing4, col_ing5 = st.columns(5)
                     with col_ing1:
                         f_ing = st.text_input("Ingrediente", placeholder="Ex: Açúcar Cristal", key=f"f_c_ing_{sel_calda}")
                     with col_ing2:
-                        f_uni = st.selectbox("Unidade", ["g", "ml", "un"], key=f"f_c_uni_{sel_calda}")
+                        f_usd = st.text_input("Quantidade Usada na Receita", value="0", key=f"f_c_usd_{sel_calda}")
                     with col_ing3:
-                        f_prec = st.text_input("Preço Embalagem (R$)", value="0.00", key=f"f_c_prec_{sel_calda}")
+                        f_uni = st.selectbox("Unidade", ["g", "ml", "un"], key=f"f_c_uni_{sel_calda}")
                     with col_ing4:
-                        f_emb = st.text_input("Qtd na Embalagem", value="1000", key=f"f_c_emb_{sel_calda}")
+                        f_emb = st.text_input("Quantidade na Embalagem", value="1000", key=f"f_c_emb_{sel_calda}")
                     with col_ing5:
-                        f_usd = st.text_input("Qtd Usada na Receita", value="0", key=f"f_c_usd_{sel_calda}")
+                        f_prec = st.text_input("Preço Embalagem (R$)", value="0.00", key=f"f_c_prec_{sel_calda}")
                     
                     submit_ing_c = st.form_submit_button("💾 Salvar Ingrediente na Receita", type="primary")
                     if submit_ing_c and f_ing:
@@ -597,7 +596,7 @@ if chave_usuario == "kg10k":
                 if submit_cob and novo_cob_nome:
                     if novo_cob_nome not in st.session_state['banco_coberturas_rec']:
                         st.session_state['banco_coberturas_rec'][novo_cob_nome] = {
-                            "ingredientes": pd.DataFrame(columns=["Ingrediente", "Unidade", "Preço Embalagem (R$)", "Qtd na Embalagem", "Qtd Usada"]),
+                            "ingredientes": pd.DataFrame(columns=["Ingrediente", "Qtd Usada", "Unidade", "Qtd na Embalagem", "Preço Embalagem (R$)"]),
                             "peso_obtido": 1000.0,
                             "preparo": "Modo de preparo.",
                             "decoracao": "Instruções."
@@ -611,20 +610,20 @@ if chave_usuario == "kg10k":
             if sel_cob:
                 rec_cob = st.session_state['banco_coberturas_rec'][sel_cob]
                 
-                # 📥 FORMULÁRIO DE ENTRADA RÁPIDA DE INGREDIENTES
+                # 📥 FORMULÁRIO COM FLUXO DE DIGITAÇÃO REFORMULADO
                 st.markdown(f"##### 📥 Adicionar Novo Ingrediente ao Banho/Blindagem: *{sel_cob}*")
                 with st.form(key=f"form_add_ing_cob_{sel_cob}", clear_on_submit=True):
                     col_ing1, col_ing2, col_ing3, col_ing4, col_ing5 = st.columns(5)
                     with col_ing1:
-                        f_ing = st.text_input("Ingrediente", placeholder="Ex: Chocolate Sicao Melken", key=f"f_cob_ing_{sel_cob}")
+                        f_ing = st.text_input("Ingrediente", placeholder="Ex: Chocolate Sicao", key=f"f_cob_ing_{sel_cob}")
                     with col_ing2:
-                        f_uni = st.selectbox("Unidade", ["g", "ml", "un"], key=f"f_cob_uni_{sel_cob}")
+                        f_usd = st.text_input("Quantidade Usada na Receita", value="0", key=f"f_cob_usd_{sel_cob}")
                     with col_ing3:
-                        f_prec = st.text_input("Preço Embalagem (R$)", value="0.00", key=f"f_cob_prec_{sel_cob}")
+                        f_uni = st.selectbox("Unidade", ["g", "ml", "un"], key=f"f_cob_uni_{sel_cob}")
                     with col_ing4:
-                        f_emb = st.text_input("Qtd na Embalagem", value="1000", key=f"f_cob_emb_{sel_cob}")
+                        f_emb = st.text_input("Quantidade na Embalagem", value="1000", key=f"f_cob_emb_{sel_cob}")
                     with col_ing5:
-                        f_usd = st.text_input("Qtd Usada na Receita", value="0", key=f"f_cob_usd_{sel_cob}")
+                        f_prec = st.text_input("Preço Embalagem (R$)", value="0.00", key=f"f_cob_prec_{sel_cob}")
                     
                     submit_ing_cob = st.form_submit_button("💾 Salvar Ingrediente na Receita", type="primary")
                     if submit_ing_cob and f_ing:
@@ -688,7 +687,7 @@ if chave_usuario == "kg10k":
             sel_calda_composta = st.selectbox("Selecione a Calda de Regar:", list(st.session_state['banco_caldas_rec'].keys()))
             sel_cobertura_composta = st.selectbox("Selecione a Cobertura/Blindagem:", list(st.session_state['banco_coberturas_rec'].keys()))
             
-        with col_pd2: # Corrigido NameError (Substituído col_prop2 para col_pd2)
+        with col_pd2:
             peso_alvo_g = peso_alvo * 1000
             calc_massa_final = peso_alvo_g * 0.35
             calc_recheio_final = peso_alvo_g * 0.40
